@@ -241,6 +241,26 @@
     padding:calc(5px * var(--bs)) 0;
   }
 
+  /* ---- colonna laterale destra (prevendita + info promo) ---- */
+  #sheet-banner .banner-side{
+    flex:1;display:flex;flex-direction:column;gap:14px;min-width:0;
+  }
+  #sheet-banner .prevendita-box{
+    border:2px solid #141212;border-radius:14px;overflow:hidden;flex-shrink:0;
+  }
+  #sheet-banner .prevendita-header{
+    background:#F2C94C;color:#141212;font-family:'Inter';font-weight:800;font-size:16px;
+    text-transform:uppercase;padding:8px 16px;display:flex;align-items:center;gap:10px;
+  }
+  #sheet-banner .prevendita-row{
+    display:flex;align-items:center;gap:10px;padding:8px 16px;border-top:1px solid #ddd;
+  }
+  #sheet-banner .prevendita-badge{
+    font-family:'Inter';font-weight:800;font-size:11px;color:#fff;padding:3px 10px;
+    border-radius:6px;text-transform:uppercase;flex-shrink:0;
+  }
+  #sheet-banner .prevendita-times{font-family:'Inter';font-weight:800;font-size:14px;}
+
   /* ---- pannello info promo bar ---- */
   #sheet-banner .banner-info{
     flex:1;border:2px solid #141212;border-radius:14px;
@@ -333,6 +353,11 @@ const ROOMS = [
   {id:'desica',     name:'DE SICA',    color:'#F2C94C'},
   {id:'mastroianni',name:'MASTROIANNI',color:'#F4685A'},
 ];
+// Sala "fantasma": non è una sala vera, è un contenitore per la prevendita.
+// Compare in fondo alla stampa A5 e allo sfondo mobile SOLO se ha film dentro,
+// e nel banner pubblico finisce sempre nel box speciale evidenziato invece che in tabella.
+const PREVENDITA_ROOM = {id:'prevendita', name:'PREVENDITA', color:'#F2C94C'};
+const ROOMS_STAMPA = [...ROOMS, PREVENDITA_ROOM]; // ordine di stampa: le 6 sale + prevendita in fondo
 
 const DEFAULT_DATA = {
   decurtis: [
@@ -357,6 +382,7 @@ const DEFAULT_DATA = {
     {film:'Odissea', times:'19:15', intero:'9', ridotto:'', abb:'N'},
     {film:'Deep Water', times:'22:15', intero:'3,5', ridotto:'', abb:'N'},
   ],
+  prevendita: [], // vuota di default: non compare finché non la riempi
 };
 
 let data = loadData();
@@ -387,7 +413,7 @@ document.querySelectorAll('.tabs button').forEach(btn=>{
 function renderEditor(){
   const wrap = document.getElementById('rooms-editor');
   wrap.innerHTML = '';
-  ROOMS.forEach(room=>{
+  ROOMS_STAMPA.forEach(room=>{
     const box = document.createElement('div');
     box.className = 'room-editor';
     const header = document.createElement('div');
@@ -395,6 +421,13 @@ function renderEditor(){
     header.style.background = room.color;
     header.textContent = room.name;
     box.appendChild(header);
+
+    if(room.id === 'prevendita'){
+      const note = document.createElement('div');
+      note.style.cssText = 'padding:8px 16px;font-size:12px;color:var(--ivory-dim);border-bottom:1px dashed var(--line);';
+      note.textContent = 'Non è una sala vera: usala per i film in prevendita. Compare solo se la riempi — in fondo alla stampa A5 e allo sfondo mobile, e nel box speciale evidenziato del banner pubblico (non nella tabella).';
+      box.appendChild(note);
+    }
 
     const list = document.createElement('div');
     list.className = 'screenings';
@@ -500,7 +533,7 @@ function renderMobileSheet(){
 }
 
 function roomsBlocksHTML(showPrices){
-  return ROOMS.map(room=>{
+  return ROOMS_STAMPA.map(room=>{
     const screenings = data[room.id] || [];
     if(screenings.length===0) return '';
     const rows = screenings.map(s=>{
@@ -562,6 +595,35 @@ function renderBannerSheet(){
     tableRowsHTML += `<div class="promo-section-bar">★ ${escHtml(sezione.toUpperCase())} ★</div>` + list.map(rowHTML).join('');
   });
 
+  // ---- Box PREVENDITA: tutto ciò che è nella sala fantasma "prevendita", raggruppato per film ----
+  const badgeColors = ['#2E7D32','#1B3A6B','#8B2E2E','#6A3E9E','#B5651D'];
+  let prevenditaHTML = '';
+  const prevenditaScreenings = (data['prevendita']||[]).filter(s=>s.film);
+  if(prevenditaScreenings.length){
+    const byFilm = new Map();
+    prevenditaScreenings.forEach(s=>{
+      if(!byFilm.has(s.film)) byFilm.set(s.film, []);
+      byFilm.get(s.film).push(s);
+    });
+    prevenditaHTML = Array.from(byFilm.entries()).map(([film, list])=>{
+      const rows = list.map((s,i)=>{
+        const label = s.versione ? s.versione.toUpperCase() : 'STANDARD';
+        const color = badgeColors[i % badgeColors.length];
+        const times = new Set();
+        s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>times.add(t));
+        const sortedTimes = sortTimesChronologically(times).join(' - ');
+        return `<div class="prevendita-row">
+          <span class="prevendita-badge" style="background:${color}">${escHtml(label)}</span>
+          <span class="prevendita-times">${escHtml(sortedTimes)}</span>
+        </div>`;
+      }).join('');
+      return `<div class="prevendita-box">
+        <div class="prevendita-header"><span class="reel-icon" style="border-color:#141212;"></span>${escHtml(film)}</div>
+        ${rows}
+      </div>`;
+    }).join('');
+  }
+
   const promoHTML = showPromo ? `<div class="banner-info">
     <div class="info-row">
       <div class="info-icon">€</div>
@@ -597,7 +659,10 @@ function renderBannerSheet(){
         </div>
         <div class="table-body" id="banner-table-body">${tableRowsHTML}</div>
       </div>
-      ${promoHTML}
+      <div class="banner-side">
+        ${prevenditaHTML}
+        ${promoHTML}
+      </div>
     </div>
     <div class="banner-footer">
       <div class="footer-web">★ Tutta la programmazione su <strong>www.cinemamultisalalumiere.it</strong> ★</div>
