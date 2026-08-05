@@ -697,17 +697,29 @@ document.getElementById('toggle-promo').addEventListener('change', renderBannerS
 
 /* ============ EXPORT ============ */
 async function exportPNG(elId, filename){
+  // Apriamo subito la scheda, nello stesso istante del tap: iOS Safari blocca
+  // le aperture "in differita" dopo un'operazione asincrona come html2canvas.
+  const win = window.open('', '_blank');
   if(elId==='sheet-banner') fitBannerTable();
   const node = document.getElementById(elId);
   const bg = elId==='sheet-banner' ? '#FFFFFF' : '#141212';
   const canvas = await html2canvas(node, {backgroundColor:bg, scale:3});
-  const link = document.createElement('a');
-  link.download = filename + '.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+  // Usiamo un Blob invece di un data-URL: un PNG in alta qualità genera un
+  // URL troppo lungo che Safari su iOS a volte rifiuta di aprire in silenzio.
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  if(win && blob){
+    const blobUrl = URL.createObjectURL(blob);
+    win.location.href = blobUrl;
+  }else if(win){
+    win.close();
+    alert('Errore nella generazione dell\'immagine. Riprova.');
+  }else{
+    alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
+  }
 }
 
 async function exportPDF(){
+  const win = window.open('', '_blank');
   fitPrintContent();
   const node = document.getElementById('sheet-print');
   const canvas = await html2canvas(node, {backgroundColor:'#141212', scale:3});
@@ -717,10 +729,16 @@ async function exportPDF(){
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
   pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
-  pdf.save('programmazione-stampa.pdf');
+  const blobUrl = pdf.output('bloburl');
+  if(win){
+    win.location.href = blobUrl;
+  }else{
+    alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
+  }
 }
 
 async function exportPDFBanner(){
+  const win = window.open('', '_blank');
   fitBannerTable();
   const node = document.getElementById('sheet-banner');
   const canvas = await html2canvas(node, {backgroundColor:'#FFFFFF', scale:3});
@@ -730,7 +748,12 @@ async function exportPDFBanner(){
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
   pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
-  pdf.save('banner-pubblico-a4.pdf');
+  const blobUrl = pdf.output('bloburl');
+  if(win){
+    win.location.href = blobUrl;
+  }else{
+    alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
+  }
 }
 
 renderAll();
