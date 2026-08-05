@@ -273,7 +273,7 @@
     border:2px solid #141212;border-radius:14px;overflow:hidden;flex-shrink:0;
   }
   #sheet-banner .prevendita-header{
-    background:#F2C94C;color:#141212;font-family:'Inter';font-weight:800;font-size:calc(16px * var(--ss));
+    background:#C0C0C8;color:#141212;font-family:'Inter';font-weight:800;font-size:calc(16px * var(--ss));
     text-transform:uppercase;padding:calc(8px * var(--ss)) 16px;display:flex;align-items:center;gap:10px;
   }
   #sheet-banner .prevendita-row{
@@ -380,7 +380,7 @@ const ROOMS = [
 // Sala "fantasma": non è una sala vera, è un contenitore per la prevendita.
 // Compare in fondo alla stampa A5 e allo sfondo mobile SOLO se ha film dentro,
 // e nel banner pubblico finisce sempre nel box speciale evidenziato invece che in tabella.
-const PREVENDITA_ROOM = {id:'prevendita', name:'PREVENDITA', color:'#F2C94C'};
+const PREVENDITA_ROOM = {id:'prevendita', name:'PREVENDITA', color:'#C0C0C8'};
 const ROOMS_STAMPA = [...ROOMS, PREVENDITA_ROOM]; // ordine di stampa: le 6 sale + prevendita in fondo
 
 const DEFAULT_DATA = {
