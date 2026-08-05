@@ -160,25 +160,48 @@
 
   /* ---- Mobile wallpaper ---- */
   #sheet-mobile{
-    width:390px;height:844px;
-    padding:70px 26px 60px 40px;
+    width:390px;height:846px; /* stesso rapporto ~2,169:1 del riferimento 2213×4798 */
+    background:#000000;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:26px;
+    padding:22px 18px;
+    overflow:hidden;
   }
-  #sheet-mobile .room-band{font-size:17px;padding:7px 0;border-radius:6px;margin-bottom:6px;}
-  #sheet-mobile .film-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;}
-  #sheet-mobile .film-title{font-size:13px;}
-  #sheet-mobile .film-times{font-size:12px;}
-  #sheet-mobile .room-block{margin-bottom:14px;}
-  #sheet-mobile .doc-title{font-family:'Bebas Neue';font-size:22px;letter-spacing:1px;margin-bottom:20px;text-align:center;}
+  #sheet-mobile .mobile-table-border{
+    width:100%;border:3px solid #E8622C;border-radius:12px;overflow:hidden;
+    padding:12px;box-sizing:border-box;
+  }
+  #mobile-content{ --s:1; }
+  /* stessa identica logica della stampa A5, solo con basi più piccole per il canvas più stretto */
+  #sheet-mobile .doc-title{font-family:'Bebas Neue';font-size:calc(19px * var(--s));letter-spacing:1px;margin-bottom:2px;text-align:center;}
+  #sheet-mobile .doc-sub{font-size:calc(8px * var(--s));color:var(--ivory-dim);margin-bottom:calc(12px * var(--s));text-align:center;}
+  #sheet-mobile .room-band{font-size:calc(13px * var(--s));padding:calc(6px * var(--s)) 0;border-radius:5px;margin-bottom:calc(6px * var(--s));}
+  #sheet-mobile .film-row{display:flex;justify-content:space-between;align-items:baseline;padding:calc(4px * var(--s)) 0;}
+  #sheet-mobile .film-title{font-size:calc(11px * var(--s));}
+  #sheet-mobile .film-times{font-size:calc(11px * var(--s));}
+  #sheet-mobile .prices{display:flex;gap:8px;font-size:calc(7.5px * var(--s));color:var(--ivory-dim);margin-bottom:calc(9px * var(--s));}
+  #sheet-mobile .room-block{margin-bottom:calc(11px * var(--s));}
+
+  #sheet-mobile .mobile-brand{
+    display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;
+  }
+  #sheet-mobile .mobile-brand img{width:56px;height:auto;}
+  #sheet-mobile .mobile-brand .brand-text{
+    font-family:'Inter';font-weight:800;font-size:18px;letter-spacing:1px;color:#E8622C;
+    text-transform:uppercase;text-align:center;
+  }
 
   /* ---- Public banner (A4 orizzontale, stampa + monitor) — stile insegna Lumière ---- */
   #sheet-banner{
-    width:1123px;height:794px; /* A4 landscape @ ~96dpi */
+    width:1123px;height:794px; /* A4 landscape @ ~96dpi — dimensione bloccata, non deve mai cambiare */
     padding:30px 40px 22px;
     display:flex;
     flex-direction:column;
     background:#FFFFFF;
     color:#141212;
     position:relative;
+    overflow:hidden; /* fondamentale: senza questo, il contenuto che trabocca viene comunque catturato nell'export, deformando il formato */
+    box-sizing:border-box;
   }
   #sheet-banner .badge-cinema-img{
     position:absolute;top:16px;right:30px;width:112px;height:auto;
@@ -243,39 +266,40 @@
 
   /* ---- colonna laterale destra (prevendita + info promo) ---- */
   #sheet-banner .banner-side{
-    flex:1;display:flex;flex-direction:column;gap:14px;min-width:0;
+    flex:1;display:flex;flex-direction:column;gap:calc(14px * var(--ss));min-width:0;
+    min-height:0;overflow:hidden;--ss:1;
   }
   #sheet-banner .prevendita-box{
     border:2px solid #141212;border-radius:14px;overflow:hidden;flex-shrink:0;
   }
   #sheet-banner .prevendita-header{
-    background:#F2C94C;color:#141212;font-family:'Inter';font-weight:800;font-size:16px;
-    text-transform:uppercase;padding:8px 16px;display:flex;align-items:center;gap:10px;
+    background:#F2C94C;color:#141212;font-family:'Inter';font-weight:800;font-size:calc(16px * var(--ss));
+    text-transform:uppercase;padding:calc(8px * var(--ss)) 16px;display:flex;align-items:center;gap:10px;
   }
   #sheet-banner .prevendita-row{
-    display:flex;align-items:center;gap:10px;padding:8px 16px;border-top:1px solid #ddd;
+    display:flex;align-items:center;gap:10px;padding:calc(8px * var(--ss)) 16px;border-top:1px solid #ddd;
   }
   #sheet-banner .prevendita-badge{
     font-family:'Inter';font-weight:800;font-size:11px;color:#fff;padding:3px 10px;
     border-radius:6px;text-transform:uppercase;flex-shrink:0;
   }
-  #sheet-banner .prevendita-times{font-family:'Inter';font-weight:800;font-size:14px;}
+  #sheet-banner .prevendita-times{font-family:'Inter';font-weight:800;font-size:calc(14px * var(--ss));}
 
   /* ---- pannello info promo bar ---- */
   #sheet-banner .banner-info{
-    flex:1;border:2px solid #141212;border-radius:14px;
-    padding:22px 20px;display:flex;flex-direction:column;justify-content:center;gap:18px;
+    flex:1;border:2px solid #141212;border-radius:14px;min-height:0;overflow:hidden;
+    padding:calc(22px * var(--ss)) 20px;display:flex;flex-direction:column;justify-content:center;gap:calc(18px * var(--ss));
   }
   #sheet-banner .info-row{display:flex;align-items:flex-start;gap:13px;}
   #sheet-banner .info-icon{
-    width:38px;height:38px;border-radius:50%;background:#141212;color:#fff;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;font-family:'Inter';font-weight:900;font-size:16px;
+    width:calc(38px * var(--ss));height:calc(38px * var(--ss));border-radius:50%;background:#141212;color:#fff;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-family:'Inter';font-weight:900;font-size:calc(16px * var(--ss));
   }
   #sheet-banner .info-icon.pin{position:relative;background:transparent;}
   #sheet-banner .info-icon.pin .pin-shape{
-    width:26px;height:26px;background:#141212;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+    width:calc(26px * var(--ss));height:calc(26px * var(--ss));background:#141212;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
   }
-  #sheet-banner .info-text{font-family:'Inter';font-size:13px;line-height:1.42;font-weight:600;}
+  #sheet-banner .info-text{font-family:'Inter';font-size:calc(13px * var(--ss));line-height:1.42;font-weight:600;}
   #sheet-banner .info-text strong{font-weight:900;}
   #sheet-banner .info-divider{border-top:1px dashed #999;margin:0 4px;}
 
@@ -405,7 +429,8 @@ document.querySelectorAll('.tabs button').forEach(btn=>{
     document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
     renderAll();
     if(btn.dataset.tab==='print'){ requestAnimationFrame(fitPrintContent); }
-    if(btn.dataset.tab==='banner'){ requestAnimationFrame(fitBannerTable); }
+    if(btn.dataset.tab==='mobile'){ requestAnimationFrame(fitMobileContent); }
+    if(btn.dataset.tab==='banner'){ requestAnimationFrame(fitBannerTable); requestAnimationFrame(fitBannerSide); }
   });
 });
 
@@ -527,9 +552,47 @@ function fitPrintContent(){
 
 function renderMobileSheet(){
   const el = document.getElementById('sheet-mobile');
-  el.innerHTML = `<div class="sprockets-v left"></div>
-    <div class="doc-title">PROGRAMMAZIONE</div>
-    <div>` + roomsBlocksHTML(false) + `</div>`;
+  el.innerHTML = `
+    <div class="mobile-table-border">
+      <div id="mobile-content">
+        <div class="doc-title">PROGRAMMAZIONE</div>
+        <div class="doc-sub">Aggiornata al ${todayStr()}</div>
+        <div>${roomsBlocksHTML(false)}</div>
+      </div>
+    </div>
+    <div class="mobile-brand">
+      <img src="logo-lumiere.png" alt="Logo Cinema Lumière" onerror="this.style.display='none';">
+      <div class="brand-text">Multisala Lumière</div>
+    </div>`;
+  fitMobileContent();
+}
+
+function fitMobileContent(){
+  const sheet = document.getElementById('sheet-mobile');
+  const content = document.getElementById('mobile-content');
+  const border = document.querySelector('#sheet-mobile .mobile-table-border');
+  const brand = document.querySelector('#sheet-mobile .mobile-brand');
+  if(!content || !border || !brand || !sheet) return;
+  if(sheet.clientHeight === 0) return; // pannello non visibile, salta
+
+  // Spazio verticale disponibile per la tabella = altezza canvas - padding - gap - branding - bordo/padding del riquadro
+  const sheetStyle = getComputedStyle(sheet);
+  const padV = parseFloat(sheetStyle.paddingTop) + parseFloat(sheetStyle.paddingBottom);
+  const gap = parseFloat(sheetStyle.rowGap || sheetStyle.gap || 26);
+  const borderExtra = 2 * (3 + 12); // border 3px + padding 12px, sopra e sotto
+  const budget = sheet.clientHeight - padV - gap - brand.offsetHeight - borderExtra;
+  border.style.maxHeight = Math.max(80, budget) + 'px';
+
+  content.style.setProperty('--s', 1);
+  let s = 1;
+  for(let i=0; i<8; i++){
+    const naturalHeight = content.scrollHeight;
+    const availableHeight = border.clientHeight;
+    if(naturalHeight <= availableHeight) break;
+    const ratio = availableHeight / naturalHeight;
+    s = s * ratio * 0.97;
+    content.style.setProperty('--s', s);
+  }
 }
 
 function roomsBlocksHTML(showPrices){
@@ -537,8 +600,11 @@ function roomsBlocksHTML(showPrices){
     const screenings = data[room.id] || [];
     if(screenings.length===0) return '';
     const rows = screenings.map(s=>{
+      const timesSet = new Set();
+      s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
+      const sortedTimes = sortTimesChronologically(timesSet).join(' - ');
       const priceLine = showPrices ? `<div class="prices"><span>Intero ${s.intero||'-'}</span><span>Ridotto ${s.ridotto||'-'}</span><span>Abb. ${s.abb||'N'}</span></div>` : '';
-      return `<div class="film-row"><span class="film-title">${escHtml(s.film)}</span><span class="film-times">${escHtml(s.times)}</span></div>${priceLine}`;
+      return `<div class="film-row"><span class="film-title">${escHtml(s.film)}</span><span class="film-times">${escHtml(sortedTimes)}</span></div>${priceLine}`;
     }).join('');
     return `<div class="room-block">
       <div class="room-band" style="background:${room.color}">${room.name}</div>
@@ -659,7 +725,7 @@ function renderBannerSheet(){
         </div>
         <div class="table-body" id="banner-table-body">${tableRowsHTML}</div>
       </div>
-      <div class="banner-side">
+      <div class="banner-side" id="banner-side">
         ${prevenditaHTML}
         ${promoHTML}
       </div>
@@ -675,6 +741,7 @@ function renderBannerSheet(){
     </div>`;
 
   fitBannerTable();
+  fitBannerSide();
 }
 
 function bannerHeadline(){
@@ -702,6 +769,22 @@ function fitBannerTable(){
     if(Math.abs(ratio - 1) < 0.03) break;
     s = Math.max(0.65, Math.min(1.35, s * ratio * 0.97));
     body.style.setProperty('--bs', s);
+  }
+}
+
+function fitBannerSide(){
+  const side = document.getElementById('banner-side');
+  if(!side) return;
+  if(side.clientHeight === 0) return; // pannello non visibile, salta
+  side.style.setProperty('--ss', 1);
+  let s = 1;
+  for(let i=0; i<10; i++){
+    const naturalH = side.scrollHeight;
+    const availH = side.clientHeight;
+    if(naturalH <= availH) break; // qui vogliamo solo evitare il traboccamento, non riempire lo spazio a tutti i costi
+    const ratio = availH / naturalH;
+    s = Math.max(0.55, s * ratio * 0.97);
+    side.style.setProperty('--ss', s);
   }
 }
 
@@ -765,10 +848,14 @@ async function exportPNG(elId, filename){
   // Apriamo subito la scheda, nello stesso istante del tap: iOS Safari blocca
   // le aperture "in differita" dopo un'operazione asincrona come html2canvas.
   const win = window.open('', '_blank');
-  if(elId==='sheet-banner') fitBannerTable();
+  if(elId==='sheet-banner'){ fitBannerTable(); fitBannerSide(); }
+  if(elId==='sheet-mobile'){ fitMobileContent(); }
   const node = document.getElementById(elId);
   const bg = elId==='sheet-banner' ? '#FFFFFF' : '#141212';
-  const canvas = await html2canvas(node, {backgroundColor:bg, scale:3});
+  // Per lo sfondo mobile puntiamo alla risoluzione esatta richiesta (2213×4798px)
+  // invece di un fattore di scala fisso, così il file combacia sempre con quella misura.
+  const scale = elId==='sheet-mobile' ? (2213 / node.offsetWidth) : 3;
+  const canvas = await html2canvas(node, {backgroundColor:bg, scale});
   // Usiamo un Blob invece di un data-URL: un PNG in alta qualità genera un
   // URL troppo lungo che Safari su iOS a volte rifiuta di aprire in silenzio.
   const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -805,6 +892,7 @@ async function exportPDF(){
 async function exportPDFBanner(){
   const win = window.open('', '_blank');
   fitBannerTable();
+  fitBannerSide();
   const node = document.getElementById('sheet-banner');
   const canvas = await html2canvas(node, {backgroundColor:'#FFFFFF', scale:3});
   const imgData = canvas.toDataURL('image/png');
