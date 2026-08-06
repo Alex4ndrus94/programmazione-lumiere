@@ -239,7 +239,7 @@
     font-family:'Inter';font-weight:800;font-size:calc(56px * var(--zs));color:#141212;text-transform:uppercase;line-height:1.15;
   }
   #sheet-banner .zone-row .zf-times{
-    font-family:'Inter';font-weight:800;font-size:calc(56px * var(--zs));color:#a11e1e;white-space:nowrap;margin-left:10px;
+    font-family:'Inter';font-weight:800;font-size:calc(56px * var(--zs));color:#a11e1e;margin-left:10px;text-align:right;
   }
   #sheet-banner .zone-row .zf-price{
     font-family:'IBM Plex Mono';font-weight:600;font-size:calc(24px * var(--zs));color:#777;display:block;
@@ -643,12 +643,16 @@ function fitZone(id){
   if(zone.clientHeight === 0) return; // pannello non visibile, salta
   zone.style.setProperty('--zs', 1);
   let s = 1;
-  for(let i=0; i<8; i++){
+  for(let i=0; i<10; i++){
     const naturalH = zone.scrollHeight;
     const availH = zone.clientHeight;
-    if(naturalH <= availH) break;
-    const ratio = availH / naturalH;
-    s = Math.max(0.5, s * ratio * 0.97);
+    const naturalW = zone.scrollWidth;
+    const availW = zone.clientWidth;
+    const hRatio = availH / naturalH;
+    const wRatio = availW / naturalW; // <1 se orari con tante fasce orarie escono dal bordo in larghezza
+    const ratio = Math.min(hRatio, wRatio, 1);
+    if(ratio >= 0.97) break;
+    s = Math.max(0.35, s * ratio * 0.97);
     zone.style.setProperty('--zs', s);
   }
 }
