@@ -191,135 +191,68 @@
     text-transform:uppercase;text-align:center;
   }
 
-  /* ---- Public banner (A4 orizzontale, stampa + monitor) — stile insegna Lumière ---- */
+  /* ---- Public banner: sfondo immagine reale + testo posizionato sopra ---- */
+  /* Dimensioni e coordinate ricavate dal file banner-frame.png (1513x1039).
+     Se in futuro cambi il file di sfondo con uno di dimensioni diverse,
+     queste coordinate vanno rimisurate. */
   #sheet-banner{
-    width:1123px;height:794px; /* A4 landscape @ ~96dpi — dimensione bloccata, non deve mai cambiare */
-    padding:30px 40px 22px;
-    display:flex;
-    flex-direction:column;
-    background:#FFFFFF;
-    color:#141212;
+    width:1513px;height:1039px;
     position:relative;
-    overflow:hidden; /* fondamentale: senza questo, il contenuto che trabocca viene comunque catturato nell'export, deformando il formato */
-    box-sizing:border-box;
+    background:#000;
+    overflow:hidden;
   }
-  #sheet-banner .badge-cinema-img{
-    position:absolute;top:16px;right:30px;width:112px;height:auto;
+  #sheet-banner .frame-bg{
+    position:absolute;top:0;left:0;width:1513px;height:1039px;display:block;z-index:0;
   }
-  #sheet-banner .projector-img{
-    position:absolute;top:6px;left:20px;width:140px;height:auto;
+  #sheet-banner .overlay-zone{
+    position:absolute;overflow:hidden;box-sizing:border-box;z-index:1;
   }
-  #sheet-banner .popcorn-chair-img{
-    position:absolute;top:108px;right:14px;width:158px;height:auto;
+  /* Zona 1: data (barra bianca sotto il logo LUMIÈRE) */
+  #sheet-banner .zone-data{
+    left:405px;top:247px;width:643px;height:52px;
+    display:flex;align-items:center;justify-content:center;
   }
-  #sheet-banner .banner-header{
-    display:flex;align-items:center;justify-content:center;gap:14px;
-    margin-bottom:6px;
-    padding:0 175px; /* riserva lo spazio delle illustrazioni ai lati, evita sovrapposizioni col titolo */
+  #sheet-banner .zone-data span{
+    font-family:'Inter';font-weight:900;font-size:26px;letter-spacing:1px;color:#141212;text-transform:uppercase;
   }
-  #sheet-banner .banner-header .stars{font-size:13px;letter-spacing:4px;color:#141212;white-space:nowrap;flex-shrink:0;}
-  #sheet-banner .banner-title{
-    font-family:'Inter';font-weight:900;font-size:27px;letter-spacing:0.5px;text-transform:uppercase;text-align:center;
-    line-height:1.15;
+  /* Zona 2: tabella FILM/ORARI normale */
+  #sheet-banner .zone-table{
+    left:23px;top:360px;width:1015px;height:356px;
+    padding:6px 14px;display:flex;flex-direction:column;justify-content:center;--zs:1;
   }
-  #sheet-banner .banner-date-badge{
-    background:#141212;color:#fff;
-    font-family:'Inter';font-weight:800;font-size:17px;letter-spacing:1px;text-transform:uppercase;
-    padding:8px 34px 8px 26px;
-    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 0 100%);
-    margin:6px auto 16px;
-    display:table;
+  /* Zona 3: sezione CineRevolution (qualunque film con "Sezione promo" compilata) */
+  #sheet-banner .zone-cinerevolution{
+    left:23px;top:753px;width:1015px;height:214px;
+    padding:6px 14px;display:flex;flex-direction:column;justify-content:center;--zs:1;
   }
-  #sheet-banner .banner-body{
-    flex:1;display:flex;gap:26px;min-height:0;
+  /* Zona 4: box Prevendite */
+  #sheet-banner .zone-prevendite{
+    left:1062px;top:389px;width:426px;height:113px;
+    padding:4px 12px;display:flex;flex-direction:column;justify-content:center;gap:2px;--zs:1;
   }
-
-  /* ---- tabella film ---- */
-  #sheet-banner .banner-table{
-    flex:1.7;border:2px solid #141212;border-radius:14px;
-    display:flex;flex-direction:column;overflow:hidden;
+  #sheet-banner .zone-row{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding:calc(3px * var(--zs)) 0;border-bottom:1px solid #eee;
   }
-  #sheet-banner .table-header{display:flex;background:#141212;color:#fff;flex-shrink:0;}
-  #sheet-banner .table-header .col-film{flex:1.7;padding:9px 20px;font-family:'Inter';font-weight:800;font-size:16px;text-transform:uppercase;border-right:2px solid #fff;}
-  #sheet-banner .table-header .col-orari{flex:1;padding:9px 20px;font-family:'Inter';font-weight:800;font-size:16px;text-transform:uppercase;text-align:center;}
-  #sheet-banner .table-body{flex:1;display:flex;flex-direction:column;justify-content:center;overflow:hidden;--bs:1;}
-  #sheet-banner .table-row{display:flex;align-items:center;border-bottom:1px solid #ddd;}
-  #sheet-banner .table-row:last-child{border-bottom:none;}
-  #sheet-banner .table-row .col-film{
-    flex:1.7;padding:calc(9px * var(--bs)) 20px;display:flex;align-items:center;gap:calc(10px * var(--bs));
-    font-family:'Inter';font-weight:800;font-size:calc(16px * var(--bs));text-transform:uppercase;line-height:1.15;
+  #sheet-banner .zone-row:last-child{border-bottom:none;}
+  #sheet-banner .zone-row .zf-title{
+    font-family:'Inter';font-weight:800;font-size:calc(15px * var(--zs));color:#141212;text-transform:uppercase;line-height:1.15;
   }
-  #sheet-banner .reel-icon{
-    width:calc(20px * var(--bs));height:calc(20px * var(--bs));border-radius:50%;flex-shrink:0;
-    border:calc(3px * var(--bs)) solid #141212;
-    background:radial-gradient(circle, #141212 24%, transparent 25%) center/55% 55% no-repeat;
+  #sheet-banner .zone-row .zf-times{
+    font-family:'Inter';font-weight:800;font-size:calc(15px * var(--zs));color:#a11e1e;white-space:nowrap;margin-left:10px;
   }
-  #sheet-banner .table-row .col-orari{
-    flex:1;padding:calc(9px * var(--bs)) 16px;text-align:center;border-left:2px solid #141212;
-    font-family:'Inter';font-weight:800;font-size:calc(16px * var(--bs));line-height:1.2;
+  #sheet-banner .zone-row .zf-price{
+    font-family:'IBM Plex Mono';font-weight:600;font-size:calc(9px * var(--zs));color:#777;display:block;
   }
-  #sheet-banner .promo-section-bar{
-    background:#141212;color:#fff;text-align:center;
-    font-family:'Inter';font-weight:800;font-size:calc(13px * var(--bs));letter-spacing:1px;text-transform:uppercase;
-    padding:calc(5px * var(--bs)) 0;
+  #sheet-banner .prevendite-row{
+    display:flex;align-items:center;gap:8px;padding:calc(2px * var(--zs)) 0;
   }
-
-  /* ---- colonna laterale destra (prevendita + info promo) ---- */
-  #sheet-banner .banner-side{
-    flex:1;display:flex;flex-direction:column;gap:calc(14px * var(--ss));min-width:0;
-    min-height:0;overflow:hidden;--ss:1;
+  #sheet-banner .prevendite-badge{
+    font-family:'Inter';font-weight:800;font-size:calc(9px * var(--zs));color:#fff;padding:2px 8px;
+    border-radius:5px;text-transform:uppercase;flex-shrink:0;
   }
-  #sheet-banner .prevendita-box{
-    border:2px solid #141212;border-radius:14px;overflow:hidden;flex-shrink:0;
-  }
-  #sheet-banner .prevendita-header{
-    background:#C0C0C8;color:#141212;font-family:'Inter';font-weight:800;font-size:calc(16px * var(--ss));
-    text-transform:uppercase;padding:calc(8px * var(--ss)) 16px;display:flex;align-items:center;gap:10px;
-  }
-  #sheet-banner .prevendita-row{
-    display:flex;align-items:center;gap:10px;padding:calc(8px * var(--ss)) 16px;border-top:1px solid #ddd;
-  }
-  #sheet-banner .prevendita-badge{
-    font-family:'Inter';font-weight:800;font-size:11px;color:#fff;padding:3px 10px;
-    border-radius:6px;text-transform:uppercase;flex-shrink:0;
-  }
-  #sheet-banner .prevendita-times{font-family:'Inter';font-weight:800;font-size:calc(14px * var(--ss));}
-
-  /* ---- pannello info promo bar ---- */
-  #sheet-banner .banner-info{
-    flex:1;border:2px solid #141212;border-radius:14px;min-height:0;overflow:hidden;
-    padding:calc(22px * var(--ss)) 20px;display:flex;flex-direction:column;justify-content:center;gap:calc(18px * var(--ss));
-  }
-  #sheet-banner .info-row{display:flex;align-items:flex-start;gap:13px;}
-  #sheet-banner .info-icon{
-    width:calc(38px * var(--ss));height:calc(38px * var(--ss));border-radius:50%;background:#141212;color:#fff;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;font-family:'Inter';font-weight:900;font-size:calc(16px * var(--ss));
-  }
-  #sheet-banner .info-icon.pin{position:relative;background:transparent;}
-  #sheet-banner .info-icon.pin .pin-shape{
-    width:calc(26px * var(--ss));height:calc(26px * var(--ss));background:#141212;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
-  }
-  #sheet-banner .info-text{font-family:'Inter';font-size:calc(13px * var(--ss));line-height:1.42;font-weight:600;}
-  #sheet-banner .info-text strong{font-weight:900;}
-  #sheet-banner .info-divider{border-top:1px dashed #999;margin:0 4px;}
-
-  #sheet-banner .banner-footer{
-    display:flex;align-items:center;gap:18px;
-    border-top:3px solid #141212;margin-top:16px;padding-top:14px;
-  }
-  #sheet-banner .footer-web{font-family:'Inter';font-size:13px;flex:1;text-align:center;}
-  #sheet-banner .footer-web strong{font-weight:800;font-size:16px;letter-spacing:0.5px;}
-  #sheet-banner .footer-divider{width:2px;align-self:stretch;background:#141212;}
-  #sheet-banner .footer-logo{
-    display:flex;align-items:center;gap:10px;
-  }
-  #sheet-banner .footer-logo img{height:46px;width:auto;display:block;}
-  #sheet-banner .footer-logo-text{
-    font-family:'Inter';font-weight:800;font-size:14px;letter-spacing:1px;text-align:right;line-height:1.3;
-  }
-  #sheet-banner .footer-logo-text span{font-weight:500;font-size:10px;letter-spacing:2px;color:#555;}
-
-
+  #sheet-banner .prevendite-film{font-family:'Inter';font-weight:800;font-size:calc(11px * var(--zs));color:#141212;}
+  #sheet-banner .prevendite-times{font-family:'Inter';font-weight:700;font-size:calc(10px * var(--zs));color:#a11e1e;margin-left:auto;}
 </style>
 </head>
 <body>
@@ -360,7 +293,6 @@
   <div class="toolbar">
     <label class="toggle"><input type="checkbox" id="toggle-sala"> Mostra sala</label>
     <label class="toggle"><input type="checkbox" id="toggle-prezzo"> Mostra prezzi</label>
-    <label class="toggle"><input type="checkbox" id="toggle-promo" checked> Mostra promo BAR</label>
     <button class="btn-export" onclick="exportPDFBanner()">Scarica PDF (A4 orizzontale)</button>
     <button class="btn-export" onclick="exportPNG('sheet-banner','banner-pubblico-monitor')">Scarica PNG (per monitor)</button>
   </div>
@@ -430,7 +362,7 @@ document.querySelectorAll('.tabs button').forEach(btn=>{
     renderAll();
     if(btn.dataset.tab==='print'){ requestAnimationFrame(fitPrintContent); }
     if(btn.dataset.tab==='mobile'){ requestAnimationFrame(fitMobileContent); }
-    if(btn.dataset.tab==='banner'){ requestAnimationFrame(fitBannerTable); requestAnimationFrame(fitBannerSide); }
+    if(btn.dataset.tab==='banner'){ requestAnimationFrame(()=>{ fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite'); }); }
   });
 });
 
@@ -614,13 +546,14 @@ function roomsBlocksHTML(showPrices){
 }
 
 /* ============ BANNER RENDER ============ */
+/* ============ BANNER RENDER (sfondo immagine + overlay testo) ============ */
 function renderBannerSheet(){
   const showSala = document.getElementById('toggle-sala').checked;
   const showPrezzo = document.getElementById('toggle-prezzo').checked;
-  const showPromo = document.getElementById('toggle-promo').checked;
   const el = document.getElementById('sheet-banner');
 
-  let filmMap = new Map(); // key: film|versione|sezionePromo -> {film, versione, sezionePromo, times:Set, rooms:Set}
+  // Raggruppa per film+versione+sezionePromo, unendo gli orari da tutte le sale (dedup automatico dei "doppioni" da overflow interno)
+  let filmMap = new Map();
   ROOMS.forEach(room=>{
     (data[room.id]||[]).forEach(s=>{
       if(!s.film) return;
@@ -631,39 +564,34 @@ function renderBannerSheet(){
       }
       const entry = filmMap.get(key);
       entry.rooms.add(room.name);
-      // uno "times" può contenere più orari separati da " - " (es. "16:45 - 19:30 - 22:15")
       s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>entry.times.add(t));
     });
   });
-
   let entries = Array.from(filmMap.values());
   const normali = entries.filter(e=>!e.sezionePromo);
-  const promoSections = new Map(); // sezione -> [entries]
-  entries.filter(e=>e.sezionePromo).forEach(e=>{
-    if(!promoSections.has(e.sezionePromo)) promoSections.set(e.sezionePromo, []);
-    promoSections.get(e.sezionePromo).push(e);
-  });
+  // Qualunque testo nella sezione promo finisce comunque nella zona "CineRevolution" già disegnata nell'immagine
+  const cinerevolution = entries.filter(e=>e.sezionePromo);
 
   function rowHTML(entry){
     const sortedTimes = sortTimesChronologically(entry.times).join(' - ');
     const versionTag = entry.versione ? ` (${escHtml(entry.versione)})` : '';
     const salaTag = showSala ? ' — ' + Array.from(entry.rooms).join(', ') : '';
-    // nelle sezioni promo il prezzo non si mostra mai, per definizione
-    const priceInline = (showPrezzo && !entry.sezionePromo) ? `<div style="font-family:'IBM Plex Mono';font-weight:600;font-size:11px;color:#777;margin-top:2px;">${pricesForFilm(entry)}</div>` : '';
-    return `<div class="table-row">
-      <div class="col-film"><span class="reel-icon"></span>${escHtml(entry.film)}${versionTag}${salaTag}</div>
-      <div class="col-orari">${escHtml(sortedTimes)}${priceInline}</div>
+    const priceInline = showPrezzo ? `<span class="zf-price">${pricesForFilm(entry)}</span>` : '';
+    return `<div class="zone-row">
+      <span class="zf-title">${escHtml(entry.film)}${versionTag}${salaTag}</span>
+      <span>
+        <span class="zf-times">${escHtml(sortedTimes)}</span>
+        ${priceInline}
+      </span>
     </div>`;
   }
 
-  let tableRowsHTML = normali.map(rowHTML).join('');
-  promoSections.forEach((list, sezione)=>{
-    tableRowsHTML += `<div class="promo-section-bar">★ ${escHtml(sezione.toUpperCase())} ★</div>` + list.map(rowHTML).join('');
-  });
+  const tableRowsHTML = normali.map(rowHTML).join('');
+  const cinerevolutionRowsHTML = cinerevolution.map(rowHTML).join('');
 
-  // ---- Box PREVENDITA: tutto ciò che è nella sala fantasma "prevendita", raggruppato per film ----
+  // ---- Box PREVENDITE: dalla sala fantasma "prevendita", raggruppata per film ----
   const badgeColors = ['#2E7D32','#1B3A6B','#8B2E2E','#6A3E9E','#B5651D'];
-  let prevenditaHTML = '';
+  let prevenditeHTML = '';
   const prevenditaScreenings = (data['prevendita']||[]).filter(s=>s.film);
   if(prevenditaScreenings.length){
     const byFilm = new Map();
@@ -671,122 +599,60 @@ function renderBannerSheet(){
       if(!byFilm.has(s.film)) byFilm.set(s.film, []);
       byFilm.get(s.film).push(s);
     });
-    prevenditaHTML = Array.from(byFilm.entries()).map(([film, list])=>{
-      const rows = list.map((s,i)=>{
+    prevenditeHTML = Array.from(byFilm.entries()).map(([film, list])=>{
+      const badgeRows = list.map((s,i)=>{
         const label = s.versione ? s.versione.toUpperCase() : 'STANDARD';
         const color = badgeColors[i % badgeColors.length];
         const times = new Set();
         s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>times.add(t));
         const sortedTimes = sortTimesChronologically(times).join(' - ');
-        return `<div class="prevendita-row">
-          <span class="prevendita-badge" style="background:${color}">${escHtml(label)}</span>
-          <span class="prevendita-times">${escHtml(sortedTimes)}</span>
+        return `<div class="prevendite-row">
+          <span class="prevendite-badge" style="background:${color}">${escHtml(label)}</span>
+          <span class="prevendite-film">${escHtml(film)}</span>
+          <span class="prevendite-times">${escHtml(sortedTimes)}</span>
         </div>`;
       }).join('');
-      return `<div class="prevendita-box">
-        <div class="prevendita-header"><span class="reel-icon" style="border-color:#141212;"></span>${escHtml(film)}</div>
-        ${rows}
-      </div>`;
+      return badgeRows;
     }).join('');
   }
 
-  const promoHTML = showPromo ? `<div class="banner-info">
-    <div class="info-row">
-      <div class="info-icon">€</div>
-      <div class="info-text">Ogni <strong>4€</strong> spesi al nostro Ritrovo prima di fare il Biglietto equivalgono a <strong>1€</strong> di sconto sul costo del Biglietto.</div>
-    </div>
-    <div class="info-divider"></div>
-    <div class="info-row">
-      <div class="info-icon">✓</div>
-      <div class="info-text">Conserva lo <strong>scontrino</strong> e presentalo alle casse cinema.</div>
-    </div>
-    <div class="info-divider"></div>
-    <div class="info-row">
-      <div class="info-icon pin"><span class="pin-shape"></span></div>
-      <div class="info-text">Ci trovi a <strong>sinistra</strong> dopo l'ingresso del Cinema Multisala Lumière.</div>
-    </div>
-  </div>` : `<div class="banner-info"></div>`;
-
   el.innerHTML = `
-    <img src="projector.png" alt="Proiettore" class="projector-img" onerror="this.style.display='none';">
-    <img src="badge-cinema.png" alt="Il cinema ti aspetta" class="badge-cinema-img" onerror="this.style.display='none';">
-    <img src="popcorn-chair.png" alt="Popcorn e sedia regista" class="popcorn-chair-img" onerror="this.style.display='none';">
-    <div class="banner-header">
-      <span class="stars">★</span>
-      <span class="banner-title">Cinema Multisala Lumière</span>
-      <span class="stars">★</span>
-    </div>
-    <div class="banner-date-badge">${bannerHeadline()}</div>
-    <div class="banner-body">
-      <div class="banner-table">
-        <div class="table-header">
-          <div class="col-film">Film</div>
-          <div class="col-orari">Orari</div>
-        </div>
-        <div class="table-body" id="banner-table-body">${tableRowsHTML}</div>
-      </div>
-      <div class="banner-side" id="banner-side">
-        ${prevenditaHTML}
-        ${promoHTML}
-      </div>
-    </div>
-    <div class="banner-footer">
-      <div class="footer-web">★ Tutta la programmazione su <strong>www.cinemamultisalalumiere.it</strong> ★</div>
-      <div class="footer-divider"></div>
-      <div class="footer-logo">
-        <img src="logo-lumiere.png" alt="Logo Cinema Lumière"
-             onerror="this.style.display='none'; document.getElementById('footer-logo-fallback').style.display='block';">
-        <div class="footer-logo-text" id="footer-logo-fallback" style="display:none;">CINEMA<br>LUMIÈRE<br><span>MULTISALA</span></div>
-      </div>
-    </div>`;
+    <img src="banner-frame.png" alt="Cinema Multisala Lumière" class="frame-bg" onerror="this.style.opacity='0';">
+    <div class="overlay-zone zone-data"><span>${bannerHeadline()}</span></div>
+    <div class="overlay-zone zone-table" id="zone-table">${tableRowsHTML}</div>
+    <div class="overlay-zone zone-cinerevolution" id="zone-cinerevolution">${cinerevolutionRowsHTML}</div>
+    <div class="overlay-zone zone-prevendite" id="zone-prevendite">${prevenditeHTML}</div>
+  `;
 
-  fitBannerTable();
-  fitBannerSide();
+  fitZone('zone-table');
+  fitZone('zone-cinerevolution');
+  fitZone('zone-prevendite');
 }
 
 function bannerHeadline(){
   const d = new Date();
   const giorni = ['DOMENICA','LUNEDÌ','MARTEDÌ','MERCOLEDÌ','GIOVEDÌ','VENERDÌ','SABATO'];
-  const dd = String(d.getDate()).padStart(2,'0');
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  return 'DA ' + giorni[d.getDay()] + ' ' + dd + '/' + mm;
+  return 'DA ' + giorni[d.getDay()];
 }
 
-function fitBannerTable(){
-  const body = document.getElementById('banner-table-body');
-  if(!body) return;
-  if(body.clientHeight === 0) return; // pannello non visibile, salta
-  body.style.setProperty('--bs', 1);
+// Rimpicciolisce il contenuto di una zona overlay se non ci sta nello spazio fisso disegnato nell'immagine.
+// Non ingrandisce mai (le zone dell'immagine hanno una dimensione fissa e nota).
+function fitZone(id){
+  const zone = document.getElementById(id);
+  if(!zone) return;
+  if(zone.clientHeight === 0) return; // pannello non visibile, salta
+  zone.style.setProperty('--zs', 1);
   let s = 1;
-  for(let i=0; i<10; i++){
-    const naturalH = body.scrollHeight;
-    const availH = body.clientHeight;
-    const naturalW = body.scrollWidth;
-    const availW = body.clientWidth;
-    const hRatio = availH / naturalH;
-    const wRatio = availW / naturalW; // <1 se il testo trabocca in larghezza (es. orari lunghi)
-    const ratio = Math.min(hRatio, wRatio); // la dimensione più stretta comanda
-    if(Math.abs(ratio - 1) < 0.03) break;
-    s = Math.max(0.65, Math.min(1.35, s * ratio * 0.97));
-    body.style.setProperty('--bs', s);
-  }
-}
-
-function fitBannerSide(){
-  const side = document.getElementById('banner-side');
-  if(!side) return;
-  if(side.clientHeight === 0) return; // pannello non visibile, salta
-  side.style.setProperty('--ss', 1);
-  let s = 1;
-  for(let i=0; i<10; i++){
-    const naturalH = side.scrollHeight;
-    const availH = side.clientHeight;
-    if(naturalH <= availH) break; // qui vogliamo solo evitare il traboccamento, non riempire lo spazio a tutti i costi
+  for(let i=0; i<8; i++){
+    const naturalH = zone.scrollHeight;
+    const availH = zone.clientHeight;
+    if(naturalH <= availH) break;
     const ratio = availH / naturalH;
-    s = Math.max(0.55, s * ratio * 0.97);
-    side.style.setProperty('--ss', s);
+    s = Math.max(0.5, s * ratio * 0.97);
+    zone.style.setProperty('--zs', s);
   }
 }
+
 
 
 function sortTimesChronologically(timesSet){
@@ -841,14 +707,13 @@ function renderAll(){
 
 document.getElementById('toggle-sala').addEventListener('change', renderBannerSheet);
 document.getElementById('toggle-prezzo').addEventListener('change', renderBannerSheet);
-document.getElementById('toggle-promo').addEventListener('change', renderBannerSheet);
 
 /* ============ EXPORT ============ */
 async function exportPNG(elId, filename){
   // Apriamo subito la scheda, nello stesso istante del tap: iOS Safari blocca
   // le aperture "in differita" dopo un'operazione asincrona come html2canvas.
   const win = window.open('', '_blank');
-  if(elId==='sheet-banner'){ fitBannerTable(); fitBannerSide(); }
+  if(elId==='sheet-banner'){ fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite'); }
   if(elId==='sheet-mobile'){ fitMobileContent(); }
   const node = document.getElementById(elId);
   const bg = elId==='sheet-banner' ? '#FFFFFF' : '#141212';
@@ -891,15 +756,17 @@ async function exportPDF(){
 
 async function exportPDFBanner(){
   const win = window.open('', '_blank');
-  fitBannerTable();
-  fitBannerSide();
+  fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite');
   const node = document.getElementById('sheet-banner');
   const canvas = await html2canvas(node, {backgroundColor:'#FFFFFF', scale:3});
   const imgData = canvas.toDataURL('image/png');
   const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({unit:'mm', format:'a4', orientation:'landscape'});
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
+  // La cornice ha un rapporto (1513:1039) leggermente diverso dall'A4 standard:
+  // usiamo una pagina larga come un A4 orizzontale ma alta il giusto per non deformare l'immagine.
+  const ratio = 1513/1039;
+  const pageW = 297;
+  const pageH = pageW / ratio;
+  const pdf = new jsPDF({unit:'mm', format:[pageW, pageH], orientation:'landscape'});
   pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
   const blobUrl = pdf.output('bloburl');
   if(win){
