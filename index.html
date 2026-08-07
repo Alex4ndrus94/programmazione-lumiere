@@ -146,17 +146,35 @@
   }
   #print-content{
     transform-origin:top left;
-    padding:34px 30px 30px 46px;
+    padding:26px 22px;
     --s:1; /* fattore di scala automatico per far entrare tutto in una pagina */
   }
-  #sheet-print .room-band{font-size:calc(19px * var(--s));padding:calc(8px * var(--s)) 0;border-radius:6px;margin-bottom:calc(8px * var(--s));}
-  #sheet-print .film-row{display:flex;justify-content:space-between;align-items:baseline;padding:calc(5px * var(--s)) 0;}
-  #sheet-print .film-title{font-size:calc(15px * var(--s));}
-  #sheet-print .film-times{font-size:calc(15px * var(--s));}
-  #sheet-print .prices{display:flex;gap:10px;font-size:calc(11px * var(--s));color:var(--ivory-dim);margin-bottom:calc(14px * var(--s));}
-  #sheet-print .room-block{margin-bottom:calc(16px * var(--s));}
-  #sheet-print .doc-title{font-family:'Bebas Neue';font-size:calc(26px * var(--s));letter-spacing:1px;margin-bottom:2px;}
-  #sheet-print .doc-sub{font-size:calc(11px * var(--s));color:var(--ivory-dim);margin-bottom:calc(18px * var(--s));}
+  #sheet-print .doc-header{display:flex;align-items:center;gap:calc(10px * var(--s));margin-bottom:calc(14px * var(--s));}
+  #sheet-print .doc-header img{width:calc(34px * var(--s));height:auto;flex-shrink:0;}
+  #sheet-print .doc-title{font-family:'Bebas Neue';font-size:calc(26px * var(--s));letter-spacing:1px;line-height:1;}
+  #sheet-print .doc-sub{font-size:calc(11px * var(--s));color:#E8622C;font-weight:700;letter-spacing:0.5px;}
+
+  #sheet-print .room-card{display:flex;border-radius:calc(9px * var(--s));overflow:hidden;margin-bottom:calc(8px * var(--s));}
+  #sheet-print .card-sidebar{
+    width:calc(46px * var(--s));flex-shrink:0;color:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(6px * var(--s)) 0;
+  }
+  #sheet-print .sidebar-label{font-family:'Inter';font-size:calc(6.5px * var(--s));letter-spacing:1px;font-weight:700;}
+  #sheet-print .sidebar-number{font-family:'Bebas Neue';font-size:calc(20px * var(--s));line-height:1;}
+  #sheet-print .card-body{flex:1;background:#fff;padding:calc(7px * var(--s)) calc(9px * var(--s));display:flex;flex-direction:column;gap:calc(3px * var(--s));min-width:0;}
+  #sheet-print .card-room-name{font-family:'Bebas Neue';font-size:calc(13px * var(--s));letter-spacing:1px;line-height:1;}
+  #sheet-print .card-film-line{display:flex;align-items:baseline;justify-content:space-between;gap:calc(6px * var(--s));flex-wrap:wrap;}
+  #sheet-print .card-film-title{font-family:'Inter';font-weight:700;font-size:calc(10px * var(--s));color:#141212;}
+  #sheet-print .card-film-price{font-family:'IBM Plex Mono';font-size:calc(7px * var(--s));color:#888;flex-basis:100%;}
+  #sheet-print .card-pills{display:flex;gap:calc(3px * var(--s));flex-wrap:wrap;}
+  #sheet-print .time-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(8px * var(--s));padding:calc(2px * var(--s)) calc(6px * var(--s));border-radius:calc(4px * var(--s));white-space:nowrap;}
+  #sheet-print .card-price{
+    width:calc(58px * var(--s));flex-shrink:0;padding:calc(6px * var(--s));
+    display:flex;flex-direction:column;justify-content:center;gap:calc(4px * var(--s));
+  }
+  #sheet-print .price-label{font-family:'Inter';font-size:calc(6.5px * var(--s));font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;}
+  #sheet-print .price-value{font-family:'Inter';font-size:calc(9.5px * var(--s));font-weight:800;color:#141212;}
+  #sheet-print .price-divider{border-top:1px dashed rgba(0,0,0,0.25);}
 
   /* ---- Mobile wallpaper ---- */
   #sheet-mobile{
@@ -169,18 +187,35 @@
   }
   #sheet-mobile .mobile-table-border{
     width:100%;border:3px solid #E8622C;border-radius:12px;overflow:hidden;
-    padding:12px;box-sizing:border-box;
+    padding:12px;box-sizing:border-box;background:var(--ink);
   }
   #mobile-content{ --s:1; }
-  /* stessa identica logica della stampa A5, solo con basi più piccole per il canvas più stretto */
-  #sheet-mobile .doc-title{font-family:'Bebas Neue';font-size:calc(19px * var(--s));letter-spacing:1px;margin-bottom:2px;text-align:center;}
-  #sheet-mobile .doc-sub{font-size:calc(8px * var(--s));color:var(--ivory-dim);margin-bottom:calc(12px * var(--s));text-align:center;}
-  #sheet-mobile .room-band{font-size:calc(13px * var(--s));padding:calc(6px * var(--s)) 0;border-radius:5px;margin-bottom:calc(6px * var(--s));}
-  #sheet-mobile .film-row{display:flex;justify-content:space-between;align-items:baseline;padding:calc(4px * var(--s)) 0;}
-  #sheet-mobile .film-title{font-size:calc(11px * var(--s));}
-  #sheet-mobile .film-times{font-size:calc(11px * var(--s));}
-  #sheet-mobile .prices{display:flex;gap:8px;font-size:calc(7.5px * var(--s));color:var(--ivory-dim);margin-bottom:calc(9px * var(--s));}
-  #sheet-mobile .room-block{margin-bottom:calc(11px * var(--s));}
+  #sheet-mobile .doc-header{display:flex;align-items:center;justify-content:center;gap:calc(8px * var(--s));margin-bottom:calc(10px * var(--s));}
+  #sheet-mobile .doc-header img{width:calc(24px * var(--s));height:auto;flex-shrink:0;}
+  #sheet-mobile .doc-title{font-family:'Bebas Neue';font-size:calc(19px * var(--s));letter-spacing:1px;line-height:1;}
+  #sheet-mobile .doc-sub{font-size:calc(8px * var(--s));color:#E8622C;font-weight:700;letter-spacing:0.5px;}
+
+  #sheet-mobile .room-card{display:flex;border-radius:calc(8px * var(--s));overflow:hidden;margin-bottom:calc(6px * var(--s));}
+  #sheet-mobile .card-sidebar{
+    width:calc(34px * var(--s));flex-shrink:0;color:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(5px * var(--s)) 0;
+  }
+  #sheet-mobile .sidebar-label{font-family:'Inter';font-size:calc(5px * var(--s));letter-spacing:0.5px;font-weight:700;}
+  #sheet-mobile .sidebar-number{font-family:'Bebas Neue';font-size:calc(14px * var(--s));line-height:1;}
+  #sheet-mobile .card-body{flex:1;background:#fff;padding:calc(5px * var(--s)) calc(7px * var(--s));display:flex;flex-direction:column;gap:calc(2px * var(--s));min-width:0;}
+  #sheet-mobile .card-room-name{font-family:'Bebas Neue';font-size:calc(9.5px * var(--s));letter-spacing:0.5px;line-height:1;}
+  #sheet-mobile .card-film-line{display:flex;align-items:baseline;justify-content:space-between;gap:calc(4px * var(--s));flex-wrap:wrap;}
+  #sheet-mobile .card-film-title{font-family:'Inter';font-weight:700;font-size:calc(7.5px * var(--s));color:#141212;}
+  #sheet-mobile .card-film-price{font-family:'IBM Plex Mono';font-size:calc(5.5px * var(--s));color:#888;flex-basis:100%;}
+  #sheet-mobile .card-pills{display:flex;gap:calc(2px * var(--s));flex-wrap:wrap;}
+  #sheet-mobile .time-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(6px * var(--s));padding:calc(1.5px * var(--s)) calc(4px * var(--s));border-radius:calc(3px * var(--s));white-space:nowrap;}
+  #sheet-mobile .card-price{
+    width:calc(42px * var(--s));flex-shrink:0;padding:calc(4px * var(--s));
+    display:flex;flex-direction:column;justify-content:center;gap:calc(3px * var(--s));
+  }
+  #sheet-mobile .price-label{font-family:'Inter';font-size:calc(5px * var(--s));font-weight:700;color:#666;text-transform:uppercase;}
+  #sheet-mobile .price-value{font-family:'Inter';font-size:calc(7px * var(--s));font-weight:800;color:#141212;}
+  #sheet-mobile .price-divider{border-top:1px dashed rgba(0,0,0,0.25);}
 
   #sheet-mobile .mobile-brand{
     display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;
@@ -458,10 +493,14 @@ function escAttr(str){ return (str||'').replace(/"/g,'&quot;'); }
 /* ============ PRINT SHEET RENDER ============ */
 function renderPrintSheet(){
   const el = document.getElementById('sheet-print');
-  el.innerHTML = `<div class="sprockets-v left"></div>
-    <div id="print-content">
-      <div class="doc-title">PROGRAMMAZIONE</div>
-      <div class="doc-sub">Aggiornata al ${todayStr()}</div>
+  el.innerHTML = `<div id="print-content">
+      <div class="doc-header">
+        <img src="logo-lumiere.png" alt="Logo" onerror="this.style.display='none';">
+        <div>
+          <div class="doc-title">PROGRAMMAZIONE</div>
+          <div class="doc-sub">Aggiornata al ${todayStr()}</div>
+        </div>
+      </div>
       <div>${roomsBlocksHTML(true)}</div>
     </div>`;
   fitPrintContent();
@@ -489,9 +528,14 @@ function renderMobileSheet(){
   el.innerHTML = `
     <div class="mobile-table-border">
       <div id="mobile-content">
-        <div class="doc-title">PROGRAMMAZIONE</div>
-        <div class="doc-sub">Aggiornata al ${todayStr()}</div>
-        <div>${roomsBlocksHTML(false)}</div>
+        <div class="doc-header">
+          <img src="logo-lumiere.png" alt="Logo" onerror="this.style.display='none';">
+          <div>
+            <div class="doc-title">PROGRAMMAZIONE</div>
+            <div class="doc-sub">Aggiornata al ${todayStr()}</div>
+          </div>
+        </div>
+        <div>${roomsBlocksHTML(true)}</div>
       </div>
     </div>
     <div class="mobile-brand">
@@ -529,20 +573,55 @@ function fitMobileContent(){
   }
 }
 
+function roomNumberFor(room){
+  if(room.id === 'prevendita') return '★';
+  const idx = ROOMS.findIndex(r=>r.id===room.id);
+  return String(idx+1).padStart(2,'0');
+}
+
 function roomsBlocksHTML(showPrices){
   return ROOMS_STAMPA.map(room=>{
     const screenings = data[room.id] || [];
     if(screenings.length===0) return '';
-    const rows = screenings.map(s=>{
+
+    // Prezzo unico di sala solo se TUTTI i film hanno lo stesso prezzo; altrimenti il prezzo va per singolo film
+    const uniquePrices = new Set(screenings.map(s=>`${s.intero}|${s.ridotto}|${s.abb}`));
+    const showSharedPrice = showPrices && uniquePrices.size === 1;
+
+    const filmLines = screenings.map(s=>{
       const timesSet = new Set();
       s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
-      const sortedTimes = sortTimesChronologically(timesSet).join(' - ');
-      const priceLine = showPrices ? `<div class="prices"><span>Intero ${s.intero||'-'}</span><span>Ridotto ${s.ridotto||'-'}</span><span>Abb. ${s.abb||'N'}</span></div>` : '';
-      return `<div class="film-row"><span class="film-title">${escHtml(s.film)}</span><span class="film-times">${escHtml(sortedTimes)}</span></div>${priceLine}`;
+      const sortedTimes = sortTimesChronologically(timesSet);
+      const pills = sortedTimes.map(t=>`<span class="time-pill" style="background:${room.color}">${escHtml(t)}</span>`).join('');
+      const perFilmPrice = (showPrices && !showSharedPrice) ?
+        `<span class="card-film-price">Intero ${s.intero||'-'} · Ridotto ${s.ridotto||'-'} · Abb. ${s.abb||'N'}</span>` : '';
+      return `<div class="card-film-line">
+        <span class="card-film-title">${escHtml(s.film)}</span>
+        <span class="card-pills">${pills}</span>
+        ${perFilmPrice}
+      </div>`;
     }).join('');
-    return `<div class="room-block">
-      <div class="room-band" style="background:${room.color}">${room.name}</div>
-      ${rows}
+
+    const first = screenings[0];
+    const priceHTML = showSharedPrice ? `
+      <div class="card-price" style="background:color-mix(in srgb, ${room.color} 15%, white);">
+        <div><div class="price-label">Intero</div><div class="price-value">€ ${first.intero||'-'}</div></div>
+        <div class="price-divider"></div>
+        <div><div class="price-label">Ridotto</div><div class="price-value">${first.ridotto?'€ '+first.ridotto:'-'}</div></div>
+        <div class="price-divider"></div>
+        <div><div class="price-label">Abb.</div><div class="price-value">${first.abb||'N'}</div></div>
+      </div>` : '';
+
+    return `<div class="room-card">
+      <div class="card-sidebar" style="background:${room.color}">
+        <div class="sidebar-label">SALA</div>
+        <div class="sidebar-number">${roomNumberFor(room)}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-room-name" style="color:${room.color}">${room.name}</div>
+        ${filmLines}
+      </div>
+      ${priceHTML}
     </div>`;
   }).join('');
 }
