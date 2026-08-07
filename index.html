@@ -581,6 +581,14 @@ function fitMobileContent(){
   }
 }
 
+// html2canvas non supporta bene color-mix() del CSS moderno: calcoliamo il colore chiaro a mano
+function lightenColor(hex, whiteAmount){
+  hex = hex.replace('#','');
+  const r = parseInt(hex.substring(0,2),16), g = parseInt(hex.substring(2,4),16), b = parseInt(hex.substring(4,6),16);
+  const mix = c => Math.round(c + (255-c)*whiteAmount);
+  return `rgb(${mix(r)},${mix(g)},${mix(b)})`;
+}
+
 function roomNumberFor(room){
   if(room.id === 'prevendita') return '★';
   const idx = ROOMS.findIndex(r=>r.id===room.id);
@@ -628,7 +636,7 @@ function roomsBlocksHTML(showPrices){
 
     const first = screenings[0];
     const priceHTML = showSharedPrice ? `
-      <div class="card-price" style="background:color-mix(in srgb, ${room.color} 15%, white);">
+      <div class="card-price" style="background:${lightenColor(room.color, 0.85)};">
         <div><div class="price-label">Intero</div><div class="price-value">€ ${first.intero||'-'}</div></div>
         <div class="price-divider"></div>
         <div><div class="price-label">Ridotto</div><div class="price-value">${first.ridotto?'€ '+first.ridotto:'-'}</div></div>
@@ -819,66 +827,84 @@ async function exportPNG(elId, filename){
   // Apriamo subito la scheda, nello stesso istante del tap: iOS Safari blocca
   // le aperture "in differita" dopo un'operazione asincrona come html2canvas.
   const win = window.open('', '_blank');
-  if(elId==='sheet-banner'){ fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite'); }
-  if(elId==='sheet-mobile'){ fitMobileContent(); }
-  const node = document.getElementById(elId);
-  const bg = elId==='sheet-banner' ? '#FFFFFF' : '#141212';
-  // Per lo sfondo mobile puntiamo alla risoluzione esatta richiesta (2213×4798px)
-  // invece di un fattore di scala fisso, così il file combacia sempre con quella misura.
-  const scale = elId==='sheet-mobile' ? (2213 / node.offsetWidth) : 3;
-  const canvas = await html2canvas(node, {backgroundColor:bg, scale});
-  // Usiamo un Blob invece di un data-URL: un PNG in alta qualità genera un
-  // URL troppo lungo che Safari su iOS a volte rifiuta di aprire in silenzio.
-  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-  if(win && blob){
-    const blobUrl = URL.createObjectURL(blob);
-    win.location.href = blobUrl;
-  }else if(win){
-    win.close();
-    alert('Errore nella generazione dell\'immagine. Riprova.');
-  }else{
-    alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
+  try{
+    if(elId==='sheet-banner'){ fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite'); }
+    if(elId==='sheet-mobile'){ fitMobileContent(); }
+    const node = document.getElementById(elId);
+    const bg = elId==='sheet-banner' ? '#FFFFFF' : '#141212';
+    // Per lo sfondo mobile puntiamo alla risoluzione esatta richiesta (2213×4798px)
+    // invece di un fattore di scala fisso, così il file combacia sempre con quella misura.
+    const scale = elId==='sheet-mobile' ? (2213 / node.offsetWidth) : 3;
+    const canvas = await html2canvas(node, {backgroundColor:bg, scale});
+    // Usiamo un Blob invece di un data-URL: un PNG in alta qualità genera un
+    // URL troppo lungo che Safari su iOS a volte rifiuta di aprire in silenzio.
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    if(win && blob){
+      const blobUrl = URL.createObjectURL(blob);
+      win.location.href = blobUrl;
+    }else if(win){
+      win.close();
+      alert('Errore nella generazione dell\'immagine. Riprova.');
+    }else{
+      alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
+    }
+  }catch(err){
+    if(win) win.close();
+    alert('Errore durante la generazione: ' + err.message);
+    console.error(err);
   }
 }
 
 async function exportPDF(){
   const win = window.open('', '_blank');
-  fitPrintContent();
-  const node = document.getElementById('sheet-print');
-  const canvas = await html2canvas(node, {backgroundColor:'#141212', scale:3});
-  const imgData = canvas.toDataURL('image/png');
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({unit:'mm', format:'a5', orientation:'portrait'});
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
-  pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
-  const blobUrl = pdf.output('bloburl');
-  if(win){
-    win.location.href = blobUrl;
-  }else{
-    alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
+  try{
+    fitPrintContent();
+    const node = document.getElementById('sheet-print');
+    const canvas = await html2canvas(node, {backgroundColor:'#141212', scale:3});
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({unit:'mm', format:'a5', orientation:'portrait'});
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
+    const blobUrl = pdf.output('bloburl');
+    if(win){
+      win.location.href = blobUrl;
+    }else{
+      alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
+    }
+  }catch(err){
+    if(win) win.close();
+    alert('Errore durante la generazione: ' + err.message);
+    console.error(err);
   }
 }
 
 async function exportPDFBanner(){
   const win = window.open('', '_blank');
-  fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite');
-  const node = document.getElementById('sheet-banner');
-  const canvas = await html2canvas(node, {backgroundColor:'#FFFFFF', scale:3});
-  const imgData = canvas.toDataURL('image/png');
-  const { jsPDF } = window.jspdf;
-  // La cornice ha un rapporto (1513:1039) leggermente diverso dall'A4 standard:
-  // usiamo una pagina larga come un A4 orizzontale ma alta il giusto per non deformare l'immagine.
-  const ratio = 1513/1039;
-  const pageW = 297;
-  const pageH = pageW / ratio;
-  const pdf = new jsPDF({unit:'mm', format:[pageW, pageH], orientation:'landscape'});
-  pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
-  const blobUrl = pdf.output('bloburl');
-  if(win){
-    win.location.href = blobUrl;
-  }else{
-    alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
+  try{
+    fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite');
+    const node = document.getElementById('sheet-banner');
+    const canvas = await html2canvas(node, {backgroundColor:'#FFFFFF', scale:3});
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    // La cornice ha un rapporto (1513:1039) leggermente diverso dall'A4 standard:
+    // usiamo una pagina larga come un A4 orizzontale ma alta il giusto per non deformare l'immagine.
+    const ratio = 1513/1039;
+    const pageW = 297;
+    const pageH = pageW / ratio;
+    const pdf = new jsPDF({unit:'mm', format:[pageW, pageH], orientation:'landscape'});
+    pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
+    const blobUrl = pdf.output('bloburl');
+    if(win){
+      win.location.href = blobUrl;
+    }else{
+      alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
+    }
+  }catch(err){
+    if(win) win.close();
+    alert('Errore durante la generazione: ' + err.message);
+    console.error(err);
   }
 }
 
