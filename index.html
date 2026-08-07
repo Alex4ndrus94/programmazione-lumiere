@@ -231,18 +231,20 @@
     padding:4px 12px;display:flex;flex-direction:column;justify-content:center;gap:2px;--zs:1;
   }
   #sheet-banner .zone-row{
-    display:flex;justify-content:space-between;align-items:baseline;
+    display:grid;grid-template-columns:58% 42%;align-items:start;column-gap:10px;
     padding:calc(6px * var(--zs)) 0;border-bottom:1px solid #eee;
   }
   #sheet-banner .zone-row:last-child{border-bottom:none;}
   #sheet-banner .zone-row .zf-title{
-    font-family:'Inter';font-weight:800;font-size:calc(56px * var(--zs));color:#141212;text-transform:uppercase;line-height:1.15;
+    font-family:'Inter';font-weight:800;font-size:calc(40px * var(--zs));color:#141212;text-transform:uppercase;line-height:1.15;
+    overflow-wrap:break-word;
   }
   #sheet-banner .zone-row .zf-times{
-    font-family:'Inter';font-weight:800;font-size:calc(56px * var(--zs));color:#a11e1e;margin-left:10px;text-align:right;
+    font-family:'Inter';font-weight:800;font-size:calc(40px * var(--zs));color:#a11e1e;text-align:right;line-height:1.15;
+    overflow-wrap:break-word;display:block;
   }
   #sheet-banner .zone-row .zf-price{
-    font-family:'IBM Plex Mono';font-weight:600;font-size:calc(24px * var(--zs));color:#777;display:block;
+    font-family:'IBM Plex Mono';font-weight:600;font-size:calc(18px * var(--zs));color:#777;display:block;text-align:right;
   }
   #sheet-banner .prevendite-row{
     display:flex;align-items:center;gap:14px;padding:calc(8px * var(--zs)) 0;
@@ -579,10 +581,7 @@ function renderBannerSheet(){
     const priceInline = showPrezzo ? `<span class="zf-price">${pricesForFilm(entry)}</span>` : '';
     return `<div class="zone-row">
       <span class="zf-title">${escHtml(entry.film)}${versionTag}${salaTag}</span>
-      <span>
-        <span class="zf-times">${escHtml(sortedTimes)}</span>
-        ${priceInline}
-      </span>
+      <span class="zf-times">${escHtml(sortedTimes)}${priceInline}</span>
     </div>`;
   }
 
