@@ -159,22 +159,26 @@
     width:calc(46px * var(--s));flex-shrink:0;color:#fff;
     display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(6px * var(--s)) 0;
   }
-  #sheet-print .sidebar-label{font-family:'Inter';font-size:calc(6.5px * var(--s));letter-spacing:1px;font-weight:700;}
-  #sheet-print .sidebar-number{font-family:'Bebas Neue';font-size:calc(20px * var(--s));line-height:1;}
-  #sheet-print .card-body{flex:1;background:#fff;padding:calc(7px * var(--s)) calc(9px * var(--s));display:flex;flex-direction:column;gap:calc(3px * var(--s));min-width:0;}
-  #sheet-print .card-room-name{font-family:'Bebas Neue';font-size:calc(13px * var(--s));letter-spacing:1px;line-height:1;}
+  #sheet-print .sidebar-label{font-family:'Inter';font-size:calc(7.5px * var(--s));letter-spacing:1px;font-weight:700;}
+  #sheet-print .sidebar-number{font-family:'Bebas Neue';font-size:calc(24px * var(--s));line-height:1;}
+  #sheet-print .card-body{flex:1;background:#fff;padding:calc(8px * var(--s)) calc(11px * var(--s));display:flex;flex-direction:column;gap:calc(4px * var(--s));min-width:0;}
+  #sheet-print .card-room-name{font-family:'Bebas Neue';font-size:calc(16px * var(--s));letter-spacing:1px;line-height:1;}
   #sheet-print .card-film-line{display:flex;align-items:baseline;justify-content:space-between;gap:calc(6px * var(--s));flex-wrap:wrap;}
-  #sheet-print .card-film-title{font-family:'Inter';font-weight:700;font-size:calc(10px * var(--s));color:#141212;}
-  #sheet-print .card-film-price{font-family:'IBM Plex Mono';font-size:calc(7px * var(--s));color:#888;flex-basis:100%;}
-  #sheet-print .card-pills{display:flex;gap:calc(3px * var(--s));flex-wrap:wrap;}
-  #sheet-print .time-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(8px * var(--s));padding:calc(2px * var(--s)) calc(6px * var(--s));border-radius:calc(4px * var(--s));white-space:nowrap;}
+  #sheet-print .card-film-title{font-family:'Inter';font-weight:700;font-size:calc(13px * var(--s));color:#141212;}
+  #sheet-print .card-film-price{font-family:'IBM Plex Mono';font-size:calc(8.5px * var(--s));color:#888;flex-basis:100%;}
+  #sheet-print .card-pills{display:flex;gap:calc(4px * var(--s));flex-wrap:wrap;}
+  #sheet-print .time-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(10.5px * var(--s));padding:calc(3px * var(--s)) calc(7px * var(--s));border-radius:calc(5px * var(--s));white-space:nowrap;}
   #sheet-print .card-price{
-    width:calc(58px * var(--s));flex-shrink:0;padding:calc(6px * var(--s));
+    width:calc(64px * var(--s));flex-shrink:0;padding:calc(6px * var(--s));
     display:flex;flex-direction:column;justify-content:center;gap:calc(4px * var(--s));
   }
-  #sheet-print .price-label{font-family:'Inter';font-size:calc(6.5px * var(--s));font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;}
-  #sheet-print .price-value{font-family:'Inter';font-size:calc(9.5px * var(--s));font-weight:800;color:#141212;}
+  #sheet-print .price-label{font-family:'Inter';font-size:calc(7.5px * var(--s));font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;}
+  #sheet-print .price-value{font-family:'Inter';font-size:calc(11.5px * var(--s));font-weight:800;color:#141212;}
   #sheet-print .price-divider{border-top:1px dashed rgba(0,0,0,0.25);}
+  /* Layout "sala con un solo film": titolo grande sopra, orari in evidenza sotto */
+  #sheet-print .card-body-single .card-film-title-lg{font-family:'Inter';font-weight:800;font-size:calc(16px * var(--s));color:#141212;margin-bottom:calc(2px * var(--s));}
+  #sheet-print .card-body-single .card-pills-lg{display:flex;gap:calc(5px * var(--s));flex-wrap:wrap;}
+  #sheet-print .card-body-single .time-pill-lg{color:#fff;font-family:'Inter';font-weight:800;font-size:calc(13px * var(--s));padding:calc(4px * var(--s)) calc(9px * var(--s));border-radius:calc(6px * var(--s));white-space:nowrap;}
 
   /* ---- Mobile wallpaper ---- */
   #sheet-mobile{
@@ -200,22 +204,26 @@
     width:calc(34px * var(--s));flex-shrink:0;color:#fff;
     display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(5px * var(--s)) 0;
   }
-  #sheet-mobile .sidebar-label{font-family:'Inter';font-size:calc(5px * var(--s));letter-spacing:0.5px;font-weight:700;}
-  #sheet-mobile .sidebar-number{font-family:'Bebas Neue';font-size:calc(14px * var(--s));line-height:1;}
-  #sheet-mobile .card-body{flex:1;background:#fff;padding:calc(5px * var(--s)) calc(7px * var(--s));display:flex;flex-direction:column;gap:calc(2px * var(--s));min-width:0;}
-  #sheet-mobile .card-room-name{font-family:'Bebas Neue';font-size:calc(9.5px * var(--s));letter-spacing:0.5px;line-height:1;}
+  #sheet-mobile .sidebar-label{font-family:'Inter';font-size:calc(6px * var(--s));letter-spacing:0.5px;font-weight:700;}
+  #sheet-mobile .sidebar-number{font-family:'Bebas Neue';font-size:calc(17px * var(--s));line-height:1;}
+  #sheet-mobile .card-body{flex:1;background:#fff;padding:calc(6px * var(--s)) calc(8px * var(--s));display:flex;flex-direction:column;gap:calc(3px * var(--s));min-width:0;}
+  #sheet-mobile .card-room-name{font-family:'Bebas Neue';font-size:calc(12px * var(--s));letter-spacing:0.5px;line-height:1;}
   #sheet-mobile .card-film-line{display:flex;align-items:baseline;justify-content:space-between;gap:calc(4px * var(--s));flex-wrap:wrap;}
-  #sheet-mobile .card-film-title{font-family:'Inter';font-weight:700;font-size:calc(7.5px * var(--s));color:#141212;}
-  #sheet-mobile .card-film-price{font-family:'IBM Plex Mono';font-size:calc(5.5px * var(--s));color:#888;flex-basis:100%;}
-  #sheet-mobile .card-pills{display:flex;gap:calc(2px * var(--s));flex-wrap:wrap;}
-  #sheet-mobile .time-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(6px * var(--s));padding:calc(1.5px * var(--s)) calc(4px * var(--s));border-radius:calc(3px * var(--s));white-space:nowrap;}
+  #sheet-mobile .card-film-title{font-family:'Inter';font-weight:700;font-size:calc(9.5px * var(--s));color:#141212;}
+  #sheet-mobile .card-film-price{font-family:'IBM Plex Mono';font-size:calc(6.5px * var(--s));color:#888;flex-basis:100%;}
+  #sheet-mobile .card-pills{display:flex;gap:calc(3px * var(--s));flex-wrap:wrap;}
+  #sheet-mobile .time-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(8px * var(--s));padding:calc(2px * var(--s)) calc(5px * var(--s));border-radius:calc(4px * var(--s));white-space:nowrap;}
   #sheet-mobile .card-price{
-    width:calc(42px * var(--s));flex-shrink:0;padding:calc(4px * var(--s));
+    width:calc(48px * var(--s));flex-shrink:0;padding:calc(4px * var(--s));
     display:flex;flex-direction:column;justify-content:center;gap:calc(3px * var(--s));
   }
-  #sheet-mobile .price-label{font-family:'Inter';font-size:calc(5px * var(--s));font-weight:700;color:#666;text-transform:uppercase;}
-  #sheet-mobile .price-value{font-family:'Inter';font-size:calc(7px * var(--s));font-weight:800;color:#141212;}
+  #sheet-mobile .price-label{font-family:'Inter';font-size:calc(6px * var(--s));font-weight:700;color:#666;text-transform:uppercase;}
+  #sheet-mobile .price-value{font-family:'Inter';font-size:calc(8.5px * var(--s));font-weight:800;color:#141212;}
   #sheet-mobile .price-divider{border-top:1px dashed rgba(0,0,0,0.25);}
+  /* Layout "sala con un solo film": titolo grande sopra, orari in evidenza sotto */
+  #sheet-mobile .card-body-single .card-film-title-lg{font-family:'Inter';font-weight:800;font-size:calc(12px * var(--s));color:#141212;margin-bottom:calc(2px * var(--s));}
+  #sheet-mobile .card-body-single .card-pills-lg{display:flex;gap:calc(4px * var(--s));flex-wrap:wrap;}
+  #sheet-mobile .card-body-single .time-pill-lg{color:#fff;font-family:'Inter';font-weight:800;font-size:calc(9.5px * var(--s));padding:calc(3px * var(--s)) calc(7px * var(--s));border-radius:calc(5px * var(--s));white-space:nowrap;}
 
   #sheet-mobile .mobile-brand{
     display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;
@@ -587,20 +595,36 @@ function roomsBlocksHTML(showPrices){
     // Prezzo unico di sala solo se TUTTI i film hanno lo stesso prezzo; altrimenti il prezzo va per singolo film
     const uniquePrices = new Set(screenings.map(s=>`${s.intero}|${s.ridotto}|${s.abb}`));
     const showSharedPrice = showPrices && uniquePrices.size === 1;
+    const isSingleFilm = screenings.length === 1;
 
-    const filmLines = screenings.map(s=>{
+    let filmLines;
+    if(isSingleFilm){
+      // Sala con un solo film: titolo grande sopra, orari in evidenza sotto (più leggibile)
+      const s = screenings[0];
       const timesSet = new Set();
       s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
       const sortedTimes = sortTimesChronologically(timesSet);
-      const pills = sortedTimes.map(t=>`<span class="time-pill" style="background:${room.color}">${escHtml(t)}</span>`).join('');
+      const pills = sortedTimes.map(t=>`<span class="time-pill-lg" style="background:${room.color}">${escHtml(t)}</span>`).join('');
       const perFilmPrice = (showPrices && !showSharedPrice) ?
         `<span class="card-film-price">Intero ${s.intero||'-'} · Ridotto ${s.ridotto||'-'} · Abb. ${s.abb||'N'}</span>` : '';
-      return `<div class="card-film-line">
-        <span class="card-film-title">${escHtml(s.film)}</span>
-        <span class="card-pills">${pills}</span>
-        ${perFilmPrice}
-      </div>`;
-    }).join('');
+      filmLines = `<div class="card-film-title-lg">${escHtml(s.film)}</div>
+        <div class="card-pills-lg">${pills}</div>
+        ${perFilmPrice}`;
+    }else{
+      filmLines = screenings.map(s=>{
+        const timesSet = new Set();
+        s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
+        const sortedTimes = sortTimesChronologically(timesSet);
+        const pills = sortedTimes.map(t=>`<span class="time-pill" style="background:${room.color}">${escHtml(t)}</span>`).join('');
+        const perFilmPrice = (showPrices && !showSharedPrice) ?
+          `<span class="card-film-price">Intero ${s.intero||'-'} · Ridotto ${s.ridotto||'-'} · Abb. ${s.abb||'N'}</span>` : '';
+        return `<div class="card-film-line">
+          <span class="card-film-title">${escHtml(s.film)}</span>
+          <span class="card-pills">${pills}</span>
+          ${perFilmPrice}
+        </div>`;
+      }).join('');
+    }
 
     const first = screenings[0];
     const priceHTML = showSharedPrice ? `
@@ -617,7 +641,7 @@ function roomsBlocksHTML(showPrices){
         <div class="sidebar-label">SALA</div>
         <div class="sidebar-number">${roomNumberFor(room)}</div>
       </div>
-      <div class="card-body">
+      <div class="card-body${isSingleFilm ? ' card-body-single' : ''}">
         <div class="card-room-name" style="color:${room.color}">${room.name}</div>
         ${filmLines}
       </div>
