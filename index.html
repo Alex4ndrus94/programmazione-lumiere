@@ -163,9 +163,10 @@
   #sheet-print .sidebar-number{font-family:'Bebas Neue';font-size:calc(24px * var(--s));line-height:1;}
   #sheet-print .card-body{flex:1;background:#fff;padding:calc(8px * var(--s)) calc(11px * var(--s));display:flex;flex-direction:column;gap:calc(4px * var(--s));min-width:0;}
   #sheet-print .card-room-name{font-family:'Bebas Neue';font-size:calc(16px * var(--s));letter-spacing:1px;line-height:1;}
-  #sheet-print .card-film-line{display:flex;align-items:baseline;justify-content:space-between;gap:calc(6px * var(--s));flex-wrap:wrap;}
+  #sheet-print .card-film-line{display:flex;align-items:baseline;justify-content:space-between;gap:calc(6px * var(--s));}
+  #sheet-print .card-film-title-group{display:flex;align-items:baseline;gap:calc(7px * var(--s));flex-wrap:wrap;min-width:0;}
   #sheet-print .card-film-title{font-family:'Inter';font-weight:700;font-size:calc(13px * var(--s));color:#141212;}
-  #sheet-print .card-film-price{font-family:'IBM Plex Mono';font-size:calc(8.5px * var(--s));color:#888;flex-basis:100%;}
+  #sheet-print .card-film-price{font-family:'IBM Plex Mono';font-size:calc(8.5px * var(--s));color:#888;white-space:nowrap;flex-shrink:0;}
   #sheet-print .card-pills{display:flex;gap:calc(4px * var(--s));flex-wrap:wrap;}
   #sheet-print .time-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(10.5px * var(--s));padding:calc(3px * var(--s)) calc(7px * var(--s));border-radius:calc(5px * var(--s));white-space:nowrap;}
   #sheet-print .card-price{
@@ -208,9 +209,10 @@
   #sheet-mobile .sidebar-number{font-family:'Bebas Neue';font-size:calc(17px * var(--s));line-height:1;}
   #sheet-mobile .card-body{flex:1;background:#fff;padding:calc(6px * var(--s)) calc(8px * var(--s));display:flex;flex-direction:column;gap:calc(3px * var(--s));min-width:0;}
   #sheet-mobile .card-room-name{font-family:'Bebas Neue';font-size:calc(12px * var(--s));letter-spacing:0.5px;line-height:1;}
-  #sheet-mobile .card-film-line{display:flex;align-items:baseline;justify-content:space-between;gap:calc(4px * var(--s));flex-wrap:wrap;}
+  #sheet-mobile .card-film-line{display:flex;align-items:baseline;justify-content:space-between;gap:calc(4px * var(--s));}
+  #sheet-mobile .card-film-title-group{display:flex;align-items:baseline;gap:calc(5px * var(--s));flex-wrap:wrap;min-width:0;}
   #sheet-mobile .card-film-title{font-family:'Inter';font-weight:700;font-size:calc(9.5px * var(--s));color:#141212;}
-  #sheet-mobile .card-film-price{font-family:'IBM Plex Mono';font-size:calc(6.5px * var(--s));color:#888;flex-basis:100%;}
+  #sheet-mobile .card-film-price{font-family:'IBM Plex Mono';font-size:calc(6.5px * var(--s));color:#888;white-space:nowrap;flex-shrink:0;}
   #sheet-mobile .card-pills{display:flex;gap:calc(3px * var(--s));flex-wrap:wrap;}
   #sheet-mobile .time-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(8px * var(--s));padding:calc(2px * var(--s)) calc(5px * var(--s));border-radius:calc(4px * var(--s));white-space:nowrap;}
   #sheet-mobile .card-price{
@@ -627,8 +629,10 @@ function roomsBlocksHTML(showPrices){
         const perFilmPrice = (showPrices && !showSharedPrice) ?
           `<span class="card-film-price">Intero ${s.intero||'-'} · Ridotto ${s.ridotto||'-'} · Abb. ${s.abb||'N'}</span>` : '';
         return `<div class="card-film-line">
-          <span class="card-film-title">${escHtml(s.film)}</span>
-          <span class="card-pills">${pills}</span>
+          <span class="card-film-title-group">
+            <span class="card-film-title">${escHtml(s.film)}</span>
+            <span class="card-pills">${pills}</span>
+          </span>
           ${perFilmPrice}
         </div>`;
       }).join('');
@@ -882,9 +886,21 @@ async function exportPDF(){
 
 async function exportPDFBanner(){
   const win = window.open('', '_blank');
+  const frameImg = document.querySelector('#sheet-banner .frame-bg');
+  const originalSrc = frameImg ? frameImg.getAttribute('src') : null;
   try{
     fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite');
     const node = document.getElementById('sheet-banner');
+
+    // Per il PDF (stampa) usiamo la cornice in bianco e nero; il PNG (monitor) resta a colori.
+    if(frameImg){
+      await new Promise((resolve, reject)=>{
+        frameImg.onload = resolve;
+        frameImg.onerror = reject;
+        frameImg.src = 'banner-frame-bw.png';
+      });
+    }
+
     const canvas = await html2canvas(node, {backgroundColor:'#FFFFFF', scale:3});
     const imgData = canvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
@@ -905,6 +921,9 @@ async function exportPDFBanner(){
     if(win) win.close();
     alert('Errore durante la generazione: ' + err.message);
     console.error(err);
+  }finally{
+    // Ripristiniamo sempre la cornice a colori nell'anteprima, qualunque cosa succeda
+    if(frameImg && originalSrc){ frameImg.src = originalSrc; }
   }
 }
 
