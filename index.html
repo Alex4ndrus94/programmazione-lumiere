@@ -191,10 +191,21 @@
   #sheet-mobile{
     width:390px;height:846px; /* stesso rapporto ~2,169:1 del riferimento 2213×4798 */
     background:#000000;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:26px;
+    display:flex;flex-direction:column;align-items:center;
     padding:22px 18px;
     overflow:hidden;
+  }
+  #sheet-mobile .mobile-safe-top{
+    flex:0 0 38%; /* zona lasciata libera per orologio e widget della lock screen iPhone */
+    width:100%;
+  }
+  #sheet-mobile .mobile-safe-bottom{
+    flex:0 0 7%; /* zona lasciata libera per le icone torcia/fotocamera in basso */
+    width:100%;
+  }
+  #sheet-mobile .mobile-content-group{
+    flex:1;min-height:0;width:100%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
   }
   #sheet-mobile .mobile-table-border{
     width:100%;border:3px solid #E8622C;border-radius:12px;overflow:hidden;
@@ -203,25 +214,25 @@
   #mobile-content{ --s:1; }
   #sheet-mobile .doc-header{display:flex;align-items:center;justify-content:center;gap:calc(8px * var(--s));margin-bottom:calc(10px * var(--s));}
   #sheet-mobile .doc-header img{width:calc(24px * var(--s));height:auto;flex-shrink:0;}
-  #sheet-mobile .doc-title{font-family:'Bebas Neue';font-size:calc(19px * var(--s));letter-spacing:1px;line-height:1;}
-  #sheet-mobile .doc-sub{font-size:calc(8px * var(--s));color:#E8622C;font-weight:700;letter-spacing:0.5px;}
+  #sheet-mobile .doc-title{font-family:'Bebas Neue';font-size:calc(25px * var(--s));letter-spacing:1px;line-height:1;}
+  #sheet-mobile .doc-sub{font-size:calc(10.5px * var(--s));color:#E8622C;font-weight:700;letter-spacing:0.5px;}
 
-  #sheet-mobile .room-card{display:flex;border-radius:calc(8px * var(--s));overflow:hidden;margin-bottom:calc(6px * var(--s));}
+  #sheet-mobile .room-card{display:flex;border-radius:calc(9px * var(--s));overflow:hidden;margin-bottom:calc(8px * var(--s));}
   #sheet-mobile .card-sidebar{
-    width:calc(34px * var(--s));flex-shrink:0;color:#fff;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(5px * var(--s)) 0;
+    width:calc(40px * var(--s));flex-shrink:0;color:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(6px * var(--s)) 0;
   }
-  #sheet-mobile .sidebar-label{font-family:'Inter';font-size:calc(6px * var(--s));letter-spacing:0.5px;font-weight:700;}
-  #sheet-mobile .sidebar-number{font-family:'Bebas Neue';font-size:calc(17px * var(--s));line-height:1;}
-  #sheet-mobile .card-body{flex:1;background:#fff;padding:calc(6px * var(--s)) calc(8px * var(--s));display:flex;flex-direction:column;gap:calc(3px * var(--s));min-width:0;}
-  #sheet-mobile .card-room-name{font-family:'Bebas Neue';font-size:calc(12px * var(--s));letter-spacing:0.5px;line-height:1;}
+  #sheet-mobile .sidebar-label{font-family:'Inter';font-size:calc(8px * var(--s));letter-spacing:0.5px;font-weight:700;}
+  #sheet-mobile .sidebar-number{font-family:'Bebas Neue';font-size:calc(23px * var(--s));line-height:1;}
+  #sheet-mobile .card-body{flex:1;background:#fff;padding:calc(9px * var(--s)) calc(11px * var(--s));display:flex;flex-direction:column;gap:calc(4px * var(--s));min-width:0;}
+  #sheet-mobile .card-room-name{font-family:'Bebas Neue';font-size:calc(17px * var(--s));letter-spacing:0.5px;line-height:1;}
   #sheet-mobile .card-film-line{display:flex;align-items:center;justify-content:space-between;gap:calc(4px * var(--s));}
   #sheet-mobile .card-film-title-group{display:flex;align-items:baseline;gap:calc(5px * var(--s));flex-wrap:wrap;min-width:0;}
-  #sheet-mobile .card-film-title{font-family:'Inter';font-weight:700;font-size:calc(9.5px * var(--s));color:#141212;}
+  #sheet-mobile .card-film-title{font-family:'Inter';font-weight:700;font-size:calc(13.5px * var(--s));color:#141212;}
   #sheet-mobile .card-film-list{display:flex;flex-direction:column;gap:calc(3px * var(--s));flex:1;}
   #sheet-mobile .card-film-list.spaced{justify-content:space-between;}
   #sheet-mobile .card-pills{display:flex;gap:calc(3px * var(--s));flex-wrap:wrap;}
-  #sheet-mobile .time-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(8px * var(--s));padding:calc(2px * var(--s)) calc(5px * var(--s));border-radius:calc(4px * var(--s));white-space:nowrap;}
+  #sheet-mobile .time-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(11.5px * var(--s));padding:calc(3px * var(--s)) calc(7px * var(--s));border-radius:calc(5px * var(--s));white-space:nowrap;}
   #sheet-mobile .card-price{
     width:calc(48px * var(--s));flex-shrink:0;padding:calc(4px * var(--s));
     display:flex;flex-direction:column;justify-content:center;gap:calc(3px * var(--s));
@@ -235,9 +246,9 @@
   #sheet-mobile .price-mini-row .pm-label{font-family:'Inter';font-weight:700;font-size:calc(5px * var(--s));color:#777;text-transform:uppercase;}
   #sheet-mobile .price-mini-row .pm-value{font-family:'Inter';font-weight:800;font-size:calc(6px * var(--s));color:#141212;}
   /* Layout "sala con un solo film": titolo grande sopra, orari in evidenza sotto */
-  #sheet-mobile .card-body-single .card-film-title-lg{font-family:'Inter';font-weight:800;font-size:calc(12px * var(--s));color:#141212;margin-bottom:calc(2px * var(--s));}
+  #sheet-mobile .card-body-single .card-film-title-lg{font-family:'Inter';font-weight:800;font-size:calc(17px * var(--s));color:#141212;margin-bottom:calc(3px * var(--s));}
   #sheet-mobile .card-body-single .card-pills-lg{display:flex;gap:calc(4px * var(--s));flex-wrap:wrap;}
-  #sheet-mobile .card-body-single .time-pill-lg{color:#fff;font-family:'Inter';font-weight:800;font-size:calc(9.5px * var(--s));padding:calc(3px * var(--s)) calc(7px * var(--s));border-radius:calc(5px * var(--s));white-space:nowrap;}
+  #sheet-mobile .card-body-single .time-pill-lg{color:#fff;font-family:'Inter';font-weight:800;font-size:calc(13.5px * var(--s));padding:calc(4px * var(--s)) calc(9px * var(--s));border-radius:calc(6px * var(--s));white-space:nowrap;}
 
   #sheet-mobile .mobile-brand{
     display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;
@@ -548,39 +559,44 @@ function fitPrintContent(){
 function renderMobileSheet(){
   const el = document.getElementById('sheet-mobile');
   el.innerHTML = `
-    <div class="mobile-table-border">
-      <div id="mobile-content">
-        <div class="doc-header">
-          <img src="logo-lumiere.png" alt="Logo" onerror="this.style.display='none';">
-          <div>
-            <div class="doc-title">PROGRAMMAZIONE</div>
-            <div class="doc-sub">Aggiornata al ${todayStr()}</div>
+    <div class="mobile-safe-top"></div>
+    <div class="mobile-content-group">
+      <div class="mobile-table-border">
+        <div id="mobile-content">
+          <div class="doc-header">
+            <img src="logo-lumiere.png" alt="Logo" onerror="this.style.display='none';">
+            <div>
+              <div class="doc-title">PROGRAMMAZIONE</div>
+              <div class="doc-sub">Aggiornata al ${todayStr()}</div>
+            </div>
           </div>
+          <div>${roomsBlocksHTML(false, false)}</div>
         </div>
-        <div>${roomsBlocksHTML(true)}</div>
+      </div>
+      <div class="mobile-brand">
+        <img src="logo-lumiere.png" alt="Logo Cinema Lumière" onerror="this.style.display='none';">
+        <div class="brand-text">Multisala Lumière</div>
       </div>
     </div>
-    <div class="mobile-brand">
-      <img src="logo-lumiere.png" alt="Logo Cinema Lumière" onerror="this.style.display='none';">
-      <div class="brand-text">Multisala Lumière</div>
-    </div>`;
+    <div class="mobile-safe-bottom"></div>`;
   fitMobileContent();
 }
 
 function fitMobileContent(){
   const sheet = document.getElementById('sheet-mobile');
+  const group = document.querySelector('#sheet-mobile .mobile-content-group');
   const content = document.getElementById('mobile-content');
   const border = document.querySelector('#sheet-mobile .mobile-table-border');
   const brand = document.querySelector('#sheet-mobile .mobile-brand');
-  if(!content || !border || !brand || !sheet) return;
+  if(!content || !border || !brand || !sheet || !group) return;
   if(sheet.clientHeight === 0) return; // pannello non visibile, salta
 
-  // Spazio verticale disponibile per la tabella = altezza canvas - padding - gap - branding - bordo/padding del riquadro
-  const sheetStyle = getComputedStyle(sheet);
-  const padV = parseFloat(sheetStyle.paddingTop) + parseFloat(sheetStyle.paddingBottom);
-  const gap = parseFloat(sheetStyle.rowGap || sheetStyle.gap || 26);
+  // Spazio verticale disponibile per la tabella = altezza del gruppo sotto la zona orologio,
+  // meno gap e bordo/padding del riquadro
+  const groupStyle = getComputedStyle(group);
+  const gap = parseFloat(groupStyle.rowGap || groupStyle.gap || 26);
   const borderExtra = 2 * (3 + 12); // border 3px + padding 12px, sopra e sotto
-  const budget = sheet.clientHeight - padV - gap - brand.offsetHeight - borderExtra;
+  const budget = group.clientHeight - gap - brand.offsetHeight - borderExtra;
   border.style.maxHeight = Math.max(80, budget) + 'px';
 
   content.style.setProperty('--s', 1);
@@ -609,8 +625,9 @@ function roomNumberFor(room){
   return String(idx+1).padStart(2,'0');
 }
 
-function roomsBlocksHTML(showPrices){
-  return ROOMS_STAMPA.map(room=>{
+function roomsBlocksHTML(showPrices, includePrevendita=true){
+  const roomsList = includePrevendita ? ROOMS_STAMPA : ROOMS;
+  return roomsList.map(room=>{
     const screenings = data[room.id] || [];
     if(screenings.length===0) return '';
 
