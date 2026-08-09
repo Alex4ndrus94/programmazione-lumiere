@@ -138,54 +138,28 @@
   .film-times{font-family:'IBM Plex Mono';font-weight:600;}
   .price-tag{font-family:'IBM Plex Mono';font-weight:500;}
 
-  /* ---- A5 print sheet ---- */
+  /* ---- A5 print sheet: sfondo immagine reale + testo posizionato sopra ---- */
+  /* Coordinate zone ricavate da print-frame.png (1410x2001), in percentuale
+     così funzionano identiche sia sul foglio A5 sia sul riquadro mobile più piccolo. */
   #sheet-print{
-    width:559px;height:794px; /* A5 @ ~96dpi-ish for screen preview */
+    width:559px;height:794px; /* stesso rapporto ~1,42:1 dell'immagine 1410x2001 */
     overflow:hidden;
     position:relative;
+    background:#000;
   }
-  #print-content{
-    transform-origin:top left;
-    padding:26px 22px;
-    --s:1; /* fattore di scala automatico per far entrare tutto in una pagina */
+  #sheet-print .print-frame-bg{
+    position:absolute;top:0;left:0;width:100%;height:100%;display:block;z-index:0;
   }
-  #sheet-print .doc-header{display:flex;align-items:center;gap:calc(10px * var(--s));margin-bottom:calc(14px * var(--s));}
-  #sheet-print .doc-header img{width:calc(34px * var(--s));height:auto;flex-shrink:0;}
-  #sheet-print .doc-title{font-family:'Bebas Neue';font-size:calc(26px * var(--s));letter-spacing:1px;line-height:1;}
-  #sheet-print .doc-sub{font-size:calc(11px * var(--s));color:#E8622C;font-weight:700;letter-spacing:0.5px;}
-
-  #sheet-print .room-card{display:flex;border-radius:calc(9px * var(--s));overflow:hidden;margin-bottom:calc(8px * var(--s));}
-  #sheet-print .card-sidebar{
-    width:calc(46px * var(--s));flex-shrink:0;color:#fff;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(6px * var(--s)) 0;
+  .frame-room-zone{
+    position:absolute;box-sizing:border-box;overflow:hidden;z-index:1;
+    display:flex;flex-direction:column;justify-content:center;
   }
-  #sheet-print .sidebar-label{font-family:'Inter';font-size:calc(7.5px * var(--s));letter-spacing:1px;font-weight:700;}
-  #sheet-print .sidebar-number{font-family:'Bebas Neue';font-size:calc(24px * var(--s));line-height:1;}
-  #sheet-print .card-body{flex:1;background:#fff;padding:calc(8px * var(--s)) calc(11px * var(--s));display:flex;flex-direction:column;gap:calc(4px * var(--s));min-width:0;}
-  #sheet-print .card-room-name{font-family:'Bebas Neue';font-size:calc(16px * var(--s));letter-spacing:1px;line-height:1;}
-  #sheet-print .card-film-line{display:flex;align-items:center;justify-content:space-between;gap:calc(6px * var(--s));}
-  #sheet-print .card-film-title-group{display:flex;align-items:baseline;gap:calc(7px * var(--s));flex-wrap:wrap;min-width:0;}
-  #sheet-print .card-film-title{font-family:'Inter';font-weight:700;font-size:calc(13px * var(--s));color:#141212;}
-  #sheet-print .card-film-list{display:flex;flex-direction:column;gap:calc(4px * var(--s));flex:1;}
-  #sheet-print .card-film-list.spaced{justify-content:space-between;}
-  #sheet-print .card-pills{display:flex;gap:calc(4px * var(--s));flex-wrap:wrap;}
-  #sheet-print .time-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(10.5px * var(--s));padding:calc(3px * var(--s)) calc(7px * var(--s));border-radius:calc(5px * var(--s));white-space:nowrap;}
-  #sheet-print .card-price{
-    width:calc(64px * var(--s));flex-shrink:0;padding:calc(6px * var(--s));
-    display:flex;flex-direction:column;justify-content:center;gap:calc(4px * var(--s));
-  }
-  #sheet-print .card-price.card-price-multi{justify-content:space-between;}
-  #sheet-print .price-label{font-family:'Inter';font-size:calc(7.5px * var(--s));font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;}
-  #sheet-print .price-value{font-family:'Inter';font-size:calc(11.5px * var(--s));font-weight:800;color:#141212;}
-  #sheet-print .price-divider{border-top:1px dashed rgba(0,0,0,0.25);}
-  #sheet-print .price-mini-row{display:flex;flex-direction:column;gap:calc(1px * var(--s));}
-  #sheet-print .price-mini-row .pm-row{display:flex;gap:calc(4px * var(--s));justify-content:space-between;white-space:nowrap;}
-  #sheet-print .price-mini-row .pm-label{font-family:'Inter';font-weight:700;font-size:calc(6.5px * var(--s));color:#777;text-transform:uppercase;}
-  #sheet-print .price-mini-row .pm-value{font-family:'Inter';font-weight:800;font-size:calc(8px * var(--s));color:#141212;}
-  /* Layout "sala con un solo film": titolo grande sopra, orari in evidenza sotto */
-  #sheet-print .card-body-single .card-film-title-lg{font-family:'Inter';font-weight:800;font-size:calc(16px * var(--s));color:#141212;margin-bottom:calc(2px * var(--s));}
-  #sheet-print .card-body-single .card-pills-lg{display:flex;gap:calc(5px * var(--s));flex-wrap:wrap;}
-  #sheet-print .card-body-single .time-pill-lg{color:#fff;font-family:'Inter';font-weight:800;font-size:calc(13px * var(--s));padding:calc(4px * var(--s)) calc(9px * var(--s));border-radius:calc(6px * var(--s));white-space:nowrap;}
+  #sheet-print .frame-room-zone{padding:6px 22px 6px 14px;}
+  #sheet-print .frame-film-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding:2px 0;}
+  #sheet-print .frame-film-title{font-family:'Inter';font-weight:700;font-size:calc(15px * var(--fz,1));color:#141212;}
+  #sheet-print .frame-pills{display:flex;gap:4px;flex-wrap:wrap;}
+  #sheet-print .frame-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(11px * var(--fz,1));padding:2px 7px;border-radius:5px;white-space:nowrap;}
+  #sheet-print .frame-price{font-family:'IBM Plex Mono';font-size:calc(9px * var(--fz,1));color:#888;flex-basis:100%;}
 
   /* ---- Mobile wallpaper ---- */
   #sheet-mobile{
@@ -205,50 +179,21 @@
   }
   #sheet-mobile .mobile-content-group{
     flex:1;min-height:0;width:100%;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
   }
-  #sheet-mobile .mobile-table-border{
-    width:100%;border:3px solid #E8622C;border-radius:12px;overflow:hidden;
-    padding:12px;box-sizing:border-box;background:var(--ink);
+  #sheet-mobile .mobile-frame-wrap{
+    position:relative;width:100%;
+    aspect-ratio:1410/2001; /* stessa proporzione dell'immagine, l'altezza segue automaticamente */
   }
-  #mobile-content{ --s:1; }
-  #sheet-mobile .doc-header{display:flex;align-items:center;justify-content:center;gap:calc(8px * var(--s));margin-bottom:calc(10px * var(--s));}
-  #sheet-mobile .doc-header img{width:calc(24px * var(--s));height:auto;flex-shrink:0;}
-  #sheet-mobile .doc-title{font-family:'Bebas Neue';font-size:calc(34px * var(--s));letter-spacing:1px;line-height:1;}
-  #sheet-mobile .doc-sub{font-size:calc(14px * var(--s));color:#E8622C;font-weight:700;letter-spacing:0.5px;}
-
-  #sheet-mobile .room-card{display:flex;border-radius:calc(11px * var(--s));overflow:hidden;margin-bottom:calc(10px * var(--s));}
-  #sheet-mobile .card-sidebar{
-    width:calc(50px * var(--s));flex-shrink:0;color:#fff;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(7px * var(--s)) 0;
+  #sheet-mobile .print-frame-bg{
+    position:absolute;top:0;left:0;width:100%;height:100%;display:block;z-index:0;
   }
-  #sheet-mobile .sidebar-label{font-family:'Inter';font-size:calc(11px * var(--s));letter-spacing:0.5px;font-weight:700;}
-  #sheet-mobile .sidebar-number{font-family:'Bebas Neue';font-size:calc(32px * var(--s));line-height:1;}
-  #sheet-mobile .card-body{flex:1;background:#fff;padding:calc(12px * var(--s)) calc(14px * var(--s));display:flex;flex-direction:column;gap:calc(6px * var(--s));min-width:0;}
-  #sheet-mobile .card-room-name{font-family:'Bebas Neue';font-size:calc(23px * var(--s));letter-spacing:0.5px;line-height:1;}
-  #sheet-mobile .card-film-line{display:flex;align-items:center;justify-content:space-between;gap:calc(4px * var(--s));}
-  #sheet-mobile .card-film-title-group{display:flex;align-items:baseline;gap:calc(5px * var(--s));flex-wrap:wrap;min-width:0;}
-  #sheet-mobile .card-film-title{font-family:'Inter';font-weight:700;font-size:calc(18px * var(--s));color:#141212;}
-  #sheet-mobile .card-film-list{display:flex;flex-direction:column;gap:calc(3px * var(--s));flex:1;}
-  #sheet-mobile .card-film-list.spaced{justify-content:space-between;}
-  #sheet-mobile .card-pills{display:flex;gap:calc(3px * var(--s));flex-wrap:wrap;}
-  #sheet-mobile .time-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(15.5px * var(--s));padding:calc(4px * var(--s)) calc(9px * var(--s));border-radius:calc(6px * var(--s));white-space:nowrap;}
-  #sheet-mobile .card-price{
-    width:calc(48px * var(--s));flex-shrink:0;padding:calc(4px * var(--s));
-    display:flex;flex-direction:column;justify-content:center;gap:calc(3px * var(--s));
-  }
-  #sheet-mobile .card-price.card-price-multi{justify-content:space-between;}
-  #sheet-mobile .price-label{font-family:'Inter';font-size:calc(6px * var(--s));font-weight:700;color:#666;text-transform:uppercase;}
-  #sheet-mobile .price-value{font-family:'Inter';font-size:calc(8.5px * var(--s));font-weight:800;color:#141212;}
-  #sheet-mobile .price-divider{border-top:1px dashed rgba(0,0,0,0.25);}
-  #sheet-mobile .price-mini-row{display:flex;flex-direction:column;gap:calc(1px * var(--s));}
-  #sheet-mobile .price-mini-row .pm-row{display:flex;gap:calc(3px * var(--s));justify-content:space-between;white-space:nowrap;}
-  #sheet-mobile .price-mini-row .pm-label{font-family:'Inter';font-weight:700;font-size:calc(5px * var(--s));color:#777;text-transform:uppercase;}
-  #sheet-mobile .price-mini-row .pm-value{font-family:'Inter';font-weight:800;font-size:calc(6px * var(--s));color:#141212;}
-  /* Layout "sala con un solo film": titolo grande sopra, orari in evidenza sotto */
-  #sheet-mobile .card-body-single .card-film-title-lg{font-family:'Inter';font-weight:800;font-size:calc(23px * var(--s));color:#141212;margin-bottom:calc(4px * var(--s));}
-  #sheet-mobile .card-body-single .card-pills-lg{display:flex;gap:calc(4px * var(--s));flex-wrap:wrap;}
-  #sheet-mobile .card-body-single .time-pill-lg{color:#fff;font-family:'Inter';font-weight:800;font-size:calc(18px * var(--s));padding:calc(5px * var(--s)) calc(11px * var(--s));border-radius:calc(7px * var(--s));white-space:nowrap;}
+  #sheet-mobile .frame-room-zone{padding:1.5% 4.5% 1.5% 2.5%;}
+  #sheet-mobile .frame-film-row{display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;padding:1px 0;}
+  #sheet-mobile .frame-film-title{font-family:'Inter';font-weight:700;font-size:calc(9.5px * var(--fz,1));color:#141212;}
+  #sheet-mobile .frame-pills{display:flex;gap:3px;flex-wrap:wrap;}
+  #sheet-mobile .frame-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(7px * var(--fz,1));padding:1.5px 5px;border-radius:4px;white-space:nowrap;}
+  #sheet-mobile .frame-price{font-family:'IBM Plex Mono';font-size:calc(5.5px * var(--fz,1));color:#888;flex-basis:100%;}
 
   #sheet-mobile .mobile-brand{
     display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;
@@ -258,7 +203,6 @@
     font-family:'Inter';font-weight:800;font-size:18px;letter-spacing:1px;color:#E8622C;
     text-transform:uppercase;text-align:center;
   }
-
   /* ---- Public banner: sfondo immagine reale + testo posizionato sopra ---- */
   /* Dimensioni e coordinate ricavate dal file banner-frame.png (1513x1039).
      Se in futuro cambi il file di sfondo con uno di dimensioni diverse,
@@ -430,8 +374,8 @@ document.querySelectorAll('.tabs button').forEach(btn=>{
     btn.classList.add('active');
     document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
     renderAll();
-    if(btn.dataset.tab==='print'){ requestAnimationFrame(fitPrintContent); }
-    if(btn.dataset.tab==='mobile'){ requestAnimationFrame(fitMobileContent); }
+    if(btn.dataset.tab==='print'){ requestAnimationFrame(()=>fitAllFrameZones('print')); }
+    if(btn.dataset.tab==='mobile'){ requestAnimationFrame(()=>fitAllFrameZones('mobile')); }
     if(btn.dataset.tab==='banner'){ requestAnimationFrame(()=>{ fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite'); }); }
   });
 });
@@ -524,36 +468,69 @@ function screeningRow(roomId, s, idx){
 function escAttr(str){ return (str||'').replace(/"/g,'&quot;'); }
 
 /* ============ PRINT SHEET RENDER ============ */
-function renderPrintSheet(){
-  const el = document.getElementById('sheet-print');
-  el.innerHTML = `<div id="print-content">
-      <div class="doc-header">
-        <img src="logo-lumiere.png" alt="Logo" onerror="this.style.display='none';">
-        <div>
-          <div class="doc-title">PROGRAMMAZIONE</div>
-          <div class="doc-sub">Aggiornata al ${todayStr()}</div>
-        </div>
-      </div>
-      <div>${roomsBlocksHTML(true)}</div>
+/* ============ PRINT SHEET RENDER (sfondo immagine + zone di testo) ============ */
+// Coordinate delle 6 zone bianche in print-frame.png (1410x2001), in percentuale.
+const FRAME_ZONES = [
+  {id:'decurtis',    top:7.10,  left:10.07, width:88.51, height:13.54},
+  {id:'sordi',       top:22.04, left:10.07, width:88.51, height:13.54},
+  {id:'bergman',     top:36.93, left:10.07, width:88.51, height:13.59},
+  {id:'virnalisi',   top:51.92, left:10.07, width:88.51, height:13.54},
+  {id:'desica',      top:66.87, left:10.07, width:88.51, height:13.54},
+  {id:'mastroianni', top:81.76, left:10.07, width:88.51, height:13.54},
+];
+
+function frameZonesHTML(prefix, showPrices){
+  return FRAME_ZONES.map(zone=>{
+    const room = ROOMS.find(r=>r.id===zone.id);
+    if(!room) return '';
+    const screenings = data[room.id] || [];
+    const rows = screenings.map(s=>{
+      const timesSet = new Set();
+      s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
+      const sortedTimes = sortTimesChronologically(timesSet);
+      const pills = sortedTimes.map(t=>`<span class="frame-pill" style="background:${room.color}">${escHtml(t)}</span>`).join('');
+      const priceLine = showPrices ? `<span class="frame-price">Intero €${s.intero||'-'} · Ridotto ${s.ridotto?'€'+s.ridotto:'-'} · Abb. ${s.abb||'N'}</span>` : '';
+      return `<div class="frame-film-row">
+        <span class="frame-film-title">${escHtml(s.film)}</span>
+        <span class="frame-pills">${pills}</span>
+        ${priceLine}
+      </div>`;
+    }).join('');
+    return `<div class="frame-room-zone" id="${prefix}-zone-${zone.id}"
+      style="left:${zone.left}%;top:${zone.top}%;width:${zone.width}%;height:${zone.height}%;">
+      ${rows}
     </div>`;
-  fitPrintContent();
+  }).join('');
 }
 
-function fitPrintContent(){
-  const content = document.getElementById('print-content');
-  if(!content) return;
-  const sheet = document.getElementById('sheet-print');
-  if(sheet.clientHeight === 0) return; // pannello non visibile, salta il calcolo
-  content.style.setProperty('--s', 1);
-  content.style.transform = 'none';
+function fitFrameZone(id){
+  const zone = document.getElementById(id);
+  if(!zone) return;
+  if(zone.clientHeight === 0) return; // pannello non visibile, salta
+  zone.style.setProperty('--fz', 1);
   let s = 1;
-  for(let i=0; i<8; i++){
-    const naturalHeight = content.scrollHeight;
-    if(naturalHeight <= sheet.clientHeight) break;
-    const ratio = sheet.clientHeight / naturalHeight;
-    s = s * ratio * 0.97; // piccolo margine di sicurezza per convergere
-    content.style.setProperty('--s', s);
+  for(let i=0; i<10; i++){
+    const naturalH = zone.scrollHeight;
+    const availH = zone.clientHeight;
+    const naturalW = zone.scrollWidth;
+    const availW = zone.clientWidth;
+    const ratio = Math.min(availH/naturalH, availW/naturalW, 1);
+    if(ratio >= 0.97) break;
+    s = Math.max(0.4, s * ratio * 0.97);
+    zone.style.setProperty('--fz', s);
   }
+}
+
+function fitAllFrameZones(prefix){
+  FRAME_ZONES.forEach(z=>fitFrameZone(`${prefix}-zone-${z.id}`));
+}
+
+function renderPrintSheet(){
+  const el = document.getElementById('sheet-print');
+  el.innerHTML = `
+    <img src="print-frame.png" alt="Programmazione" class="print-frame-bg" onerror="this.style.opacity='0';">
+    ${frameZonesHTML('print', true)}`;
+  fitAllFrameZones('print');
 }
 
 function renderMobileSheet(){
@@ -561,17 +538,9 @@ function renderMobileSheet(){
   el.innerHTML = `
     <div class="mobile-safe-top"></div>
     <div class="mobile-content-group">
-      <div class="mobile-table-border">
-        <div id="mobile-content">
-          <div class="doc-header">
-            <img src="logo-lumiere.png" alt="Logo" onerror="this.style.display='none';">
-            <div>
-              <div class="doc-title">PROGRAMMAZIONE</div>
-              <div class="doc-sub">Aggiornata al ${todayStr()}</div>
-            </div>
-          </div>
-          <div>${roomsBlocksHTML(false, false)}</div>
-        </div>
+      <div class="mobile-frame-wrap">
+        <img src="print-frame.png" alt="Programmazione" class="print-frame-bg" onerror="this.style.opacity='0';">
+        ${frameZonesHTML('mobile', false)}
       </div>
       <div class="mobile-brand">
         <img src="logo-lumiere.png" alt="Logo Cinema Lumière" onerror="this.style.display='none';">
@@ -579,139 +548,21 @@ function renderMobileSheet(){
       </div>
     </div>
     <div class="mobile-safe-bottom"></div>`;
-  fitMobileContent();
-  // Le immagini del logo si caricano in modo asincrono: se il ricalcolo dello spazio
-  // disponibile avviene prima che siano pronte, il layout si sposta dopo e taglia
-  // l'ultima riga. Ricalcoliamo appena tutte le immagini hanno finito di caricare.
+  fitAllFrameZones('mobile');
+  // Le immagini si caricano in modo asincrono: ricalcoliamo dopo che sono pronte
+  // per evitare che il layout si sposti e tagli l'ultima riga.
   const imgs = el.querySelectorAll('img');
   let toLoad = imgs.length;
   if(toLoad > 0){
     imgs.forEach(img=>{
       if(img.complete){ toLoad--; }
       else{
-        img.addEventListener('load', ()=>{ toLoad--; if(toLoad<=0) fitMobileContent(); });
-        img.addEventListener('error', ()=>{ toLoad--; if(toLoad<=0) fitMobileContent(); });
+        img.addEventListener('load', ()=>{ toLoad--; if(toLoad<=0) fitAllFrameZones('mobile'); });
+        img.addEventListener('error', ()=>{ toLoad--; if(toLoad<=0) fitAllFrameZones('mobile'); });
       }
     });
-    if(toLoad<=0) fitMobileContent();
+    if(toLoad<=0) fitAllFrameZones('mobile');
   }
-}
-
-function fitMobileContent(){
-  const sheet = document.getElementById('sheet-mobile');
-  const group = document.querySelector('#sheet-mobile .mobile-content-group');
-  const content = document.getElementById('mobile-content');
-  const border = document.querySelector('#sheet-mobile .mobile-table-border');
-  const brand = document.querySelector('#sheet-mobile .mobile-brand');
-  if(!content || !border || !brand || !sheet || !group) return;
-  if(sheet.clientHeight === 0) return; // pannello non visibile, salta
-
-  // Spazio verticale disponibile per la tabella = altezza del gruppo sotto la zona orologio,
-  // meno gap e bordo/padding del riquadro
-  const groupStyle = getComputedStyle(group);
-  const gap = parseFloat(groupStyle.rowGap || groupStyle.gap || 26);
-  const borderExtra = 2 * (3 + 12); // border 3px + padding 12px, sopra e sotto
-  const budget = group.clientHeight - gap - brand.offsetHeight - borderExtra;
-  border.style.maxHeight = Math.max(80, budget) + 'px';
-
-  content.style.setProperty('--s', 1);
-  let s = 1;
-  for(let i=0; i<8; i++){
-    const naturalHeight = content.scrollHeight;
-    const availableHeight = border.clientHeight;
-    if(naturalHeight <= availableHeight) break;
-    const ratio = availableHeight / naturalHeight;
-    s = s * ratio * 0.97;
-    content.style.setProperty('--s', s);
-  }
-}
-
-// html2canvas non supporta bene color-mix() del CSS moderno: calcoliamo il colore chiaro a mano
-function lightenColor(hex, whiteAmount){
-  hex = hex.replace('#','');
-  const r = parseInt(hex.substring(0,2),16), g = parseInt(hex.substring(2,4),16), b = parseInt(hex.substring(4,6),16);
-  const mix = c => Math.round(c + (255-c)*whiteAmount);
-  return `rgb(${mix(r)},${mix(g)},${mix(b)})`;
-}
-
-function roomNumberFor(room){
-  if(room.id === 'prevendita') return '★';
-  const idx = ROOMS.findIndex(r=>r.id===room.id);
-  return String(idx+1).padStart(2,'0');
-}
-
-function roomsBlocksHTML(showPrices, includePrevendita=true){
-  const roomsList = includePrevendita ? ROOMS_STAMPA : ROOMS;
-  return roomsList.map(room=>{
-    const screenings = data[room.id] || [];
-    if(screenings.length===0) return '';
-
-    // Prezzo unico di sala solo se TUTTI i film hanno lo stesso prezzo; altrimenti un pannello con una riga per film
-    const uniquePrices = new Set(screenings.map(s=>`${s.intero}|${s.ridotto}|${s.abb}`));
-    const showSharedPrice = showPrices && uniquePrices.size === 1;
-    const showPerFilmPrice = showPrices && !showSharedPrice;
-    const isSingleFilm = screenings.length === 1;
-
-    let filmLines;
-    if(isSingleFilm){
-      // Sala con un solo film: titolo grande sopra, orari in evidenza sotto (più leggibile)
-      const s = screenings[0];
-      const timesSet = new Set();
-      s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
-      const sortedTimes = sortTimesChronologically(timesSet);
-      const pills = sortedTimes.map(t=>`<span class="time-pill-lg" style="background:${room.color}">${escHtml(t)}</span>`).join('');
-      filmLines = `<div class="card-film-title-lg">${escHtml(s.film)}</div>
-        <div class="card-pills-lg">${pills}</div>`;
-    }else{
-      filmLines = `<div class="card-film-list${showPerFilmPrice ? ' spaced' : ''}">` + screenings.map(s=>{
-        const timesSet = new Set();
-        s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
-        const sortedTimes = sortTimesChronologically(timesSet);
-        const pills = sortedTimes.map(t=>`<span class="time-pill" style="background:${room.color}">${escHtml(t)}</span>`).join('');
-        return `<div class="card-film-line">
-          <span class="card-film-title-group">
-            <span class="card-film-title">${escHtml(s.film)}</span>
-            <span class="card-pills">${pills}</span>
-          </span>
-        </div>`;
-      }).join('') + `</div>`;
-    }
-
-    const first = screenings[0];
-    let priceHTML = '';
-    if(showSharedPrice){
-      priceHTML = `
-      <div class="card-price" style="background:${lightenColor(room.color, 0.85)};">
-        <div><div class="price-label">Intero</div><div class="price-value">€ ${first.intero||'-'}</div></div>
-        <div class="price-divider"></div>
-        <div><div class="price-label">Ridotto</div><div class="price-value">${first.ridotto?'€ '+first.ridotto:'-'}</div></div>
-        <div class="price-divider"></div>
-        <div><div class="price-label">Abb.</div><div class="price-value">${first.abb||'N'}</div></div>
-      </div>`;
-    }else if(showPerFilmPrice){
-      // Un unico pannello a tutta altezza come nelle sale a film singolo, ma con una riga di prezzo
-      // per ciascun film, allineata alla riga del film corrispondente nel corpo della card.
-      const rows = screenings.map(s=>`
-        <div class="price-mini-row">
-          <div class="pm-row"><span class="pm-label">Int.</span><span class="pm-value">€${s.intero||'-'}</span></div>
-          <div class="pm-row"><span class="pm-label">Rid.</span><span class="pm-value">${s.ridotto?'€'+s.ridotto:'-'}</span></div>
-          <div class="pm-row"><span class="pm-label">Abb.</span><span class="pm-value">${s.abb||'N'}</span></div>
-        </div>`).join('');
-      priceHTML = `<div class="card-price card-price-multi" style="background:${lightenColor(room.color, 0.85)};">${rows}</div>`;
-    }
-
-    return `<div class="room-card">
-      <div class="card-sidebar" style="background:${room.color}">
-        <div class="sidebar-label">SALA</div>
-        <div class="sidebar-number">${roomNumberFor(room)}</div>
-      </div>
-      <div class="card-body${isSingleFilm ? ' card-body-single' : ''}">
-        <div class="card-room-name" style="color:${room.color}">${room.name}</div>
-        ${filmLines}
-      </div>
-      ${priceHTML}
-    </div>`;
-  }).join('');
 }
 
 /* ============ BANNER RENDER ============ */
@@ -885,7 +736,7 @@ async function exportPNG(elId, filename){
   const win = window.open('', '_blank');
   try{
     if(elId==='sheet-banner'){ fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite'); }
-    if(elId==='sheet-mobile'){ fitMobileContent(); }
+    if(elId==='sheet-mobile'){ fitAllFrameZones('mobile'); }
     const node = document.getElementById(elId);
     // Aspettiamo che tutte le immagini (logo ecc.) siano caricate, altrimenti il layout
     // può spostarsi dopo la cattura e tagliare l'ultima riga.
@@ -895,7 +746,7 @@ async function exportPNG(elId, filename){
         img.addEventListener('load', res); img.addEventListener('error', res);
       })));
       if(elId==='sheet-banner'){ fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite'); }
-      if(elId==='sheet-mobile'){ fitMobileContent(); }
+      if(elId==='sheet-mobile'){ fitAllFrameZones('mobile'); }
     }
     const bg = elId==='sheet-banner' ? '#FFFFFF' : '#141212';
     // Per lo sfondo mobile puntiamo alla risoluzione esatta richiesta (2213×4798px)
@@ -924,8 +775,15 @@ async function exportPNG(elId, filename){
 async function exportPDF(){
   const win = window.open('', '_blank');
   try{
-    fitPrintContent();
+    fitAllFrameZones('print');
     const node = document.getElementById('sheet-print');
+    const imgsToWait = Array.from(node.querySelectorAll('img')).filter(img=>!img.complete);
+    if(imgsToWait.length){
+      await Promise.all(imgsToWait.map(img=>new Promise(res=>{
+        img.addEventListener('load', res); img.addEventListener('error', res);
+      })));
+      fitAllFrameZones('print');
+    }
     const canvas = await html2canvas(node, {backgroundColor:'#141212', scale:3});
     const imgData = canvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
