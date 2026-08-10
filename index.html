@@ -310,7 +310,7 @@
     <label class="toggle"><input type="checkbox" id="toggle-sala"> Mostra sala</label>
     <label class="toggle"><input type="checkbox" id="toggle-prezzo"> Mostra prezzi</label>
     <button class="btn-export" onclick="exportPDFBanner()">Scarica PDF (A4 orizzontale)</button>
-    <button class="btn-export" onclick="exportPNG('sheet-banner','banner-pubblico-monitor')">Scarica PNG (per monitor)</button>
+    <button class="btn-export" onclick="exportPNG('sheet-banner','banner-pubblico-monitor','jpeg')">Scarica JPEG (per monitor)</button>
   </div>
   <div class="preview-wrap"><div id="sheet-banner" class="sheet"></div></div>
 </div>
@@ -736,7 +736,7 @@ document.getElementById('toggle-sala').addEventListener('change', renderBannerSh
 document.getElementById('toggle-prezzo').addEventListener('change', renderBannerSheet);
 
 /* ============ EXPORT ============ */
-async function exportPNG(elId, filename){
+async function exportPNG(elId, filename, format='png'){
   // Apriamo subito la scheda, nello stesso istante del tap: iOS Safari blocca
   // le aperture "in differita" dopo un'operazione asincrona come html2canvas.
   const win = window.open('', '_blank');
@@ -759,9 +759,11 @@ async function exportPNG(elId, filename){
     // invece di un fattore di scala fisso, così il file combacia sempre con quella misura.
     const scale = elId==='sheet-mobile' ? (2213 / node.offsetWidth) : 3;
     const canvas = await html2canvas(node, {backgroundColor:bg, scale});
-    // Usiamo un Blob invece di un data-URL: un PNG in alta qualità genera un
+    // Usiamo un Blob invece di un data-URL: un PNG/JPEG in alta qualità genera un
     // URL troppo lungo che Safari su iOS a volte rifiuta di aprire in silenzio.
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const mime = format==='jpeg' ? 'image/jpeg' : 'image/png';
+    const quality = format==='jpeg' ? 0.92 : undefined;
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, mime, quality));
     if(win && blob){
       const blobUrl = URL.createObjectURL(blob);
       win.location.href = blobUrl;
