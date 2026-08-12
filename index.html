@@ -155,12 +155,25 @@
     display:flex;flex-direction:column;justify-content:center;
   }
   #sheet-print .frame-room-zone{padding:1.5% 4% 1.5% 24%;}
-  #sheet-print .frame-film-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:2px 0;}
-  #sheet-print .frame-film-title-group{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0;}
+  #sheet-print .frame-content-row{display:flex;align-items:stretch;gap:10px;height:100%;}
+  #sheet-print .frame-film-list{display:flex;flex-direction:column;justify-content:center;gap:2px;flex:1;min-width:0;}
+  #sheet-print .frame-film-list.spaced{justify-content:space-between;}
+  #sheet-print .frame-film-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding:2px 0;}
   #sheet-print .frame-film-title{font-family:'Inter';font-weight:700;font-size:calc(15px * var(--fz,1));color:#141212;}
   #sheet-print .frame-pills{display:flex;gap:4px;flex-wrap:wrap;}
   #sheet-print .frame-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(11px * var(--fz,1));padding:2px 7px;border-radius:5px;white-space:nowrap;}
-  #sheet-print .frame-price{font-family:'IBM Plex Mono';font-size:calc(9px * var(--fz,1));color:#888;white-space:nowrap;flex-shrink:0;}
+  #sheet-print .frame-price-panel{
+    width:calc(78px * var(--fz,1));flex-shrink:0;padding:4px 8px;border-radius:8px;
+    display:flex;flex-direction:column;justify-content:center;gap:4px;
+  }
+  #sheet-print .frame-price-panel.frame-price-panel-multi{justify-content:space-between;}
+  #sheet-print .fp-label{font-family:'Inter';font-size:calc(8px * var(--fz,1));font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;}
+  #sheet-print .fp-value{font-family:'Inter';font-size:calc(12px * var(--fz,1));font-weight:800;color:#141212;}
+  #sheet-print .fp-divider{border-top:1px dashed rgba(0,0,0,0.25);}
+  #sheet-print .fp-mini-row{display:flex;flex-direction:column;gap:1px;}
+  #sheet-print .fp-mini-line{display:flex;justify-content:space-between;gap:4px;white-space:nowrap;}
+  #sheet-print .fp-mini-label{font-family:'Inter';font-weight:700;font-size:calc(7px * var(--fz,1));color:#777;text-transform:uppercase;}
+  #sheet-print .fp-mini-value{font-family:'Inter';font-weight:800;font-size:calc(8.5px * var(--fz,1));color:#141212;}
 
   /* ---- Mobile wallpaper ---- */
   #sheet-mobile{
@@ -190,12 +203,13 @@
     position:absolute;top:0;left:0;width:100%;height:100%;display:block;z-index:0;
   }
   #sheet-mobile .frame-room-zone{padding:1.5% 4% 1.5% 24%;}
-  #sheet-mobile .frame-film-row{display:flex;align-items:baseline;justify-content:space-between;gap:4px;padding:1px 0;}
-  #sheet-mobile .frame-film-title-group{display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;min-width:0;}
+  #sheet-mobile .frame-content-row{display:flex;align-items:stretch;gap:6px;height:100%;}
+  #sheet-mobile .frame-film-list{display:flex;flex-direction:column;justify-content:center;gap:1px;flex:1;min-width:0;}
+  #sheet-mobile .frame-film-list.spaced{justify-content:space-between;}
+  #sheet-mobile .frame-film-row{display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;padding:1px 0;}
   #sheet-mobile .frame-film-title{font-family:'Inter';font-weight:700;font-size:calc(9.5px * var(--fz,1));color:#141212;}
   #sheet-mobile .frame-pills{display:flex;gap:3px;flex-wrap:wrap;}
   #sheet-mobile .frame-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(7px * var(--fz,1));padding:1.5px 5px;border-radius:4px;white-space:nowrap;}
-  #sheet-mobile .frame-price{font-family:'IBM Plex Mono';font-size:calc(5.5px * var(--fz,1));color:#888;white-space:nowrap;flex-shrink:0;}
 
   #sheet-mobile .mobile-brand{
     display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;
@@ -486,25 +500,57 @@ function frameZonesHTML(prefix, showPrices){
     const room = ROOMS.find(r=>r.id===zone.id);
     if(!room) return '';
     const screenings = data[room.id] || [];
+    if(screenings.length===0){
+      return `<div class="frame-room-zone" id="${prefix}-zone-${zone.id}"
+        style="left:${zone.left}%;top:${zone.top}%;width:${zone.width}%;height:${zone.height}%;"></div>`;
+    }
+
+    const uniquePrices = new Set(screenings.map(s=>`${s.intero}|${s.ridotto}|${s.abb}`));
+    const showSharedPrice = showPrices && uniquePrices.size === 1;
+    const showPerFilmPrice = showPrices && !showSharedPrice;
+
     const rows = screenings.map(s=>{
       const timesSet = new Set();
       s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
       const sortedTimes = sortTimesChronologically(timesSet);
       const pills = sortedTimes.map(t=>`<span class="frame-pill" style="background:${room.color}">${escHtml(t)}</span>`).join('');
-      const ridottoClean = (s.ridotto||'').trim();
-      const ridottoDisplay = (ridottoClean && ridottoClean !== '-') ? '€'+ridottoClean : '-';
-      const priceLine = showPrices ? `<span class="frame-price">Intero €${s.intero||'-'} · Ridotto ${ridottoDisplay} · Abb. ${s.abb||'N'}</span>` : '';
       return `<div class="frame-film-row">
-        <span class="frame-film-title-group">
-          <span class="frame-film-title">${escHtml(s.film)}</span>
-          <span class="frame-pills">${pills}</span>
-        </span>
-        ${priceLine}
+        <span class="frame-film-title">${escHtml(s.film)}</span>
+        <span class="frame-pills">${pills}</span>
       </div>`;
     }).join('');
+
+    const first = screenings[0];
+    let priceHTML = '';
+    if(showSharedPrice){
+      const ridottoClean = (first.ridotto||'').trim();
+      const ridottoDisplay = (ridottoClean && ridottoClean !== '-') ? '€'+ridottoClean : '-';
+      priceHTML = `<div class="frame-price-panel" style="background:${lightenColor(room.color, 0.85)};">
+        <div><div class="fp-label">Intero</div><div class="fp-value">€${first.intero||'-'}</div></div>
+        <div class="fp-divider"></div>
+        <div><div class="fp-label">Ridotto</div><div class="fp-value">${ridottoDisplay}</div></div>
+        <div class="fp-divider"></div>
+        <div><div class="fp-label">Abb.</div><div class="fp-value">${first.abb||'N'}</div></div>
+      </div>`;
+    }else if(showPerFilmPrice){
+      const miniRows = screenings.map(s=>{
+        const ridottoClean = (s.ridotto||'').trim();
+        const ridottoDisplay = (ridottoClean && ridottoClean !== '-') ? '€'+ridottoClean : '-';
+        return `<div class="fp-mini-row">
+          <div class="fp-mini-line"><span class="fp-mini-label">Int.</span><span class="fp-mini-value">€${s.intero||'-'}</span></div>
+          <div class="fp-mini-line"><span class="fp-mini-label">Rid.</span><span class="fp-mini-value">${ridottoDisplay}</span></div>
+          <div class="fp-mini-line"><span class="fp-mini-label">Abb.</span><span class="fp-mini-value">${s.abb||'N'}</span></div>
+        </div>`;
+      }).join('');
+      priceHTML = `<div class="frame-price-panel frame-price-panel-multi" style="background:${lightenColor(room.color, 0.85)};">${miniRows}</div>`;
+    }
+
     return `<div class="frame-room-zone" id="${prefix}-zone-${zone.id}"
       style="left:${zone.left}%;top:${zone.top}%;width:${zone.width}%;height:${zone.height}%;">
-      ${rows}
+      <div class="frame-content-row">
+        <div class="frame-film-list${showPerFilmPrice ? ' spaced' : ''}">${rows}</div>
+        ${priceHTML}
+      </div>
     </div>`;
   }).join('');
 }
@@ -691,6 +737,14 @@ function sortTimesChronologically(timesSet){
     };
     return toMinutes(a) - toMinutes(b);
   });
+}
+
+// html2canvas non supporta bene color-mix() del CSS moderno: calcoliamo il colore chiaro a mano
+function lightenColor(hex, whiteAmount){
+  hex = hex.replace('#','');
+  const r = parseInt(hex.substring(0,2),16), g = parseInt(hex.substring(2,4),16), b = parseInt(hex.substring(4,6),16);
+  const mix = c => Math.round(c + (255-c)*whiteAmount);
+  return `rgb(${mix(r)},${mix(g)},${mix(b)})`;
 }
 
 function roomColorByName(name){
