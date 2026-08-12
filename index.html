@@ -524,21 +524,24 @@ function frameZonesHTML(prefix, showPrices){
     let priceHTML = '';
     if(showSharedPrice){
       const ridottoClean = (first.ridotto||'').trim();
-      const ridottoDisplay = (ridottoClean && ridottoClean !== '-') ? '€'+ridottoClean : '-';
+      const hasRidotto = ridottoClean && ridottoClean !== '-';
+      const ridottoBlock = hasRidotto ? `
+        <div class="fp-divider"></div>
+        <div><div class="fp-label">Ridotto</div><div class="fp-value">€${ridottoClean}</div></div>` : '';
       priceHTML = `<div class="frame-price-panel" style="background:${lightenColor(room.color, 0.85)};">
         <div><div class="fp-label">Intero</div><div class="fp-value">€${first.intero||'-'}</div></div>
-        <div class="fp-divider"></div>
-        <div><div class="fp-label">Ridotto</div><div class="fp-value">${ridottoDisplay}</div></div>
+        ${ridottoBlock}
         <div class="fp-divider"></div>
         <div><div class="fp-label">Abb.</div><div class="fp-value">${first.abb||'N'}</div></div>
       </div>`;
     }else if(showPerFilmPrice){
       const miniRows = screenings.map(s=>{
         const ridottoClean = (s.ridotto||'').trim();
-        const ridottoDisplay = (ridottoClean && ridottoClean !== '-') ? '€'+ridottoClean : '-';
+        const hasRidotto = ridottoClean && ridottoClean !== '-';
+        const ridottoLine = hasRidotto ? `<div class="fp-mini-line"><span class="fp-mini-label">Rid.</span><span class="fp-mini-value">€${ridottoClean}</span></div>` : '';
         return `<div class="fp-mini-row">
           <div class="fp-mini-line"><span class="fp-mini-label">Int.</span><span class="fp-mini-value">€${s.intero||'-'}</span></div>
-          <div class="fp-mini-line"><span class="fp-mini-label">Rid.</span><span class="fp-mini-value">${ridottoDisplay}</span></div>
+          ${ridottoLine}
           <div class="fp-mini-line"><span class="fp-mini-label">Abb.</span><span class="fp-mini-value">${s.abb||'N'}</span></div>
         </div>`;
       }).join('');
@@ -762,13 +765,14 @@ function pricesForFilm(entry){
       const entryKey = (entry.film.trim().toLowerCase())+'|'+(entry.versione.trim().toLowerCase());
       if(key===entryKey){
         if(s.intero) interi.add(s.intero.trim());
-        if(s.ridotto) ridotti.add(s.ridotto.trim());
+        const rid = (s.ridotto||'').trim();
+        if(rid && rid !== '-') ridotti.add(rid);
       }
     });
   });
   const interoStr = interi.size ? Array.from(interi).join('/') : '-';
-  const ridottoStr = ridotti.size ? Array.from(ridotti).join('/') : '-';
-  return `Intero ${interoStr} · Ridotto ${ridottoStr}`;
+  const ridottoPart = ridotti.size ? ` · Ridotto ${Array.from(ridotti).join('/')}` : '';
+  return `Intero ${interoStr}${ridottoPart}`;
 }
 
 function escHtml(str){
