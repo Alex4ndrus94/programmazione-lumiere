@@ -219,70 +219,56 @@
     font-family:'Inter';font-weight:800;font-size:18px;letter-spacing:1px;color:#E8622C;
     text-transform:uppercase;text-align:center;
   }
-  /* ---- Public banner: sfondo immagine reale + testo posizionato sopra ---- */
-  /* Dimensioni e coordinate ricavate dal file banner-frame.png (1513x1039).
-     Se in futuro cambi il file di sfondo con uno di dimensioni diverse,
-     queste coordinate vanno rimisurate. */
+  /* ---- Public banner: sfondo immagine reale + un'unica zona di testo ---- */
+  /* Coordinate misurate separatamente su banner-color.png (1512x1040) e
+     banner-bw.png (1513x1039) — percentuali quasi identiche tra le due. */
   #sheet-banner{
-    width:1513px;height:1039px;
+    width:1512px;height:1040px;
     position:relative;
     background:#000;
     overflow:hidden;
   }
   #sheet-banner .frame-bg{
-    position:absolute;top:0;left:0;width:1513px;height:1039px;display:block;z-index:0;
+    position:absolute;top:0;left:0;width:100%;height:100%;display:block;z-index:0;
   }
-  #sheet-banner .overlay-zone{
+  #sheet-banner .banner-zone{
     position:absolute;overflow:hidden;box-sizing:border-box;z-index:1;
+    left:1.92%;top:28%;width:68.75%;height:64.6%;
+    padding:1.2% 2.5%;
+    display:flex;flex-direction:column;justify-content:center;gap:calc(6px * var(--zs,1));
   }
-  /* Zona 1: data (barra bianca sotto il logo LUMIÈRE) */
-  #sheet-banner .zone-data{
-    left:405px;top:247px;width:643px;height:52px;
-    display:flex;align-items:center;justify-content:center;
+  #sheet-banner .banner-date-line{
+    font-family:'Inter';font-weight:900;font-size:calc(24px * var(--zs,1));letter-spacing:1px;
+    color:#141212;text-transform:uppercase;text-align:center;margin-bottom:calc(4px * var(--zs,1));
   }
-  #sheet-banner .zone-data span{
-    font-family:'Inter';font-weight:900;font-size:44px;letter-spacing:1px;color:#141212;text-transform:uppercase;
+  #sheet-banner .banner-zone .zone-row{
+    display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+    padding:calc(4px * var(--zs,1)) 0;border-bottom:1px solid #eee;
   }
-  /* Zona 2: tabella FILM/ORARI normale */
-  #sheet-banner .zone-table{
-    left:23px;top:360px;width:1015px;height:356px;
-    padding:6px 14px;display:flex;flex-direction:column;justify-content:center;--zs:1;
+  #sheet-banner .banner-zone .zone-row:last-child{border-bottom:none;}
+  #sheet-banner .banner-zone .zf-title-group{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0;}
+  #sheet-banner .banner-zone .zf-title{font-family:'Inter';font-weight:800;font-size:calc(20px * var(--zs,1));color:#141212;text-transform:uppercase;}
+  #sheet-banner .banner-zone .zf-times{font-family:'Inter';font-weight:800;font-size:calc(20px * var(--zs,1));color:#a11e1e;white-space:nowrap;}
+  #sheet-banner .banner-zone .zf-price{font-family:'IBM Plex Mono';font-size:calc(11px * var(--zs,1));color:#777;white-space:nowrap;flex-shrink:0;}
+  #sheet-banner .banner-zone .promo-section-bar{
+    background:#141212;color:#fff;text-align:center;
+    font-family:'Inter';font-weight:800;font-size:calc(14px * var(--zs,1));letter-spacing:1px;text-transform:uppercase;
+    padding:calc(4px * var(--zs,1)) 0;margin-top:calc(4px * var(--zs,1));
   }
-  /* Zona 3: sezione CineRevolution (qualunque film con "Sezione promo" compilata) */
-  #sheet-banner .zone-cinerevolution{
-    left:23px;top:753px;width:1015px;height:214px;
-    padding:6px 14px;display:flex;flex-direction:column;justify-content:center;--zs:1;
+  #sheet-banner .banner-zone .prevendite-bar{
+    background:#C0C0C8;color:#141212;text-align:center;
+    font-family:'Inter';font-weight:800;font-size:calc(14px * var(--zs,1));letter-spacing:1px;text-transform:uppercase;
+    padding:calc(4px * var(--zs,1)) 0;margin-top:calc(4px * var(--zs,1));
   }
-  /* Zona 4: box Prevendite */
-  #sheet-banner .zone-prevendite{
-    left:1062px;top:389px;width:426px;height:113px;
-    padding:4px 12px;display:flex;flex-direction:column;justify-content:center;gap:2px;--zs:1;
+  #sheet-banner .banner-zone .prevendite-mini-row{
+    display:flex;align-items:center;gap:8px;padding:calc(3px * var(--zs,1)) 0;
   }
-  #sheet-banner .zone-row{
-    display:grid;grid-template-columns:58% 42%;align-items:start;column-gap:10px;
-    padding:calc(6px * var(--zs)) 0;border-bottom:1px solid #eee;
+  #sheet-banner .banner-zone .prevendite-badge{
+    font-family:'Inter';font-weight:800;font-size:calc(11px * var(--zs,1));color:#fff;padding:2px 8px;
+    border-radius:5px;text-transform:uppercase;flex-shrink:0;
   }
-  #sheet-banner .zone-row:last-child{border-bottom:none;}
-  #sheet-banner .zone-row .zf-title{
-    font-family:'Inter';font-weight:800;font-size:calc(40px * var(--zs));color:#141212;text-transform:uppercase;line-height:1.15;
-    overflow-wrap:break-word;text-align:center;
-  }
-  #sheet-banner .zone-row .zf-times{
-    font-family:'Inter';font-weight:800;font-size:calc(40px * var(--zs));color:#a11e1e;text-align:center;line-height:1.15;
-    overflow-wrap:break-word;display:block;
-  }
-  #sheet-banner .zone-row .zf-price{
-    font-family:'IBM Plex Mono';font-weight:600;font-size:calc(18px * var(--zs));color:#777;display:block;text-align:center;
-  }
-  #sheet-banner .prevendite-row{
-    display:flex;align-items:center;gap:14px;padding:calc(8px * var(--zs)) 0;
-  }
-  #sheet-banner .prevendite-badge{
-    font-family:'Inter';font-weight:800;font-size:calc(26px * var(--zs));color:#fff;padding:5px 14px;
-    border-radius:7px;text-transform:uppercase;flex-shrink:0;
-  }
-  #sheet-banner .prevendite-film{font-family:'Inter';font-weight:800;font-size:calc(36px * var(--zs));color:#141212;}
-  #sheet-banner .prevendite-times{font-family:'Inter';font-weight:700;font-size:calc(30px * var(--zs));color:#a11e1e;margin-left:auto;}
+  #sheet-banner .banner-zone .prevendite-film{font-family:'Inter';font-weight:800;font-size:calc(15px * var(--zs,1));color:#141212;}
+  #sheet-banner .banner-zone .prevendite-times{font-family:'Inter';font-weight:700;font-size:calc(13px * var(--zs,1));color:#a11e1e;margin-left:auto;}
 </style>
 </head>
 <body>
@@ -392,7 +378,7 @@ document.querySelectorAll('.tabs button').forEach(btn=>{
     renderAll();
     if(btn.dataset.tab==='print'){ requestAnimationFrame(()=>fitAllFrameZones('print')); }
     if(btn.dataset.tab==='mobile'){ requestAnimationFrame(()=>fitAllFrameZones('mobile')); }
-    if(btn.dataset.tab==='banner'){ requestAnimationFrame(()=>{ fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite'); }); }
+    if(btn.dataset.tab==='banner'){ requestAnimationFrame(()=>fitZone('banner-zone')); }
   });
 });
 
@@ -622,12 +608,13 @@ function renderMobileSheet(){
 
 /* ============ BANNER RENDER ============ */
 /* ============ BANNER RENDER (sfondo immagine + overlay testo) ============ */
+/* ============ BANNER RENDER (sfondo immagine + un'unica zona di testo) ============ */
 function renderBannerSheet(){
   const showSala = document.getElementById('toggle-sala').checked;
   const showPrezzo = document.getElementById('toggle-prezzo').checked;
   const el = document.getElementById('sheet-banner');
 
-  // Raggruppa per film+versione+sezionePromo, unendo gli orari da tutte le sale (dedup automatico dei "doppioni" da overflow interno)
+  // Raggruppa per film+versione+sezionePromo, unendo gli orari da tutte le sale
   let filmMap = new Map();
   ROOMS.forEach(room=>{
     (data[room.id]||[]).forEach(s=>{
@@ -644,7 +631,6 @@ function renderBannerSheet(){
   });
   let entries = Array.from(filmMap.values());
   const normali = entries.filter(e=>!e.sezionePromo);
-  // Qualunque testo nella sezione promo finisce comunque nella zona "CineRevolution" già disegnata nell'immagine
   const cinerevolution = entries.filter(e=>e.sezionePromo);
 
   function rowHTML(entry){
@@ -653,17 +639,22 @@ function renderBannerSheet(){
     const salaTag = showSala ? ' — ' + Array.from(entry.rooms).join(', ') : '';
     const priceInline = showPrezzo ? `<span class="zf-price">${pricesForFilm(entry)}</span>` : '';
     return `<div class="zone-row">
-      <span class="zf-title">${escHtml(entry.film)}${versionTag}${salaTag}</span>
-      <span class="zf-times">${escHtml(sortedTimes)}${priceInline}</span>
+      <span class="zf-title-group">
+        <span class="zf-title">${escHtml(entry.film)}${versionTag}${salaTag}</span>
+        <span class="zf-times">${escHtml(sortedTimes)}</span>
+      </span>
+      ${priceInline}
     </div>`;
   }
 
-  const tableRowsHTML = normali.map(rowHTML).join('');
-  const cinerevolutionRowsHTML = cinerevolution.map(rowHTML).join('');
+  let contentHTML = `<div class="banner-date-line">${bannerHeadline()}</div>` + normali.map(rowHTML).join('');
 
-  // ---- Box PREVENDITE: dalla sala fantasma "prevendita", raggruppata per film ----
+  if(cinerevolution.length){
+    contentHTML += `<div class="promo-section-bar">★ CINEREVOLUTION ★</div>` + cinerevolution.map(rowHTML).join('');
+  }
+
+  // ---- Sezione PREVENDITE: dalla sala fantasma "prevendita", raggruppata per film ----
   const badgeColors = ['#2E7D32','#1B3A6B','#8B2E2E','#6A3E9E','#B5651D'];
-  let prevenditeHTML = '';
   const prevenditaScreenings = (data['prevendita']||[]).filter(s=>s.film);
   if(prevenditaScreenings.length){
     const byFilm = new Map();
@@ -671,34 +662,29 @@ function renderBannerSheet(){
       if(!byFilm.has(s.film)) byFilm.set(s.film, []);
       byFilm.get(s.film).push(s);
     });
-    prevenditeHTML = Array.from(byFilm.entries()).map(([film, list])=>{
-      const badgeRows = list.map((s,i)=>{
+    contentHTML += `<div class="prevendite-bar">★ PREVENDITE ★</div>`;
+    contentHTML += Array.from(byFilm.entries()).map(([film, list])=>{
+      return list.map((s,i)=>{
         const label = s.versione ? s.versione.toUpperCase() : 'STANDARD';
         const color = badgeColors[i % badgeColors.length];
         const times = new Set();
         s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>times.add(t));
         const sortedTimes = sortTimesChronologically(times).join(' - ');
-        return `<div class="prevendite-row">
+        return `<div class="prevendite-mini-row">
           <span class="prevendite-badge" style="background:${color}">${escHtml(label)}</span>
           <span class="prevendite-film">${escHtml(film)}</span>
           <span class="prevendite-times">${escHtml(sortedTimes)}</span>
         </div>`;
       }).join('');
-      return badgeRows;
     }).join('');
   }
 
   el.innerHTML = `
-    <img src="banner-frame.png" alt="Cinema Multisala Lumière" class="frame-bg" onerror="this.style.opacity='0';">
-    <div class="overlay-zone zone-data"><span>${bannerHeadline()}</span></div>
-    <div class="overlay-zone zone-table" id="zone-table">${tableRowsHTML}</div>
-    <div class="overlay-zone zone-cinerevolution" id="zone-cinerevolution">${cinerevolutionRowsHTML}</div>
-    <div class="overlay-zone zone-prevendite" id="zone-prevendite">${prevenditeHTML}</div>
+    <img src="banner-color.png" alt="Cinema Multisala Lumière" class="frame-bg" onerror="this.style.opacity='0';">
+    <div class="banner-zone" id="banner-zone">${contentHTML}</div>
   `;
 
-  fitZone('zone-table');
-  fitZone('zone-cinerevolution');
-  fitZone('zone-prevendite');
+  fitZone('banner-zone');
 }
 
 function bannerHeadline(){
@@ -707,8 +693,6 @@ function bannerHeadline(){
   return 'DA ' + giorni[d.getDay()];
 }
 
-// Rimpicciolisce il contenuto di una zona overlay se non ci sta nello spazio fisso disegnato nell'immagine.
-// Non ingrandisce mai (le zone dell'immagine hanno una dimensione fissa e nota).
 function fitZone(id){
   const zone = document.getElementById(id);
   if(!zone) return;
@@ -721,7 +705,7 @@ function fitZone(id){
     const naturalW = zone.scrollWidth;
     const availW = zone.clientWidth;
     const hRatio = availH / naturalH;
-    const wRatio = availW / naturalW; // <1 se orari con tante fasce orarie escono dal bordo in larghezza
+    const wRatio = availW / naturalW;
     const ratio = Math.min(hRatio, wRatio, 1);
     if(ratio >= 0.97) break;
     s = Math.max(0.35, s * ratio * 0.97);
@@ -799,7 +783,7 @@ async function exportPNG(elId, filename, format='png'){
   // le aperture "in differita" dopo un'operazione asincrona come html2canvas.
   const win = window.open('', '_blank');
   try{
-    if(elId==='sheet-banner'){ fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite'); }
+    if(elId==='sheet-banner'){ fitZone('banner-zone'); }
     if(elId==='sheet-mobile'){ fitAllFrameZones('mobile'); }
     const node = document.getElementById(elId);
     // Aspettiamo che tutte le immagini (logo ecc.) siano caricate, altrimenti il layout
@@ -809,7 +793,7 @@ async function exportPNG(elId, filename, format='png'){
       await Promise.all(imgsToWait.map(img=>new Promise(res=>{
         img.addEventListener('load', res); img.addEventListener('error', res);
       })));
-      if(elId==='sheet-banner'){ fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite'); }
+      if(elId==='sheet-banner'){ fitZone('banner-zone'); }
       if(elId==='sheet-mobile'){ fitAllFrameZones('mobile'); }
     }
     const bg = elId==='sheet-banner' ? '#FFFFFF' : '#141212';
@@ -825,6 +809,17 @@ async function exportPNG(elId, filename, format='png'){
     if(win && blob){
       const blobUrl = URL.createObjectURL(blob);
       win.location.href = blobUrl;
+      // Su Chrome desktop, aprire un blob JPEG senza nome file lo fa salvare
+      // come .jfif invece di .jpg: forziamo il nome corretto con un link "download"
+      // in parallelo. Su iOS questo passaggio in genere non fa nulla (nessun danno),
+      // e la scheda già aperta resta comunque disponibile per il salvataggio manuale.
+      const ext = format==='jpeg' ? 'jpg' : 'png';
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `${filename}.${ext}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }else if(win){
       win.close();
       alert('Errore nella generazione dell\'immagine. Riprova.');
@@ -875,7 +870,7 @@ async function exportPDFBanner(){
   const frameImg = document.querySelector('#sheet-banner .frame-bg');
   const originalSrc = frameImg ? frameImg.getAttribute('src') : null;
   try{
-    fitZone('zone-table'); fitZone('zone-cinerevolution'); fitZone('zone-prevendite');
+    fitZone('banner-zone');
     const node = document.getElementById('sheet-banner');
 
     // Per il PDF (stampa) usiamo la cornice in bianco e nero; il PNG (monitor) resta a colori.
@@ -883,7 +878,7 @@ async function exportPDFBanner(){
       await new Promise((resolve, reject)=>{
         frameImg.onload = resolve;
         frameImg.onerror = reject;
-        frameImg.src = 'banner-frame-bw.png';
+        frameImg.src = 'banner-bw.png';
       });
     }
 
