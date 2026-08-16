@@ -243,8 +243,8 @@
   }
   #sheet-banner .banner-zone .zone-row:last-child{border-bottom:none;}
   #sheet-banner .banner-zone .zf-cell{display:flex;align-items:center;justify-content:center;text-align:center;min-width:0;}
-  #sheet-banner .banner-zone .zf-title{font-family:'Inter';font-weight:800;font-size:calc(20px * var(--zs,1));color:#141212;text-transform:uppercase;line-height:1.15;}
-  #sheet-banner .banner-zone .zf-times{font-family:'Inter';font-weight:800;font-size:calc(20px * var(--zs,1));color:#a11e1e;line-height:1.15;}
+  #sheet-banner .banner-zone .zf-title{font-family:'Inter';font-weight:800;font-size:calc(27px * var(--zs,1));color:#141212;text-transform:uppercase;line-height:1.15;}
+  #sheet-banner .banner-zone .zf-times{font-family:'Inter';font-weight:800;font-size:calc(27px * var(--zs,1));color:#a11e1e;line-height:1.15;}
   #sheet-banner .banner-zone .zf-price{font-family:'IBM Plex Mono';font-size:calc(11px * var(--zs,1));color:#777;line-height:1.2;}
   #sheet-banner .banner-zone .promo-section-bar{
     background:#141212;color:#fff;text-align:center;
@@ -260,9 +260,9 @@
     display:flex;align-items:center;justify-content:center;gap:calc(8px * var(--zs,1));padding:calc(3px * var(--zg,1)) 0;
   }
   #sheet-banner .banner-zone .prevendite-badge{
-    font-family:'Inter';font-weight:800;font-size:calc(11px * var(--zs,1));color:#fff;padding:2px 8px;
+    font-family:'Inter';font-weight:800;font-size:calc(14px * var(--zs,1));color:#fff;padding:3px 10px;
     border-radius:5px;text-transform:uppercase;flex-shrink:0;
   }
-  #sheet-banner .banner-zone .prevendite-film{font-family:'Inter';font-weight:800;font-size:calc(15px * var(--zs,1));color:#141212;}
-  #sheet-banner .banner-zone .prevendite-data{font-family:'Inter';font-weight:600;font-size:calc(11px * var(--zs,1));color:#8a8a8a;}
-  #sheet-banner .banner-zone .prevendite-times{font-family:'Inter';font-weight:700;font-size:calc(13px * var(--zs,1));color:#a11e1e;}
+  #sheet-banner .banner-zone .prevendite-film{font-family:'Inter';font-weight:800;font-size:calc(19px * var(--zs,1));color:#141212;}
+  #sheet-banner .banner-zone .prevendite-data{font-family:'Inter';font-weight:600;font-size:calc(14px * var(--zs,1));color:#8a8a8a;}
+  #sheet-banner .banner-zone .prevendite-times{font-family:'Inter';font-weight:700;font-size:calc(17px * var(--zs,1));color:#a11e1e;}
