@@ -1,0 +1,267 @@
+:root{
+    --ink:#141212;
+    --ink-soft:#1c1a19;
+    --ivory:#F5F0E6;
+    --ivory-dim:#a8a29a;
+    --line: rgba(245,240,230,0.12);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:#0c0b0a;
+    color:var(--ivory);
+    font-family:'Inter',sans-serif;
+    padding:20px;
+  }
+  h1{
+    font-family:'Bebas Neue',sans-serif;
+    letter-spacing:1px;
+    font-size:34px;
+    margin:0 0 4px;
+  }
+  .sub{color:var(--ivory-dim);font-size:14px;margin-bottom:24px;}
+
+  /* ---- Tabs ---- */
+  .tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+  .tabs button{
+    background:var(--ink-soft);
+    color:var(--ivory-dim);
+    border:1px solid var(--line);
+    padding:9px 16px;
+    border-radius:8px;
+    font-family:'Inter';
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .tabs button.active{background:var(--ivory);color:var(--ink);border-color:var(--ivory);}
+
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  /* ---- Editor ---- */
+  .room-editor{
+    background:var(--ink-soft);
+    border:1px solid var(--line);
+    border-radius:12px;
+    margin-bottom:14px;
+    overflow:hidden;
+  }
+  .room-header{
+    padding:12px 16px;
+    font-family:'Bebas Neue';
+    font-size:20px;
+    letter-spacing:1px;
+    color:#141212;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .screenings{padding:12px 16px;}
+  .screening-row{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:8px;
+    padding:12px 0;
+    border-bottom:1px dashed var(--line);
+  }
+  .screening-row:last-child{border-bottom:none;}
+  .screening-row input{
+    background:#0c0b0a;
+    border:1px solid var(--line);
+    color:var(--ivory);
+    padding:9px 10px;
+    border-radius:7px;
+    font-family:'Inter';
+    font-size:14px;
+    width:100%;
+  }
+  .field-label{font-size:11px;color:var(--ivory-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;display:block;}
+  .price-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .price-grid select{
+    background:#0c0b0a;border:1px solid var(--line);color:var(--ivory);
+    padding:9px 10px;border-radius:7px;font-family:'Inter';font-size:14px;width:100%;
+  }
+  .row-actions{display:flex;justify-content:flex-end;}
+  .btn-remove{background:transparent;border:1px solid #a8453d;color:#e08078;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;}
+  .btn-add{
+    width:100%;margin-top:8px;padding:10px;border-radius:7px;border:1px dashed var(--line);
+    background:transparent;color:var(--ivory-dim);font-size:13px;cursor:pointer;font-family:'Inter';font-weight:600;
+  }
+
+  /* ---- Preview toolbar ---- */
+  .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+  .btn-export{
+    background:#E8622C;color:#fff;border:none;padding:10px 18px;
+    border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Inter';
+  }
+  .toggle{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ivory-dim);}
+  .preview-wrap{display:flex;justify-content:center;background:#000;padding:24px;border-radius:12px;overflow:auto;}
+
+  /* ===================== SHEET (shared) ===================== */
+  .sheet{background:var(--ink);color:var(--ivory);position:relative;flex-shrink:0;}
+  .sprockets-v{
+    position:absolute;top:0;bottom:0;width:22px;
+    background-image: radial-gradient(circle, #0c0b0a 6px, transparent 6.5px);
+    background-size: 22px 34px;
+    background-position: center;
+  }
+  .sprockets-v.left{left:0;}
+  .sprockets-v.right{right:0;}
+  .sprockets-h{
+    position:absolute;left:0;right:0;height:22px;
+    background-image: radial-gradient(circle, #0c0b0a 6px, transparent 6.5px);
+    background-size: 34px 22px;
+    background-position: center;
+  }
+  .sprockets-h.top{top:0;}
+  .sprockets-h.bottom{bottom:0;}
+
+  .room-band{
+    font-family:'Bebas Neue';
+    letter-spacing:2px;
+    color:#141212;
+    text-align:center;
+  }
+  .film-title{font-family:'Inter';font-weight:700;}
+  .film-times{font-family:'IBM Plex Mono';font-weight:600;}
+  .price-tag{font-family:'IBM Plex Mono';font-weight:500;}
+
+  /* ---- A5 print sheet: sfondo immagine reale + testo posizionato sopra ---- */
+  /* Coordinate zone ricavate da print-frame.png (1410x2001), in percentuale
+     così funzionano identiche sia sul foglio A5 sia sul riquadro mobile più piccolo. */
+  #sheet-print{
+    width:559px;height:794px; /* stesso rapporto ~1,42:1 dell'immagine 1410x2001 */
+    overflow:hidden;
+    position:relative;
+    background:#000;
+  }
+  #sheet-print .print-frame-bg{
+    position:absolute;top:0;left:0;width:100%;height:100%;display:block;z-index:0;
+  }
+  .frame-room-zone{
+    position:absolute;box-sizing:border-box;overflow:hidden;z-index:1;
+    display:flex;flex-direction:column;justify-content:center;
+  }
+  #sheet-print .frame-room-zone{padding:1.5% 4% 1.5% 24%;}
+  #sheet-print .frame-content-row{display:flex;align-items:stretch;gap:10px;height:100%;}
+  #sheet-print .frame-film-list{display:flex;flex-direction:column;justify-content:center;gap:2px;flex:1;min-width:0;}
+  #sheet-print .frame-film-list.spaced{justify-content:space-between;}
+  #sheet-print .frame-film-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding:2px 0;}
+  #sheet-print .frame-film-title{font-family:'Inter';font-weight:700;font-size:calc(15px * var(--fz,1));color:#141212;}
+  #sheet-print .frame-pills{display:flex;gap:4px;flex-wrap:wrap;}
+  #sheet-print .frame-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(11px * var(--fz,1));padding:2px 7px;border-radius:5px;white-space:nowrap;}
+  #sheet-print .frame-price-panel{
+    width:calc(78px * var(--fz,1));flex-shrink:0;padding:4px 8px;border-radius:8px;
+    display:flex;flex-direction:column;justify-content:center;gap:4px;
+  }
+  #sheet-print .frame-price-panel.frame-price-panel-multi{justify-content:space-between;}
+  #sheet-print .fp-label{font-family:'Inter';font-size:calc(8px * var(--fz,1));font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;}
+  #sheet-print .fp-value{font-family:'Inter';font-size:calc(12px * var(--fz,1));font-weight:800;color:#141212;}
+  #sheet-print .fp-divider{border-top:1px dashed rgba(0,0,0,0.25);}
+  #sheet-print .fp-mini-row{display:flex;flex-direction:column;gap:1px;}
+  #sheet-print .fp-mini-line{display:flex;justify-content:space-between;gap:4px;white-space:nowrap;}
+  #sheet-print .fp-mini-label{font-family:'Inter';font-weight:700;font-size:calc(7px * var(--fz,1));color:#777;text-transform:uppercase;}
+  #sheet-print .fp-mini-value{font-family:'Inter';font-weight:800;font-size:calc(8.5px * var(--fz,1));color:#141212;}
+
+  /* ---- Mobile wallpaper ---- */
+  #sheet-mobile{
+    width:390px;height:846px; /* stesso rapporto ~2,169:1 del riferimento 2213×4798 */
+    background:#000000;
+    display:flex;flex-direction:column;align-items:center;
+    padding:22px 18px;
+    overflow:hidden;
+  }
+  #sheet-mobile .mobile-safe-top{
+    flex:0 0 25%; /* zona lasciata libera per orologio e data della lock screen iPhone */
+    width:100%;
+  }
+  #sheet-mobile .mobile-safe-bottom{
+    flex:0 0 7%; /* zona lasciata libera per le icone torcia/fotocamera in basso */
+    width:100%;
+  }
+  #sheet-mobile .mobile-content-group{
+    flex:1;min-height:0;width:100%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  }
+  #sheet-mobile .mobile-frame-wrap{
+    position:relative;width:100%;
+    aspect-ratio:1410/2001; /* stessa proporzione dell'immagine, l'altezza segue automaticamente */
+  }
+  #sheet-mobile .print-frame-bg{
+    position:absolute;top:0;left:0;width:100%;height:100%;display:block;z-index:0;
+  }
+  #sheet-mobile .frame-room-zone{padding:1.5% 4% 1.5% 24%;}
+  #sheet-mobile .frame-content-row{display:flex;align-items:stretch;gap:6px;height:100%;}
+  #sheet-mobile .frame-film-list{display:flex;flex-direction:column;justify-content:center;gap:1px;flex:1;min-width:0;}
+  #sheet-mobile .frame-film-list.spaced{justify-content:space-between;}
+  #sheet-mobile .frame-film-row{display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;padding:1px 0;}
+  #sheet-mobile .frame-film-title{font-family:'Inter';font-weight:700;font-size:calc(9.5px * var(--fz,1));color:#141212;}
+  #sheet-mobile .frame-pills{display:flex;gap:3px;flex-wrap:wrap;}
+  #sheet-mobile .frame-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(7px * var(--fz,1));padding:1.5px 5px;border-radius:4px;white-space:nowrap;}
+
+  #sheet-mobile .mobile-brand{
+    display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;
+  }
+  #sheet-mobile .mobile-brand img{width:56px;height:auto;}
+  #sheet-mobile .mobile-brand .brand-text{
+    font-family:'Inter';font-weight:800;font-size:18px;letter-spacing:1px;color:#E8622C;
+    text-transform:uppercase;text-align:center;
+  }
+  /* ---- Public banner: sfondo immagine reale + zona data + zona contenuto ---- */
+  #sheet-banner{
+    width:1512px;height:1040px;
+    position:relative;
+    background:#000;
+    overflow:hidden;
+  }
+  #sheet-banner .frame-bg{
+    position:absolute;top:0;left:0;width:100%;height:100%;display:block;z-index:0;
+  }
+  /* Zona data: fascia scura libera sotto "LUMIÈRE", sopra la scatola bianca */
+  #sheet-banner .banner-date-zone{
+    position:absolute;left:30%;top:18.5%;width:40%;height:9%;z-index:1;
+    display:flex;align-items:center;justify-content:center;
+  }
+  #sheet-banner .banner-date-zone span{
+    font-family:'Inter';font-weight:900;font-size:28px;letter-spacing:1px;
+    color:#F2C94C;text-transform:uppercase;text-align:center;
+  }
+  #sheet-banner .banner-zone{
+    position:absolute;overflow:hidden;box-sizing:border-box;z-index:1;
+    left:1.92%;top:28%;width:68.75%;height:64.6%;
+    padding:1.2% 2.5%;
+    display:flex;flex-direction:column;justify-content:center;gap:calc(4px * var(--zs,1));
+  }
+  #sheet-banner .banner-zone .zone-row{
+    display:grid;align-items:center;column-gap:calc(10px * var(--zs,1));
+    padding:calc(4px * var(--zs,1)) 0;border-bottom:1px solid #eee;
+    grid-template-columns:1fr 1fr; /* titolo 50% / orari 50%, senza prezzo */
+  }
+  #sheet-banner .banner-zone .zone-row.with-price{
+    grid-template-columns:0.9fr 0.75fr 0.5fr; /* titolo / orari / prezzo, quando i prezzi sono attivi */
+  }
+  #sheet-banner .banner-zone .zone-row:last-child{border-bottom:none;}
+  #sheet-banner .banner-zone .zf-cell{display:flex;align-items:center;justify-content:center;text-align:center;min-width:0;}
+  #sheet-banner .banner-zone .zf-title{font-family:'Inter';font-weight:800;font-size:calc(20px * var(--zs,1));color:#141212;text-transform:uppercase;line-height:1.15;}
+  #sheet-banner .banner-zone .zf-times{font-family:'Inter';font-weight:800;font-size:calc(20px * var(--zs,1));color:#a11e1e;line-height:1.15;}
+  #sheet-banner .banner-zone .zf-price{font-family:'IBM Plex Mono';font-size:calc(11px * var(--zs,1));color:#777;line-height:1.2;}
+  #sheet-banner .banner-zone .promo-section-bar{
+    background:#141212;color:#fff;text-align:center;
+    font-family:'Inter';font-weight:800;font-size:calc(14px * var(--zs,1));letter-spacing:1px;text-transform:uppercase;
+    padding:calc(4px * var(--zs,1)) 0;margin-top:calc(4px * var(--zs,1));
+  }
+  #sheet-banner .banner-zone .prevendite-bar{
+    background:#C0C0C8;color:#141212;text-align:center;
+    font-family:'Inter';font-weight:800;font-size:calc(14px * var(--zs,1));letter-spacing:1px;text-transform:uppercase;
+    padding:calc(4px * var(--zs,1)) 0;margin-top:calc(4px * var(--zs,1));
+  }
+  #sheet-banner .banner-zone .prevendite-mini-row{
+    display:flex;align-items:center;justify-content:center;gap:calc(8px * var(--zs,1));padding:calc(3px * var(--zs,1)) 0;
+  }
+  #sheet-banner .banner-zone .prevendite-badge{
+    font-family:'Inter';font-weight:800;font-size:calc(11px * var(--zs,1));color:#fff;padding:2px 8px;
+    border-radius:5px;text-transform:uppercase;flex-shrink:0;
+  }
+  #sheet-banner .banner-zone .prevendite-film{font-family:'Inter';font-weight:800;font-size:calc(15px * var(--zs,1));color:#141212;}
+  #sheet-banner .banner-zone .prevendite-times{font-family:'Inter';font-weight:700;font-size:calc(13px * var(--zs,1));color:#a11e1e;}
