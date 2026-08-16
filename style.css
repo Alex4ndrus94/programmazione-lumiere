@@ -231,11 +231,11 @@
     position:absolute;overflow:hidden;box-sizing:border-box;z-index:1;
     left:1.92%;top:28%;width:68.75%;height:64.6%;
     padding:1.2% 2.5%;
-    display:flex;flex-direction:column;justify-content:center;gap:calc(4px * var(--zs,1));
+    display:flex;flex-direction:column;justify-content:center;gap:calc(4px * var(--zg,1));
   }
   #sheet-banner .banner-zone .zone-row{
     display:grid;align-items:center;column-gap:calc(10px * var(--zs,1));
-    padding:calc(4px * var(--zs,1)) 0;border-bottom:1px solid #eee;
+    padding:calc(4px * var(--zg,1)) 0;border-bottom:1px solid #eee;
     grid-template-columns:1fr 1fr; /* titolo 50% / orari 50%, senza prezzo */
   }
   #sheet-banner .banner-zone .zone-row.with-price{
@@ -249,15 +249,15 @@
   #sheet-banner .banner-zone .promo-section-bar{
     background:#141212;color:#fff;text-align:center;
     font-family:'Inter';font-weight:800;font-size:calc(14px * var(--zs,1));letter-spacing:1px;text-transform:uppercase;
-    padding:calc(4px * var(--zs,1)) 0;margin-top:calc(4px * var(--zs,1));
+    padding:calc(4px * var(--zg,1)) 0;margin-top:calc(4px * var(--zg,1));
   }
   #sheet-banner .banner-zone .prevendite-bar{
     background:#C0C0C8;color:#141212;text-align:center;
     font-family:'Inter';font-weight:800;font-size:calc(14px * var(--zs,1));letter-spacing:1px;text-transform:uppercase;
-    padding:calc(4px * var(--zs,1)) 0;margin-top:calc(4px * var(--zs,1));
+    padding:calc(4px * var(--zg,1)) 0;margin-top:calc(4px * var(--zg,1));
   }
   #sheet-banner .banner-zone .prevendite-mini-row{
-    display:flex;align-items:center;justify-content:center;gap:calc(8px * var(--zs,1));padding:calc(3px * var(--zs,1)) 0;
+    display:flex;align-items:center;justify-content:center;gap:calc(8px * var(--zs,1));padding:calc(3px * var(--zg,1)) 0;
   }
   #sheet-banner .banner-zone .prevendite-badge{
     font-family:'Inter';font-weight:800;font-size:calc(11px * var(--zs,1));color:#fff;padding:2px 8px;

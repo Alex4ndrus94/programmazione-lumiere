@@ -383,6 +383,7 @@ function fitZone(id){
   if(!zone) return;
   if(zone.clientHeight === 0) return; // pannello non visibile, salta
   zone.style.setProperty('--zs', 1);
+  zone.style.setProperty('--zg', 1);
   let s = 1;
   for(let i=0; i<12; i++){
     const naturalH = zone.scrollHeight;
@@ -395,6 +396,18 @@ function fitZone(id){
     if(Math.abs(ratio - 1) < 0.03) break;
     s = Math.max(0.35, Math.min(2.5, s * ratio * 0.97));
     zone.style.setProperty('--zs', s);
+  }
+  // Fase 2: se una riga larga (es. tanti orari) ha impedito al testo di crescere
+  // abbastanza da riempire l'altezza, allarghiamo lo spazio TRA le righe (non il
+  // font) per non lasciare vuoto in fondo alla tessera.
+  let g = 1;
+  for(let i=0; i<8; i++){
+    const naturalH = zone.scrollHeight;
+    const availH = zone.clientHeight;
+    if(naturalH >= availH * 0.97) break;
+    const ratio = availH / naturalH;
+    g = Math.min(4, g * Math.min(ratio, 1.3));
+    zone.style.setProperty('--zg', g);
   }
 }
 
