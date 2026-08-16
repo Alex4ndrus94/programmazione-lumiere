@@ -107,6 +107,11 @@ function renderEditor(){
 function screeningRow(roomId, s, idx){
   const row = document.createElement('div');
   row.className = 'screening-row';
+  const dataInizioField = roomId === 'prevendita' ? `
+    <div>
+      <span class="field-label">Data inizio (facoltativo — es. "dal 19 agosto". Compare accanto al titolo nel banner)</span>
+      <input type="text" value="${escAttr(s.dataInizio||'')}" data-field="dataInizio" placeholder="es. dal 19 agosto">
+    </div>` : '';
   row.innerHTML = `
     <div>
       <span class="field-label">Film</span>
@@ -124,6 +129,7 @@ function screeningRow(roomId, s, idx){
       <span class="field-label">Sezione promo (facoltativo — es. CineRevolution, Cinema in Festa. Se compilato, nel banner pubblico il film comparirà raggruppato sotto quell'etichetta SENZA mostrare il prezzo)</span>
       <input type="text" value="${escAttr(s.sezionePromo||'')}" data-field="sezionePromo" placeholder="es. CineRevolution">
     </div>
+    ${dataInizioField}
     <div class="price-grid">
       <div><span class="field-label">Intero</span><input type="text" value="${escAttr(s.intero)}" data-field="intero"></div>
       <div><span class="field-label">Ridotto</span><input type="text" value="${escAttr(s.ridotto)}" data-field="ridotto"></div>
@@ -346,14 +352,16 @@ function renderBannerSheet(){
     contentHTML += `<div class="prevendite-bar">★ PREVENDITE ★</div>`;
     contentHTML += Array.from(byFilm.entries()).map(([film, list])=>{
       return list.map((s,i)=>{
-        const label = s.versione ? s.versione.toUpperCase() : 'STANDARD';
         const color = badgeColors[i % badgeColors.length];
+        const badgeHTML = s.versione ? `<span class="prevendite-badge" style="background:${color}">${escHtml(s.versione.toUpperCase())}</span>` : '';
         const times = new Set();
         s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>times.add(t));
         const sortedTimes = sortTimesChronologically(times).join(' - ');
+        const dataInizio = (s.dataInizio||'').trim();
+        const dataInizioTag = dataInizio ? ` <span class="prevendite-data">(${escHtml(dataInizio)})</span>` : '';
         return `<div class="prevendite-mini-row">
-          <span class="prevendite-badge" style="background:${color}">${escHtml(label)}</span>
-          <span class="prevendite-film">${escHtml(film)}</span>
+          ${badgeHTML}
+          <span class="prevendite-film">${escHtml(film)}${dataInizioTag}</span>
           <span class="prevendite-times">${escHtml(sortedTimes)}</span>
         </div>`;
       }).join('');

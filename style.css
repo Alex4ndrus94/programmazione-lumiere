@@ -264,4 +264,5 @@
     border-radius:5px;text-transform:uppercase;flex-shrink:0;
   }
   #sheet-banner .banner-zone .prevendite-film{font-family:'Inter';font-weight:800;font-size:calc(15px * var(--zs,1));color:#141212;}
+  #sheet-banner .banner-zone .prevendite-data{font-family:'Inter';font-weight:600;font-size:calc(11px * var(--zs,1));color:#8a8a8a;}
   #sheet-banner .banner-zone .prevendite-times{font-family:'Inter';font-weight:700;font-size:calc(13px * var(--zs,1));color:#a11e1e;}
