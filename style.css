@@ -229,8 +229,8 @@
   }
   #sheet-banner .banner-zone{
     position:absolute;overflow:hidden;box-sizing:border-box;z-index:1;
-    left:1.92%;top:28%;width:68.75%;height:64.6%;
-    padding:1.2% 2.5%;
+    left:1.8%;top:28.3%;width:69.3%;height:64.6%;
+    padding:0.4% 1.2%;
     display:flex;flex-direction:column;justify-content:center;gap:calc(4px * var(--zg,1));
   }
   #sheet-banner .banner-zone .zone-row{
