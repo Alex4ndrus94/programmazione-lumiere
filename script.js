@@ -182,17 +182,31 @@ function frameZonesHTML(prefix, showPrices){
     const uniquePrices = new Set(screenings.map(s=>`${s.intero}|${s.ridotto}|${s.abb}`));
     const showSharedPrice = showPrices && uniquePrices.size === 1;
     const showPerFilmPrice = showPrices && !showSharedPrice;
+    const isSingleFilm = screenings.length === 1;
 
-    const rows = screenings.map(s=>{
+    let rows;
+    if(isSingleFilm){
+      const s = screenings[0];
       const timesSet = new Set();
       s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
       const sortedTimes = sortTimesChronologically(timesSet);
-      const pills = sortedTimes.map(t=>`<span class="frame-pill" style="background:${room.color}">${escHtml(t)}</span>`).join('');
-      return `<div class="frame-film-row">
-        <span class="frame-film-title">${escHtml(s.film)}</span>
-        <span class="frame-pills">${pills}</span>
+      const pills = sortedTimes.map(t=>`<span class="frame-pill-lg" style="background:${room.color}">${escHtml(t)}</span>`).join('');
+      rows = `<div class="frame-film-single">
+        <div class="frame-film-title-lg">${escHtml(s.film)}</div>
+        <div class="frame-pills-lg">${pills}</div>
       </div>`;
-    }).join('');
+    }else{
+      rows = screenings.map(s=>{
+        const timesSet = new Set();
+        s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
+        const sortedTimes = sortTimesChronologically(timesSet);
+        const pills = sortedTimes.map(t=>`<span class="frame-pill" style="background:${room.color}">${escHtml(t)}</span>`).join('');
+        return `<div class="frame-film-row">
+          <span class="frame-film-title">${escHtml(s.film)}</span>
+          <span class="frame-pills">${pills}</span>
+        </div>`;
+      }).join('');
+    }
 
     const first = screenings[0];
     let priceHTML = '';
@@ -237,16 +251,29 @@ function fitFrameZone(id){
   if(!zone) return;
   if(zone.clientHeight === 0) return; // pannello non visibile, salta
   zone.style.setProperty('--fz', 1);
+  zone.style.setProperty('--fg', 1);
   let s = 1;
-  for(let i=0; i<10; i++){
+  for(let i=0; i<12; i++){
     const naturalH = zone.scrollHeight;
     const availH = zone.clientHeight;
     const naturalW = zone.scrollWidth;
     const availW = zone.clientWidth;
-    const ratio = Math.min(availH/naturalH, availW/naturalW, 1);
-    if(ratio >= 0.97) break;
-    s = Math.max(0.4, s * ratio * 0.97);
+    const ratio = Math.min(availH/naturalH, availW/naturalW);
+    if(Math.abs(ratio - 1) < 0.03) break;
+    s = Math.max(0.4, Math.min(2.5, s * ratio * 0.97));
     zone.style.setProperty('--fz', s);
+  }
+  // Se una riga larga ha impedito al testo di crescere abbastanza da riempire
+  // l'altezza, allarghiamo lo spazio tra le righe (non il font) per non
+  // lasciare vuoto nella cella.
+  let g = 1;
+  for(let i=0; i<15; i++){
+    const naturalH = zone.scrollHeight;
+    const availH = zone.clientHeight;
+    if(naturalH >= availH * 0.98) break;
+    const ratio = availH / naturalH;
+    g = Math.min(10, g * Math.min(ratio, 1.4));
+    zone.style.setProperty('--fg', g);
   }
 }
 

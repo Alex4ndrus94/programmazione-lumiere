@@ -145,12 +145,16 @@
   }
   #sheet-print .frame-room-zone{padding:1.5% 4% 1.5% 24%;}
   #sheet-print .frame-content-row{display:flex;align-items:stretch;gap:10px;height:100%;}
-  #sheet-print .frame-film-list{display:flex;flex-direction:column;justify-content:center;gap:2px;flex:1;min-width:0;}
+  #sheet-print .frame-film-list{display:flex;flex-direction:column;justify-content:center;gap:calc(2px * var(--fg,1));flex:1;min-width:0;}
   #sheet-print .frame-film-list.spaced{justify-content:space-between;}
-  #sheet-print .frame-film-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding:2px 0;}
-  #sheet-print .frame-film-title{font-family:'Inter';font-weight:700;font-size:calc(15px * var(--fz,1));color:#141212;}
+  #sheet-print .frame-film-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding:calc(2px * var(--fg,1)) 0;}
+  #sheet-print .frame-film-title{font-family:'Inter';font-weight:700;font-size:calc(19px * var(--fz,1));color:#141212;}
   #sheet-print .frame-pills{display:flex;gap:4px;flex-wrap:wrap;}
-  #sheet-print .frame-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(11px * var(--fz,1));padding:2px 7px;border-radius:5px;white-space:nowrap;}
+  #sheet-print .frame-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(14px * var(--fz,1));padding:3px 9px;border-radius:6px;white-space:nowrap;}
+  #sheet-print .frame-film-single{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(6px * var(--fz,1));height:100%;text-align:center;}
+  #sheet-print .frame-film-title-lg{font-family:'Inter';font-weight:800;font-size:calc(26px * var(--fz,1));color:#141212;}
+  #sheet-print .frame-pills-lg{display:flex;gap:calc(6px * var(--fz,1));flex-wrap:wrap;justify-content:center;}
+  #sheet-print .frame-pill-lg{color:#fff;font-family:'Inter';font-weight:800;font-size:calc(19px * var(--fz,1));padding:4px 12px;border-radius:7px;white-space:nowrap;}
   #sheet-print .frame-price-panel{
     width:calc(78px * var(--fz,1));flex-shrink:0;padding:4px 8px;border-radius:8px;
     display:flex;flex-direction:column;justify-content:center;gap:4px;
@@ -193,12 +197,16 @@
   }
   #sheet-mobile .frame-room-zone{padding:1.5% 4% 1.5% 24%;}
   #sheet-mobile .frame-content-row{display:flex;align-items:stretch;gap:6px;height:100%;}
-  #sheet-mobile .frame-film-list{display:flex;flex-direction:column;justify-content:center;gap:1px;flex:1;min-width:0;}
+  #sheet-mobile .frame-film-list{display:flex;flex-direction:column;justify-content:center;gap:calc(1px * var(--fg,1));flex:1;min-width:0;}
   #sheet-mobile .frame-film-list.spaced{justify-content:space-between;}
-  #sheet-mobile .frame-film-row{display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;padding:1px 0;}
-  #sheet-mobile .frame-film-title{font-family:'Inter';font-weight:700;font-size:calc(9.5px * var(--fz,1));color:#141212;}
+  #sheet-mobile .frame-film-row{display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;padding:calc(1px * var(--fg,1)) 0;}
+  #sheet-mobile .frame-film-title{font-family:'Inter';font-weight:700;font-size:calc(12.5px * var(--fz,1));color:#141212;}
   #sheet-mobile .frame-pills{display:flex;gap:3px;flex-wrap:wrap;}
-  #sheet-mobile .frame-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(7px * var(--fz,1));padding:1.5px 5px;border-radius:4px;white-space:nowrap;}
+  #sheet-mobile .frame-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(9.5px * var(--fz,1));padding:2px 6px;border-radius:5px;white-space:nowrap;}
+  #sheet-mobile .frame-film-single{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(4px * var(--fz,1));height:100%;text-align:center;}
+  #sheet-mobile .frame-film-title-lg{font-family:'Inter';font-weight:800;font-size:calc(17px * var(--fz,1));color:#141212;}
+  #sheet-mobile .frame-pills-lg{display:flex;gap:calc(4px * var(--fz,1));flex-wrap:wrap;justify-content:center;}
+  #sheet-mobile .frame-pill-lg{color:#fff;font-family:'Inter';font-weight:800;font-size:calc(13px * var(--fz,1));padding:3px 9px;border-radius:6px;white-space:nowrap;}
 
   #sheet-mobile .mobile-brand{
     display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;
