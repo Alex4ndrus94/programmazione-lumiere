@@ -127,11 +127,11 @@
   .film-times{font-family:'IBM Plex Mono';font-weight:600;}
   .price-tag{font-family:'IBM Plex Mono';font-weight:500;}
 
-  /* ---- A5 print sheet: sfondo immagine reale + testo posizionato sopra ---- */
-  /* Coordinate zone ricavate da print-frame.png (1410x2001), in percentuale
-     così funzionano identiche sia sul foglio A5 sia sul riquadro mobile più piccolo. */
+  /* ---- A5 print sheet: sfondo immagine reale, 6 sale con zone indipendenti ---- */
+  /* Coordinate ricavate da print-frame.png (1054x1492): ogni sala ha una zona
+     contenuto + tre colonne prezzo separate (Intero/Ridotto/Abb.). */
   #sheet-print{
-    width:559px;height:794px; /* stesso rapporto ~1,42:1 dell'immagine 1410x2001 */
+    width:527px;height:746px; /* stesso rapporto ~1,416:1 dell'immagine 1054x1492 */
     overflow:hidden;
     position:relative;
     background:#000;
@@ -139,74 +139,69 @@
   #sheet-print .print-frame-bg{
     position:absolute;top:0;left:0;width:100%;height:100%;display:block;z-index:0;
   }
-  .frame-room-zone{
-    position:absolute;box-sizing:border-box;overflow:hidden;z-index:1;
-    display:flex;flex-direction:column;justify-content:center;
+  .pf-zone{position:absolute;box-sizing:border-box;overflow:hidden;z-index:1;}
+  #sheet-print .pf-content{
+    padding:2% 2.5%;display:flex;flex-direction:column;justify-content:center;gap:calc(3px * var(--fg,1));
   }
-  #sheet-print .frame-room-zone{padding:1.5% 4% 1.5% 24%;}
-  #sheet-print .frame-content-row{display:flex;align-items:stretch;gap:10px;height:100%;}
-  #sheet-print .frame-film-list{display:flex;flex-direction:column;justify-content:center;gap:calc(2px * var(--fg,1));flex:1;min-width:0;}
-  #sheet-print .frame-film-list.spaced{justify-content:space-between;}
-  #sheet-print .frame-film-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding:calc(2px * var(--fg,1)) 0;}
-  #sheet-print .frame-film-title{font-family:'Inter';font-weight:700;font-size:calc(19px * var(--fz,1));color:#141212;}
-  #sheet-print .frame-pills{display:flex;gap:4px;flex-wrap:wrap;}
-  #sheet-print .frame-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(14px * var(--fz,1));padding:3px 9px;border-radius:6px;white-space:nowrap;}
-  #sheet-print .frame-film-single{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(6px * var(--fz,1));height:100%;text-align:center;}
-  #sheet-print .frame-film-title-lg{font-family:'Inter';font-weight:800;font-size:calc(26px * var(--fz,1));color:#141212;}
-  #sheet-print .frame-pills-lg{display:flex;gap:calc(6px * var(--fz,1));flex-wrap:wrap;justify-content:center;}
-  #sheet-print .frame-pill-lg{color:#fff;font-family:'Inter';font-weight:800;font-size:calc(19px * var(--fz,1));padding:4px 12px;border-radius:7px;white-space:nowrap;}
-  #sheet-print .frame-price-panel{
-    width:calc(78px * var(--fz,1));flex-shrink:0;padding:4px 8px;border-radius:8px;
-    display:flex;flex-direction:column;justify-content:center;gap:4px;
+  #sheet-print .pf-price{
+    padding:2% 3px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:calc(3px * var(--fg,1));text-align:center;
   }
-  #sheet-print .frame-price-panel.frame-price-panel-multi{justify-content:space-between;}
-  #sheet-print .fp-label{font-family:'Inter';font-size:calc(8px * var(--fz,1));font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;}
-  #sheet-print .fp-value{font-family:'Inter';font-size:calc(12px * var(--fz,1));font-weight:800;color:#141212;}
-  #sheet-print .fp-divider{border-top:1px dashed rgba(0,0,0,0.25);}
-  #sheet-print .fp-mini-row{display:flex;flex-direction:column;gap:1px;}
-  #sheet-print .fp-mini-line{display:flex;justify-content:space-between;gap:4px;white-space:nowrap;}
-  #sheet-print .fp-mini-label{font-family:'Inter';font-weight:700;font-size:calc(7px * var(--fz,1));color:#777;text-transform:uppercase;}
-  #sheet-print .fp-mini-value{font-family:'Inter';font-weight:800;font-size:calc(8.5px * var(--fz,1));color:#141212;}
+  #sheet-print .pf-film-row{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
+  #sheet-print .pf-film-title{font-family:'Inter';font-weight:700;font-size:calc(13px * var(--fz,1));color:#141212;}
+  #sheet-print .pf-pills{display:flex;gap:4px;flex-wrap:wrap;}
+  #sheet-print .pf-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(10px * var(--fz,1));padding:2px 7px;border-radius:5px;white-space:nowrap;}
+  #sheet-print .pf-badge{font-family:'Inter';font-weight:800;font-size:calc(8.5px * var(--fz,1));padding:1px 5px;border-radius:4px;border:1.5px solid currentColor;white-space:nowrap;}
+  #sheet-print .pf-badge.badge-3d{color:#1B3A6B;}
+  #sheet-print .pf-badge.badge-vo{color:#6A3E9E;}
+  #sheet-print .pf-film-single{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(5px * var(--fz,1));height:100%;text-align:center;}
+  #sheet-print .pf-film-title-lg{font-family:'Inter';font-weight:800;font-size:calc(18px * var(--fz,1));color:#141212;}
+  #sheet-print .pf-pills-lg{display:flex;gap:calc(5px * var(--fz,1));flex-wrap:wrap;justify-content:center;}
+  #sheet-print .pf-pill-lg{color:#fff;font-family:'Inter';font-weight:800;font-size:calc(13px * var(--fz,1));padding:3px 10px;border-radius:6px;white-space:nowrap;}
+  #sheet-print .pf-price-value{font-family:'Inter';font-weight:700;font-size:calc(12px * var(--fz,1));color:#141212;}
+  #sheet-print .pf-abb-yes{color:#2E7D32;font-size:calc(15px * var(--fz,1));font-weight:900;}
+  #sheet-print .pf-abb-no{color:#B03A2E;font-size:calc(15px * var(--fz,1));font-weight:900;}
 
   /* ---- Mobile wallpaper ---- */
   #sheet-mobile{
-    width:390px;height:846px; /* stesso rapporto ~2,169:1 del riferimento 2213×4798 */
+    width:390px;height:846px;
     background:#000000;
     display:flex;flex-direction:column;align-items:center;
     padding:22px 18px;
     overflow:hidden;
   }
-  #sheet-mobile .mobile-safe-top{
-    flex:0 0 25%; /* zona lasciata libera per orologio e data della lock screen iPhone */
-    width:100%;
-  }
-  #sheet-mobile .mobile-safe-bottom{
-    flex:0 0 7%; /* zona lasciata libera per le icone torcia/fotocamera in basso */
-    width:100%;
-  }
+  #sheet-mobile .mobile-safe-top{ flex:0 0 25%; width:100%; }
+  #sheet-mobile .mobile-safe-bottom{ flex:0 0 7%; width:100%; }
   #sheet-mobile .mobile-content-group{
     flex:1;min-height:0;width:100%;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
   }
   #sheet-mobile .mobile-frame-wrap{
     position:relative;width:100%;
-    aspect-ratio:1410/2001; /* stessa proporzione dell'immagine, l'altezza segue automaticamente */
+    aspect-ratio:1054/1492; /* stessa proporzione della nuova cornice */
   }
   #sheet-mobile .print-frame-bg{
     position:absolute;top:0;left:0;width:100%;height:100%;display:block;z-index:0;
   }
-  #sheet-mobile .frame-room-zone{padding:1.5% 4% 1.5% 24%;}
-  #sheet-mobile .frame-content-row{display:flex;align-items:stretch;gap:6px;height:100%;}
-  #sheet-mobile .frame-film-list{display:flex;flex-direction:column;justify-content:center;gap:calc(1px * var(--fg,1));flex:1;min-width:0;}
-  #sheet-mobile .frame-film-list.spaced{justify-content:space-between;}
-  #sheet-mobile .frame-film-row{display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;padding:calc(1px * var(--fg,1)) 0;}
-  #sheet-mobile .frame-film-title{font-family:'Inter';font-weight:700;font-size:calc(12.5px * var(--fz,1));color:#141212;}
-  #sheet-mobile .frame-pills{display:flex;gap:3px;flex-wrap:wrap;}
-  #sheet-mobile .frame-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(9.5px * var(--fz,1));padding:2px 6px;border-radius:5px;white-space:nowrap;}
-  #sheet-mobile .frame-film-single{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(4px * var(--fz,1));height:100%;text-align:center;}
-  #sheet-mobile .frame-film-title-lg{font-family:'Inter';font-weight:800;font-size:calc(17px * var(--fz,1));color:#141212;}
-  #sheet-mobile .frame-pills-lg{display:flex;gap:calc(4px * var(--fz,1));flex-wrap:wrap;justify-content:center;}
-  #sheet-mobile .frame-pill-lg{color:#fff;font-family:'Inter';font-weight:800;font-size:calc(13px * var(--fz,1));padding:3px 9px;border-radius:6px;white-space:nowrap;}
+  #sheet-mobile .pf-content{
+    padding:2% 2.5%;display:flex;flex-direction:column;justify-content:center;gap:calc(2px * var(--fg,1));
+  }
+  #sheet-mobile .pf-price{
+    padding:2% 2px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:calc(2px * var(--fg,1));text-align:center;
+  }
+  #sheet-mobile .pf-film-row{display:flex;align-items:baseline;gap:3px;flex-wrap:wrap;}
+  #sheet-mobile .pf-film-title{font-family:'Inter';font-weight:700;font-size:calc(9px * var(--fz,1));color:#141212;}
+  #sheet-mobile .pf-pills{display:flex;gap:2.5px;flex-wrap:wrap;}
+  #sheet-mobile .pf-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(6.5px * var(--fz,1));padding:1.5px 5px;border-radius:4px;white-space:nowrap;}
+  #sheet-mobile .pf-badge{font-family:'Inter';font-weight:800;font-size:calc(5.5px * var(--fz,1));padding:1px 4px;border-radius:3px;border:1px solid currentColor;white-space:nowrap;}
+  #sheet-mobile .pf-badge.badge-3d{color:#1B3A6B;}
+  #sheet-mobile .pf-badge.badge-vo{color:#6A3E9E;}
+  #sheet-mobile .pf-film-single{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(3px * var(--fz,1));height:100%;text-align:center;}
+  #sheet-mobile .pf-film-title-lg{font-family:'Inter';font-weight:800;font-size:calc(12.5px * var(--fz,1));color:#141212;}
+  #sheet-mobile .pf-pills-lg{display:flex;gap:calc(3px * var(--fz,1));flex-wrap:wrap;justify-content:center;}
+  #sheet-mobile .pf-pill-lg{color:#fff;font-family:'Inter';font-weight:800;font-size:calc(9.5px * var(--fz,1));padding:2px 8px;border-radius:5px;white-space:nowrap;}
+  #sheet-mobile .pf-price-value{font-family:'Inter';font-weight:700;font-size:calc(8.5px * var(--fz,1));color:#141212;}
+  #sheet-mobile .pf-abb-yes{color:#2E7D32;font-size:calc(11px * var(--fz,1));font-weight:900;}
+  #sheet-mobile .pf-abb-no{color:#B03A2E;font-size:calc(11px * var(--fz,1));font-weight:900;}
 
   #sheet-mobile .mobile-brand{
     display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;
@@ -216,6 +211,7 @@
     font-family:'Inter';font-weight:800;font-size:18px;letter-spacing:1px;color:#E8622C;
     text-transform:uppercase;text-align:center;
   }
+
   /* ---- Public banner: sfondo immagine reale + zona data + zona contenuto ---- */
   #sheet-banner{
     width:1512px;height:1040px;

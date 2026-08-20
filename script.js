@@ -160,89 +160,83 @@ function escAttr(str){ return (str||'').replace(/"/g,'&quot;'); }
 /* ============ PRINT SHEET RENDER ============ */
 /* ============ PRINT SHEET RENDER (sfondo immagine + zone di testo) ============ */
 // Coordinate delle 6 zone bianche in print-frame.png (1410x2001), in percentuale.
-const FRAME_ZONES = [
-  {id:'decurtis',    top:7.10,  left:10.07, width:88.51, height:13.54},
-  {id:'sordi',       top:22.04, left:10.07, width:88.51, height:13.54},
-  {id:'bergman',     top:36.93, left:10.07, width:88.51, height:13.59},
-  {id:'virnalisi',   top:51.92, left:10.07, width:88.51, height:13.54},
-  {id:'desica',      top:66.87, left:10.07, width:88.51, height:13.54},
-  {id:'mastroianni', top:81.76, left:10.07, width:88.51, height:13.54},
+// Coordinate per ciascuna delle 6 sale in print-frame.png (1054x1492), in percentuale.
+// Ogni sala ha una zona contenuto + tre colonne prezzo separate (Intero/Ridotto/Abb.).
+const ROOM_ZONES = [
+  {top:6.30,  height:11.33}, // decurtis
+  {top:22.12, height:11.39}, // sordi
+  {top:37.94, height:11.39}, // bergman
+  {top:53.69, height:11.19}, // virnalisi
+  {top:68.83, height:10.32}, // desica
+  {top:83.31, height:9.12},  // mastroianni
 ];
+const ZONE_CONTENT = {left:3.13, width:72.01};
+const ZONE_INTERO  = {left:76.28, width:6.64};
+const ZONE_RIDOTTO = {left:83.68, width:6.55};
+const ZONE_ABB     = {left:90.89, width:6.36};
+
+// Riconosce 3D / V.O. dal campo Versione (testo libero) per mostrare il badge accanto al titolo
+function versionBadges(versione){
+  const v = (versione||'').toLowerCase();
+  let html = '';
+  if(v.includes('3d')) html += `<span class="pf-badge badge-3d">3D</span>`;
+  if(v.includes('ov') || v.includes('v.o') || v.includes('originale')) html += `<span class="pf-badge badge-vo">V.O.</span>`;
+  return html;
+}
 
 function frameZonesHTML(prefix, showPrices){
-  return FRAME_ZONES.map(zone=>{
-    const room = ROOMS.find(r=>r.id===zone.id);
-    if(!room) return '';
+  return ROOMS.map((room, idx)=>{
+    const rz = ROOM_ZONES[idx];
     const screenings = data[room.id] || [];
+    const baseStyle = `top:${rz.top}%;height:${rz.height}%;`;
     if(screenings.length===0){
-      return `<div class="frame-room-zone" id="${prefix}-zone-${zone.id}"
-        style="left:${zone.left}%;top:${zone.top}%;width:${zone.width}%;height:${zone.height}%;"></div>`;
+      return `<div class="pf-zone pf-content" id="${prefix}-content-${room.id}" style="left:${ZONE_CONTENT.left}%;width:${ZONE_CONTENT.width}%;${baseStyle}"></div>`;
     }
 
-    const uniquePrices = new Set(screenings.map(s=>`${s.intero}|${s.ridotto}|${s.abb}`));
-    const showSharedPrice = showPrices && uniquePrices.size === 1;
-    const showPerFilmPrice = showPrices && !showSharedPrice;
     const isSingleFilm = screenings.length === 1;
-
-    let rows;
+    let contentHTML;
     if(isSingleFilm){
       const s = screenings[0];
       const timesSet = new Set();
       s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
       const sortedTimes = sortTimesChronologically(timesSet);
-      const pills = sortedTimes.map(t=>`<span class="frame-pill-lg" style="background:${room.color}">${escHtml(t)}</span>`).join('');
-      rows = `<div class="frame-film-single">
-        <div class="frame-film-title-lg">${escHtml(s.film)}</div>
-        <div class="frame-pills-lg">${pills}</div>
+      const pills = sortedTimes.map(t=>`<span class="pf-pill-lg" style="background:${room.color}">${escHtml(t)}</span>`).join('');
+      contentHTML = `<div class="pf-film-single">
+        <div class="pf-film-title-lg">${escHtml(s.film)} ${versionBadges(s.versione)}</div>
+        <div class="pf-pills-lg">${pills}</div>
       </div>`;
     }else{
-      rows = screenings.map(s=>{
+      contentHTML = screenings.map(s=>{
         const timesSet = new Set();
         s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
         const sortedTimes = sortTimesChronologically(timesSet);
-        const pills = sortedTimes.map(t=>`<span class="frame-pill" style="background:${room.color}">${escHtml(t)}</span>`).join('');
-        return `<div class="frame-film-row">
-          <span class="frame-film-title">${escHtml(s.film)}</span>
-          <span class="frame-pills">${pills}</span>
+        const pills = sortedTimes.map(t=>`<span class="pf-pill" style="background:${room.color}">${escHtml(t)}</span>`).join('');
+        return `<div class="pf-film-row">
+          <span class="pf-film-title">${escHtml(s.film)}</span>
+          ${versionBadges(s.versione)}
+          <span class="pf-pills">${pills}</span>
         </div>`;
       }).join('');
     }
 
-    const first = screenings[0];
-    let priceHTML = '';
-    if(showSharedPrice){
-      const ridottoClean = (first.ridotto||'').trim();
-      const hasRidotto = ridottoClean && ridottoClean !== '-';
-      const ridottoBlock = hasRidotto ? `
-        <div class="fp-divider"></div>
-        <div><div class="fp-label">Ridotto</div><div class="fp-value">€${ridottoClean}</div></div>` : '';
-      priceHTML = `<div class="frame-price-panel" style="background:${lightenColor(room.color, 0.85)};">
-        <div><div class="fp-label">Intero</div><div class="fp-value">€${first.intero||'-'}</div></div>
-        ${ridottoBlock}
-        <div class="fp-divider"></div>
-        <div><div class="fp-label">Abb.</div><div class="fp-value">${first.abb||'N'}</div></div>
-      </div>`;
-    }else if(showPerFilmPrice){
-      const miniRows = screenings.map(s=>{
-        const ridottoClean = (s.ridotto||'').trim();
-        const hasRidotto = ridottoClean && ridottoClean !== '-';
-        const ridottoLine = hasRidotto ? `<div class="fp-mini-line"><span class="fp-mini-label">Rid.</span><span class="fp-mini-value">€${ridottoClean}</span></div>` : '';
-        return `<div class="fp-mini-row">
-          <div class="fp-mini-line"><span class="fp-mini-label">Int.</span><span class="fp-mini-value">€${s.intero||'-'}</span></div>
-          ${ridottoLine}
-          <div class="fp-mini-line"><span class="fp-mini-label">Abb.</span><span class="fp-mini-value">${s.abb||'N'}</span></div>
-        </div>`;
+    let priceZones = '';
+    if(showPrices){
+      const interoRows = screenings.map(s=>`<div class="pf-price-value">€${s.intero||'-'}</div>`).join('');
+      const ridottoRows = screenings.map(s=>{
+        const r = (s.ridotto||'').trim();
+        return `<div class="pf-price-value">${(r && r!=='-') ? '€'+r : '-'}</div>`;
       }).join('');
-      priceHTML = `<div class="frame-price-panel frame-price-panel-multi" style="background:${lightenColor(room.color, 0.85)};">${miniRows}</div>`;
+      const abbRows = screenings.map(s=>{
+        return s.abb==='S' ? `<div class="pf-abb-yes">✓</div>` : `<div class="pf-abb-no">✕</div>`;
+      }).join('');
+      priceZones = `
+        <div class="pf-zone pf-price" id="${prefix}-intero-${room.id}" style="left:${ZONE_INTERO.left}%;width:${ZONE_INTERO.width}%;${baseStyle}">${interoRows}</div>
+        <div class="pf-zone pf-price" id="${prefix}-ridotto-${room.id}" style="left:${ZONE_RIDOTTO.left}%;width:${ZONE_RIDOTTO.width}%;${baseStyle}">${ridottoRows}</div>
+        <div class="pf-zone pf-price" id="${prefix}-abb-${room.id}" style="left:${ZONE_ABB.left}%;width:${ZONE_ABB.width}%;${baseStyle}">${abbRows}</div>`;
     }
 
-    return `<div class="frame-room-zone" id="${prefix}-zone-${zone.id}"
-      style="left:${zone.left}%;top:${zone.top}%;width:${zone.width}%;height:${zone.height}%;">
-      <div class="frame-content-row">
-        <div class="frame-film-list${showPerFilmPrice ? ' spaced' : ''}">${rows}</div>
-        ${priceHTML}
-      </div>
-    </div>`;
+    return `<div class="pf-zone pf-content" id="${prefix}-content-${room.id}" style="left:${ZONE_CONTENT.left}%;width:${ZONE_CONTENT.width}%;${baseStyle}">${contentHTML}</div>
+      ${priceZones}`;
   }).join('');
 }
 
@@ -263,9 +257,6 @@ function fitFrameZone(id){
     s = Math.max(0.4, Math.min(2.5, s * ratio * 0.97));
     zone.style.setProperty('--fz', s);
   }
-  // Se una riga larga ha impedito al testo di crescere abbastanza da riempire
-  // l'altezza, allarghiamo lo spazio tra le righe (non il font) per non
-  // lasciare vuoto nella cella.
   let g = 1;
   for(let i=0; i<15; i++){
     const naturalH = zone.scrollHeight;
@@ -278,7 +269,12 @@ function fitFrameZone(id){
 }
 
 function fitAllFrameZones(prefix){
-  FRAME_ZONES.forEach(z=>fitFrameZone(`${prefix}-zone-${z.id}`));
+  ROOMS.forEach(room=>{
+    fitFrameZone(`${prefix}-content-${room.id}`);
+    fitFrameZone(`${prefix}-intero-${room.id}`);
+    fitFrameZone(`${prefix}-ridotto-${room.id}`);
+    fitFrameZone(`${prefix}-abb-${room.id}`);
+  });
 }
 
 function renderPrintSheet(){
@@ -320,6 +316,7 @@ function renderMobileSheet(){
     if(toLoad<=0) fitAllFrameZones('mobile');
   }
 }
+
 
 /* ============ BANNER RENDER ============ */
 /* ============ BANNER RENDER (sfondo immagine + overlay testo) ============ */
