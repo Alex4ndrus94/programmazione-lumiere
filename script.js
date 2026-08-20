@@ -176,11 +176,21 @@ const ZONE_RIDOTTO = {left:83.68, width:6.55};
 const ZONE_ABB     = {left:90.89, width:6.36};
 
 // Riconosce 3D / V.O. dal campo Versione (testo libero) per mostrare il badge accanto al titolo
-function versionBadges(versione){
-  const v = (versione||'').toLowerCase();
+// Icone SVG semplici, in stile con la legenda (3D, V.O., persone = usata per CineRevolution)
+const PF_ICONS = {
+  threeD: `<svg viewBox="0 0 24 24" class="pf-icon"><circle cx="7" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2.3"/><circle cx="17" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2.3"/><line x1="12" y1="12" x2="12" y2="12" stroke="currentColor" stroke-width="2.3"/></svg>`,
+  vo: `<svg viewBox="0 0 24 24" class="pf-icon"><path d="M3 5h18v11H9l-5 5V5z" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/></svg>`,
+  people: `<svg viewBox="0 0 24 24" class="pf-icon"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 21c0-5 4-8 8-8s8 3 8 8" fill="currentColor"/></svg>`,
+};
+
+// Badge per versione (3D / V.O., riconosciuti dal testo libero del campo Versione)
+// e per CineRevolution (icona "persone" della legenda, riusata per identificarlo a colpo d'occhio)
+function versionBadges(s){
+  const v = (s.versione||'').toLowerCase();
   let html = '';
-  if(v.includes('3d')) html += `<span class="pf-badge badge-3d">3D</span>`;
-  if(v.includes('ov') || v.includes('v.o') || v.includes('originale')) html += `<span class="pf-badge badge-vo">V.O.</span>`;
+  if(v.includes('3d')) html += `<span class="pf-icon-badge badge-3d" title="3D">${PF_ICONS.threeD}</span>`;
+  if(v.includes('ov') || v.includes('v.o') || v.includes('originale')) html += `<span class="pf-icon-badge badge-vo" title="Versione originale">${PF_ICONS.vo}</span>`;
+  if((s.sezionePromo||'').trim()) html += `<span class="pf-icon-badge badge-cinerev" title="CineRevolution">${PF_ICONS.people}</span>`;
   return html;
 }
 
@@ -202,7 +212,7 @@ function frameZonesHTML(prefix, showPrices){
       const sortedTimes = sortTimesChronologically(timesSet);
       const pills = sortedTimes.map(t=>`<span class="pf-pill-lg" style="background:${room.color}">${escHtml(t)}</span>`).join('');
       contentHTML = `<div class="pf-film-single">
-        <div class="pf-film-title-lg">${escHtml(s.film)} ${versionBadges(s.versione)}</div>
+        <div class="pf-film-title-lg">${escHtml(s.film)} ${versionBadges(s)}</div>
         <div class="pf-pills-lg">${pills}</div>
       </div>`;
     }else{
@@ -213,7 +223,7 @@ function frameZonesHTML(prefix, showPrices){
         const pills = sortedTimes.map(t=>`<span class="pf-pill" style="background:${room.color}">${escHtml(t)}</span>`).join('');
         return `<div class="pf-film-row">
           <span class="pf-film-title">${escHtml(s.film)}</span>
-          ${versionBadges(s.versione)}
+          ${versionBadges(s)}
           <span class="pf-pills">${pills}</span>
         </div>`;
       }).join('');
@@ -292,7 +302,7 @@ function renderMobileSheet(){
     <div class="mobile-content-group">
       <div class="mobile-frame-wrap">
         <img src="print-frame.png" alt="Programmazione" class="print-frame-bg" onerror="this.style.opacity='0';">
-        ${frameZonesHTML('mobile', false)}
+        ${frameZonesHTML('mobile', true)}
       </div>
       <div class="mobile-brand">
         <img src="logo-lumiere.png" alt="Logo Cinema Lumière" onerror="this.style.display='none';">
