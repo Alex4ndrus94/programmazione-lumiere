@@ -82,8 +82,12 @@
     background:#0c0b0a;border:1px solid var(--line);color:var(--ivory);
     padding:9px 10px;border-radius:7px;font-family:'Inter';font-size:14px;width:100%;
   }
-  .row-actions{display:flex;justify-content:flex-end;}
-  .btn-remove{background:transparent;border:1px solid #a8453d;color:#e08078;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;}
+  .row-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  .move-room-select{
+    background:#0c0b0a;border:1px solid var(--line);color:var(--ivory);
+    padding:8px 10px;border-radius:7px;font-family:'Inter';font-size:12px;flex:1;
+  }
+  .btn-remove{background:transparent;border:1px solid #a8453d;color:#e08078;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;flex-shrink:0;}
   .btn-add{
     width:100%;margin-top:8px;padding:10px;border-radius:7px;border:1px dashed var(--line);
     background:transparent;color:var(--ivory-dim);font-size:13px;cursor:pointer;font-family:'Inter';font-weight:600;
