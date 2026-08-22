@@ -175,22 +175,15 @@ const ZONE_INTERO  = {left:76.28, width:6.64};
 const ZONE_RIDOTTO = {left:83.68, width:6.55};
 const ZONE_ABB     = {left:90.89, width:6.36};
 
-// Riconosce 3D / V.O. dal campo Versione (testo libero) per mostrare il badge accanto al titolo
-// Icone SVG semplici, in stile con la legenda (3D, V.O., persone = usata per CineRevolution)
-const PF_ICONS = {
-  threeD: `<svg viewBox="0 0 24 24" class="pf-icon"><circle cx="7" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2.3"/><circle cx="17" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2.3"/><line x1="12" y1="12" x2="12" y2="12" stroke="currentColor" stroke-width="2.3"/></svg>`,
-  vo: `<svg viewBox="0 0 24 24" class="pf-icon"><path d="M3 5h18v11H9l-5 5V5z" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/></svg>`,
-  people: `<svg viewBox="0 0 24 24" class="pf-icon"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 21c0-5 4-8 8-8s8 3 8 8" fill="currentColor"/></svg>`,
-};
-
 // Badge per versione (3D / V.O., riconosciuti dal testo libero del campo Versione)
 // e per CineRevolution (icona "persone" della legenda, riusata per identificarlo a colpo d'occhio)
+// Icone ritagliate direttamente dalla legenda della cornice (stessa identità visiva).
 function versionBadges(s){
   const v = (s.versione||'').toLowerCase();
   let html = '';
-  if(v.includes('3d')) html += `<span class="pf-icon-badge badge-3d" title="3D">${PF_ICONS.threeD}</span>`;
-  if(v.includes('ov') || v.includes('v.o') || v.includes('originale')) html += `<span class="pf-icon-badge badge-vo" title="Versione originale">${PF_ICONS.vo}</span>`;
-  if((s.sezionePromo||'').trim()) html += `<span class="pf-icon-badge badge-cinerev" title="CineRevolution">${PF_ICONS.people}</span>`;
+  if(v.includes('3d')) html += `<img src="icon-3d.png" class="pf-icon-badge" alt="3D" title="3D">`;
+  if(v.includes('ov') || v.includes('v.o') || v.includes('originale')) html += `<img src="icon-vo.png" class="pf-icon-badge" alt="Versione originale" title="Versione originale">`;
+  if((s.sezionePromo||'').trim()) html += `<img src="icon-people.png" class="pf-icon-badge" alt="CineRevolution" title="CineRevolution">`;
   return html;
 }
 
@@ -237,7 +230,7 @@ function frameZonesHTML(prefix, showPrices){
         return `<div class="pf-price-value">${(r && r!=='-') ? '€'+r : '-'}</div>`;
       }).join('');
       const abbRows = screenings.map(s=>{
-        return s.abb==='S' ? `<div class="pf-abb-yes">✓</div>` : `<div class="pf-abb-no">✕</div>`;
+        return s.abb==='S' ? `<div class="pf-abb-cell"><img src="icon-abb-yes.png" class="pf-abb-icon" alt="Abbonamento sì"></div>` : `<div class="pf-abb-cell"><img src="icon-abb-no.png" class="pf-abb-icon" alt="Abbonamento no"></div>`;
       }).join('');
       priceZones = `
         <div class="pf-zone pf-price" id="${prefix}-intero-${room.id}" style="left:${ZONE_INTERO.left}%;width:${ZONE_INTERO.width}%;${baseStyle}">${interoRows}</div>
