@@ -104,6 +104,41 @@ function renderEditor(){
   });
 }
 
+// Genera gli scaglioni di prezzo da min a max ogni 0,50€, formattati con la virgola (es. "3,50")
+function priceOptionsRange(min, max, step){
+  const opts = [];
+  for(let v = min; v <= max + 0.001; v += step){
+    opts.push(v.toFixed(2).replace('.', ','));
+  }
+  return opts;
+}
+const INTERO_OPTIONS = priceOptionsRange(3.5, 35, 0.5);
+const RIDOTTO_OPTIONS = priceOptionsRange(5, 33, 0.5);
+
+// Normalizza per confrontare valori scritti in modo diverso (es. "10,5" e "10,50" sono lo stesso prezzo)
+function normalizePrice(str){
+  const n = parseFloat((str||'').replace(',', '.'));
+  if(isNaN(n)) return null;
+  return n.toFixed(2).replace('.', ',');
+}
+
+function priceSelectHTML(fieldName, currentValue, options, allowEmpty){
+  const normalizedCurrent = normalizePrice(currentValue);
+  let optionsHTML = allowEmpty ? `<option value="" ${!currentValue?'selected':''}>—</option>` : '';
+  let matched = !currentValue;
+  options.forEach(opt=>{
+    const isSelected = normalizedCurrent === normalizePrice(opt);
+    if(isSelected) matched = true;
+    optionsHTML += `<option value="${opt}" ${isSelected?'selected':''}>€ ${opt}</option>`;
+  });
+  // Se il valore salvato non combacia con nessuno scaglione standard (es. inserito manualmente prima),
+  // lo aggiungiamo come opzione extra così non si perde il dato.
+  if(!matched && currentValue){
+    optionsHTML += `<option value="${escAttr(currentValue)}" selected>€ ${escHtml(currentValue)} (personalizzato)</option>`;
+  }
+  return `<select data-field="${fieldName}">${optionsHTML}</select>`;
+}
+
 function screeningRow(roomId, s, idx){
   const row = document.createElement('div');
   row.className = 'screening-row';
@@ -131,8 +166,8 @@ function screeningRow(roomId, s, idx){
     </div>
     ${dataInizioField}
     <div class="price-grid">
-      <div><span class="field-label">Intero</span><input type="text" value="${escAttr(s.intero)}" data-field="intero"></div>
-      <div><span class="field-label">Ridotto</span><input type="text" value="${escAttr(s.ridotto)}" data-field="ridotto"></div>
+      <div><span class="field-label">Intero</span>${priceSelectHTML('intero', s.intero, INTERO_OPTIONS, false)}</div>
+      <div><span class="field-label">Ridotto</span>${priceSelectHTML('ridotto', s.ridotto, RIDOTTO_OPTIONS, true)}</div>
       <div><span class="field-label">Abb.</span>
         <select data-field="abb">
           <option value="N" ${s.abb==='N'?'selected':''}>N</option>
@@ -140,13 +175,27 @@ function screeningRow(roomId, s, idx){
         </select>
       </div>
     </div>
-    <div class="row-actions"><button class="btn-remove">Rimuovi</button></div>
+    <div class="row-actions">
+      <select class="move-room-select" title="Sposta in un'altra sala">
+        <option value="">Sposta in sala…</option>
+        ${ROOMS_STAMPA.filter(r=>r.id!==roomId).map(r=>`<option value="${r.id}">${r.name}</option>`).join('')}
+      </select>
+      <button class="btn-remove">Rimuovi</button>
+    </div>
   `;
-  row.querySelectorAll('input,select').forEach(el=>{
+  row.querySelectorAll('input,select:not(.move-room-select)').forEach(el=>{
     el.addEventListener('input', ()=>{
       data[roomId][idx][el.dataset.field] = el.value;
       saveData();
     });
+  });
+  row.querySelector('.move-room-select').addEventListener('change', (e)=>{
+    const targetRoomId = e.target.value;
+    if(!targetRoomId) return;
+    const [screening] = data[roomId].splice(idx,1);
+    data[targetRoomId] = data[targetRoomId] || [];
+    data[targetRoomId].push(screening);
+    saveData(); renderEditor();
   });
   row.querySelector('.btn-remove').addEventListener('click', ()=>{
     data[roomId].splice(idx,1);
