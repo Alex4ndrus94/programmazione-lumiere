@@ -232,7 +232,8 @@ function versionBadges(s){
   let html = '';
   if(v.includes('3d')) html += `<img src="icon-3d.png" class="pf-icon-badge" alt="3D" title="3D">`;
   if(v.includes('ov') || v.includes('v.o') || v.includes('originale')) html += `<img src="icon-vo.png" class="pf-icon-badge" alt="Versione originale" title="Versione originale">`;
-  if((s.sezionePromo||'').trim()) html += `<img src="icon-people.png" class="pf-icon-badge" alt="CineRevolution" title="CineRevolution">`;
+  const sezionePromoText = (s.sezionePromo||'').trim();
+  if(sezionePromoText) html += `<img src="icon-people.png" class="pf-icon-badge" alt="${escAttr(sezionePromoText)}" title="${escAttr(sezionePromoText)}">`;
   return html;
 }
 
@@ -396,7 +397,15 @@ function renderBannerSheet(){
   });
   let entries = Array.from(filmMap.values());
   const normali = entries.filter(e=>!e.sezionePromo);
-  const cinerevolution = entries.filter(e=>e.sezionePromo);
+
+  // Raggruppa per il testo ESATTO scritto in "Sezione promo": ogni nome diverso
+  // ottiene la propria barra con la propria etichetta, invece di finire tutto
+  // insieme sotto "CineRevolution".
+  const promoGroups = new Map(); // testo sezione -> [entries], nell'ordine di prima comparsa
+  entries.filter(e=>e.sezionePromo).forEach(e=>{
+    if(!promoGroups.has(e.sezionePromo)) promoGroups.set(e.sezionePromo, []);
+    promoGroups.get(e.sezionePromo).push(e);
+  });
 
   function rowHTML(entry){
     const sortedTimes = sortTimesChronologically(entry.times).join(' - ');
@@ -412,9 +421,9 @@ function renderBannerSheet(){
 
   let contentHTML = normali.map(rowHTML).join('');
 
-  if(cinerevolution.length){
-    contentHTML += `<div class="promo-section-bar">★ CINEREVOLUTION ★</div>` + cinerevolution.map(rowHTML).join('');
-  }
+  promoGroups.forEach((groupEntries, sezioneName)=>{
+    contentHTML += `<div class="promo-section-bar">★ ${escHtml(sezioneName.toUpperCase())} ★</div>` + groupEntries.map(rowHTML).join('');
+  });
 
   // ---- Sezione PREVENDITE: dalla sala fantasma "prevendita", raggruppata per film ----
   const badgeColors = ['#2E7D32','#1B3A6B','#8B2E2E','#6A3E9E','#B5651D'];
