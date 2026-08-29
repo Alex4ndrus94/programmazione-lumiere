@@ -122,6 +122,15 @@ function normalizePrice(str){
   return n.toFixed(2).replace('.', ',');
 }
 
+// Formato compatto per gli spazi stretti: niente simbolo €, e niente zero finale
+// inutile (es. "9,50" -> "9,5", "8,00" -> "8"), coerente con come scrivevi già i prezzi prima.
+function formatPriceShort(str){
+  const n = parseFloat((str||'').replace(',', '.'));
+  if(isNaN(n)) return '-';
+  let out = n % 1 === 0 ? String(n) : n.toFixed(2).replace(/0$/, '');
+  return out.replace('.', ',');
+}
+
 function priceSelectHTML(fieldName, currentValue, options, allowEmpty){
   const normalizedCurrent = normalizePrice(currentValue);
   let optionsHTML = allowEmpty ? `<option value="" ${!currentValue?'selected':''}>—</option>` : '';
@@ -274,10 +283,10 @@ function frameZonesHTML(prefix, showPrices){
 
     let priceZones = '';
     if(showPrices){
-      const interoRows = screenings.map(s=>`<div class="pf-price-value">€${s.intero||'-'}</div>`).join('');
+      const interoRows = screenings.map(s=>`<div class="pf-price-value">${formatPriceShort(s.intero)}</div>`).join('');
       const ridottoRows = screenings.map(s=>{
         const r = (s.ridotto||'').trim();
-        return `<div class="pf-price-value">${(r && r!=='-') ? '€'+r : '-'}</div>`;
+        return `<div class="pf-price-value">${(r && r!=='-') ? formatPriceShort(r) : '-'}</div>`;
       }).join('');
       const abbRows = screenings.map(s=>{
         return s.abb==='S' ? `<div class="pf-abb-cell"><img src="icon-abb-yes.png" class="pf-abb-icon" alt="Abbonamento sì"></div>` : `<div class="pf-abb-cell"><img src="icon-abb-no.png" class="pf-abb-icon" alt="Abbonamento no"></div>`;

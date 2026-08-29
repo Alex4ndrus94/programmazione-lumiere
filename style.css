@@ -150,7 +150,7 @@
   #sheet-print .pf-price{
     padding:2% 3px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:calc(3px * var(--fg,1));text-align:center;
   }
-  #sheet-print .pf-film-row{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
+  #sheet-print .pf-film-row{display:flex;align-items:baseline;justify-content:center;gap:6px;flex-wrap:wrap;text-align:center;}
   #sheet-print .pf-film-title{font-family:'Inter';font-weight:700;font-size:calc(13px * var(--fz,1));color:#141212;}
   #sheet-print .pf-pills{display:flex;gap:4px;flex-wrap:wrap;}
   #sheet-print .pf-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(10px * var(--fz,1));padding:2px 7px;border-radius:5px;white-space:nowrap;}
@@ -193,7 +193,7 @@
   #sheet-mobile .pf-price{
     padding:2% 2px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:calc(2px * var(--fg,1));text-align:center;
   }
-  #sheet-mobile .pf-film-row{display:flex;align-items:baseline;gap:3px;flex-wrap:wrap;}
+  #sheet-mobile .pf-film-row{display:flex;align-items:baseline;justify-content:center;gap:3px;flex-wrap:wrap;text-align:center;}
   #sheet-mobile .pf-film-title{font-family:'Inter';font-weight:700;font-size:calc(9px * var(--fz,1));color:#141212;}
   #sheet-mobile .pf-pills{display:flex;gap:2.5px;flex-wrap:wrap;}
   #sheet-mobile .pf-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(6.5px * var(--fz,1));padding:1.5px 5px;border-radius:4px;white-space:nowrap;}
