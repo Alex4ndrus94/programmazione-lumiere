@@ -39,15 +39,59 @@ const DEFAULT_DATA = {
   prevendita: [], // vuota di default: non compare finché non la riempi
 };
 
-let data = loadData();
+// ---- Firebase: fonte dati condivisa fra tutti i dispositivi ----
+// NB: databaseURL da completare non appena disponibile dalla console Firebase.
+const firebaseConfig = {
+  apiKey: "AIzaSyAyQSVrMfEgws_yca7f8Lo_HTysszmhsqU",
+  authDomain: "programmazione-lumiere.firebaseapp.com",
+  databaseURL: "https://programmazione-lumiere-default-rtdb.europe-west1.firebasedatabase.app/",
+  projectId: "programmazione-lumiere",
+  storageBucket: "programmazione-lumiere.firebasestorage.app",
+  messagingSenderId: "145340126224",
+  appId: "1:145340126224:web:12fc08064b27da3448a695"
+};
+let fbRef = null;
+try{
+  firebase.initializeApp(firebaseConfig);
+  fbRef = firebase.database().ref('programmazione');
+}catch(e){ console.error('Firebase non disponibile, uso solo il salvataggio locale.', e); }
 
-function loadData(){
+let data = JSON.parse(JSON.stringify(DEFAULT_DATA)); // valore iniziale, sostituito appena Firebase risponde
+let saveTimeout = null;
+
+function loadDataLocalFallback(){
   const saved = localStorage.getItem('programmazione-data');
   if(saved){ try{ return JSON.parse(saved); }catch(e){} }
   return JSON.parse(JSON.stringify(DEFAULT_DATA));
 }
+
+async function initData(){
+  if(!fbRef){ data = loadDataLocalFallback(); renderAll(); return; }
+  try{
+    const snapshot = await fbRef.once('value');
+    if(snapshot.exists()){
+      data = snapshot.val();
+    }else{
+      // Primo avvio in assoluto: nessun dato condiviso ancora presente, carichiamo quello di default
+      data = loadDataLocalFallback();
+      await fbRef.set(data);
+    }
+  }catch(e){
+    console.error('Errore nel caricare da Firebase, uso la copia locale come riserva.', e);
+    data = loadDataLocalFallback();
+  }
+  renderAll();
+}
+
 function saveData(){
+  // Copia locale immediata come riserva se manca la connessione
   localStorage.setItem('programmazione-data', JSON.stringify(data));
+  if(!fbRef) return;
+  // Raggruppiamo i salvataggi (es. mentre si digita) invece di scrivere ad ogni carattere
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(()=>{
+    fbRef.set(data).catch(e=>console.error('Errore nel salvare su Firebase:', e));
+  }, 500);
 }
 
 /* ============ TABS ============ */
@@ -709,4 +753,4 @@ async function exportPDFBanner(){
   }
 }
 
-renderAll();
+initData();
