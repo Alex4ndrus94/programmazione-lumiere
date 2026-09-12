@@ -242,6 +242,23 @@ function screeningRow(roomId, s, idx){
       saveData();
     });
   });
+  // Automazione: quando scegli l'Intero, il Ridotto si propone da solo a -1€
+  // (resta comunque modificabile a mano subito dopo, se per quel film serve un altro valore)
+  const interoSelect = row.querySelector('select[data-field="intero"]');
+  const ridottoSelect = row.querySelector('select[data-field="ridotto"]');
+  if(interoSelect && ridottoSelect){
+    interoSelect.addEventListener('change', (e)=>{
+      const n = parseFloat(e.target.value.replace(',', '.'));
+      if(isNaN(n)) return;
+      const target = normalizePrice((n - 1).toFixed(2).replace('.', ','));
+      const matchOption = Array.from(ridottoSelect.options).find(opt=>normalizePrice(opt.value) === target);
+      if(matchOption){
+        ridottoSelect.value = matchOption.value;
+        data[roomId][idx].ridotto = matchOption.value;
+        saveData();
+      }
+    });
+  }
   row.querySelector('.move-room-select').addEventListener('change', (e)=>{
     const targetRoomId = e.target.value;
     if(!targetRoomId) return;
