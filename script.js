@@ -368,7 +368,10 @@ function fitFrameZone(id){
   if(!zone) return;
   if(zone.clientHeight === 0) return; // pannello non visibile, salta
   zone.style.setProperty('--fz', 1);
-  zone.style.setProperty('--fg', 1);
+  // Partiamo con uno spazio tra le righe già stretto: se il contenuto è tanto
+  // (4-5 film), lo spazio "rubato" qui lascia più margine al font, invece di
+  // sacrificare subito la leggibilità del testo.
+  zone.style.setProperty('--fg', 0.45);
   let s = 1;
   for(let i=0; i<12; i++){
     const naturalH = zone.scrollHeight;
@@ -377,10 +380,10 @@ function fitFrameZone(id){
     const availW = zone.clientWidth;
     const ratio = Math.min(availH/naturalH, availW/naturalW);
     if(Math.abs(ratio - 1) < 0.03) break;
-    s = Math.max(0.4, Math.min(2.5, s * ratio * 0.97));
+    s = Math.max(0.55, Math.min(2.5, s * ratio * 0.97));
     zone.style.setProperty('--fz', s);
   }
-  let g = 1;
+  let g = 0.45;
   for(let i=0; i<15; i++){
     const naturalH = zone.scrollHeight;
     const availH = zone.clientHeight;
