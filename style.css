@@ -131,40 +131,33 @@
   .film-times{font-family:'IBM Plex Mono';font-weight:600;}
   .price-tag{font-family:'IBM Plex Mono';font-weight:500;}
 
-  /* ---- A5 print sheet: sfondo immagine reale, 6 sale con zone indipendenti ---- */
-  /* Coordinate ricavate da print-frame.png (1054x1492): ogni sala ha una zona
-     contenuto + tre colonne prezzo separate (Intero/Ridotto/Abb.). */
+  /* ---- A5 print sheet: sale impilate, ognuna con la propria immagine e le proprie celle ---- */
   #sheet-print{
-    width:527px;height:746px; /* stesso rapporto ~1,416:1 dell'immagine 1054x1492 */
+    width:600px;height:846px; /* rapporto A5 ~1,41:1 */
     overflow:hidden;
     position:relative;
-    background:#000;
+    background:#141212;
+    padding:14px 16px;
+    box-sizing:border-box;
   }
-  #sheet-print .print-frame-bg{
-    position:absolute;top:0;left:0;width:100%;height:100%;display:block;z-index:0;
+  #sheet-print .print-stack{ width:100%; }
+  #sheet-print .print-doc-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  #sheet-print .print-doc-header img{width:30px;height:auto;flex-shrink:0;}
+  #sheet-print .print-doc-title{font-family:'Bebas Neue';font-size:22px;letter-spacing:1px;color:#F5F0E6;line-height:1;}
+  #sheet-print .print-doc-sub{font-size:10px;color:#E8622C;font-weight:700;letter-spacing:0.5px;}
+  #sheet-print .print-room-band{position:relative;width:100%;margin-bottom:5px;}
+  #sheet-print .print-band-img{display:block;width:100%;height:auto;}
+  #sheet-print .print-legend-img{display:block;width:100%;height:auto;margin-top:4px;}
+  #sheet-print .print-cell{position:absolute;box-sizing:border-box;overflow:hidden;z-index:1;
+    display:flex;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center;
+    padding:2px 6px;gap:calc(4px * var(--fg,1));
   }
-  .pf-zone{position:absolute;box-sizing:border-box;overflow:hidden;z-index:1;}
-  #sheet-print .pf-content{
-    padding:2% 2.5%;display:flex;flex-direction:column;justify-content:center;gap:calc(3px * var(--fg,1));
-  }
-  #sheet-print .pf-price{
-    padding:2% 3px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:calc(3px * var(--fg,1));text-align:center;
-  }
-  #sheet-print .pf-film-row{display:flex;align-items:baseline;justify-content:center;gap:6px;flex-wrap:wrap;text-align:center;}
-  #sheet-print .pf-film-title{font-family:'Inter';font-weight:700;font-size:calc(13px * var(--fz,1));color:#141212;}
-  #sheet-print .pf-pills{display:flex;gap:4px;flex-wrap:wrap;}
-  #sheet-print .pf-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(10px * var(--fz,1));padding:2px 7px;border-radius:5px;white-space:nowrap;}
-  #sheet-print .pf-icon-badge{
-    width:calc(17px * var(--fz,1));height:calc(17px * var(--fz,1));object-fit:contain;
-    flex-shrink:0;vertical-align:middle;
-  }
-  #sheet-print .pf-film-single{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(5px * var(--fz,1));height:100%;text-align:center;}
-  #sheet-print .pf-film-title-lg{font-family:'Inter';font-weight:800;font-size:calc(18px * var(--fz,1));color:#141212;}
-  #sheet-print .pf-pills-lg{display:flex;gap:calc(5px * var(--fz,1));flex-wrap:wrap;justify-content:center;}
-  #sheet-print .pf-pill-lg{color:#fff;font-family:'Inter';font-weight:800;font-size:calc(13px * var(--fz,1));padding:3px 10px;border-radius:6px;white-space:nowrap;}
-  #sheet-print .pf-price-value{font-family:'Inter';font-weight:700;font-size:calc(12px * var(--fz,1));color:#141212;}
-  #sheet-print .pf-abb-cell{display:flex;align-items:center;justify-content:center;}
-  #sheet-print .pf-abb-icon{width:calc(18px * var(--fz,1));height:calc(18px * var(--fz,1));object-fit:contain;}
+  #sheet-print .print-film-title{font-family:'Inter';font-weight:700;font-size:calc(15px * var(--fz,1));color:#141212;}
+  #sheet-print .print-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(11px * var(--fz,1));padding:2px 7px;border-radius:5px;white-space:nowrap;}
+  #sheet-print .print-icon-badge{width:calc(14px * var(--fz,1));height:calc(14px * var(--fz,1));object-fit:contain;flex-shrink:0;}
+  #sheet-print .print-price-cell{font-family:'Inter';font-weight:700;font-size:calc(14px * var(--fz,1));color:#141212;}
+  #sheet-print .print-abb-cell{display:flex;align-items:center;justify-content:center;}
+  #sheet-print .print-abb-icon{width:60%;height:60%;object-fit:contain;}
 
   /* ---- Mobile wallpaper ---- */
   #sheet-mobile{
@@ -177,37 +170,22 @@
   #sheet-mobile .mobile-safe-top{ flex:0 0 25%; width:100%; }
   #sheet-mobile .mobile-safe-bottom{ flex:0 0 7%; width:100%; }
   #sheet-mobile .mobile-content-group{
-    flex:1;min-height:0;width:100%;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+    flex:1;min-height:0;width:100%;overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
   }
-  #sheet-mobile .mobile-frame-wrap{
-    position:relative;width:100%;
-    aspect-ratio:1054/1492; /* stessa proporzione della nuova cornice */
+  #sheet-mobile .mobile-stack{ width:100%; }
+  #sheet-mobile .mobile-room-band{position:relative;width:100%;margin-bottom:4px;}
+  #sheet-mobile .mobile-band-img{display:block;width:100%;height:auto;}
+  #sheet-mobile .mobile-cell{position:absolute;box-sizing:border-box;overflow:hidden;z-index:1;
+    display:flex;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center;
+    padding:1px 4px;gap:calc(3px * var(--fg,1));
   }
-  #sheet-mobile .print-frame-bg{
-    position:absolute;top:0;left:0;width:100%;height:100%;display:block;z-index:0;
-  }
-  #sheet-mobile .pf-content{
-    padding:2% 2.5%;display:flex;flex-direction:column;justify-content:center;gap:calc(2px * var(--fg,1));
-  }
-  #sheet-mobile .pf-price{
-    padding:2% 2px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:calc(2px * var(--fg,1));text-align:center;
-  }
-  #sheet-mobile .pf-film-row{display:flex;align-items:baseline;justify-content:center;gap:3px;flex-wrap:wrap;text-align:center;}
-  #sheet-mobile .pf-film-title{font-family:'Inter';font-weight:700;font-size:calc(9px * var(--fz,1));color:#141212;}
-  #sheet-mobile .pf-pills{display:flex;gap:2.5px;flex-wrap:wrap;}
-  #sheet-mobile .pf-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(6.5px * var(--fz,1));padding:1.5px 5px;border-radius:4px;white-space:nowrap;}
-  #sheet-mobile .pf-icon-badge{
-    width:calc(12px * var(--fz,1));height:calc(12px * var(--fz,1));object-fit:contain;
-    flex-shrink:0;vertical-align:middle;
-  }
-  #sheet-mobile .pf-film-single{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(3px * var(--fz,1));height:100%;text-align:center;}
-  #sheet-mobile .pf-film-title-lg{font-family:'Inter';font-weight:800;font-size:calc(12.5px * var(--fz,1));color:#141212;}
-  #sheet-mobile .pf-pills-lg{display:flex;gap:calc(3px * var(--fz,1));flex-wrap:wrap;justify-content:center;}
-  #sheet-mobile .pf-pill-lg{color:#fff;font-family:'Inter';font-weight:800;font-size:calc(9.5px * var(--fz,1));padding:2px 8px;border-radius:5px;white-space:nowrap;}
-  #sheet-mobile .pf-price-value{font-family:'Inter';font-weight:700;font-size:calc(8.5px * var(--fz,1));color:#141212;}
-  #sheet-mobile .pf-abb-cell{display:flex;align-items:center;justify-content:center;}
-  #sheet-mobile .pf-abb-icon{width:calc(13px * var(--fz,1));height:calc(13px * var(--fz,1));object-fit:contain;}
+  #sheet-mobile .mobile-film-title{font-family:'Inter';font-weight:700;font-size:calc(10px * var(--fz,1));color:#141212;}
+  #sheet-mobile .mobile-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(7.5px * var(--fz,1));padding:1.5px 5px;border-radius:4px;white-space:nowrap;}
+  #sheet-mobile .mobile-icon-badge{width:calc(9.5px * var(--fz,1));height:calc(9.5px * var(--fz,1));object-fit:contain;flex-shrink:0;}
+  #sheet-mobile .mobile-price-cell{font-family:'Inter';font-weight:700;font-size:calc(9.5px * var(--fz,1));color:#141212;}
+  #sheet-mobile .mobile-abb-cell{display:flex;align-items:center;justify-content:center;}
+  #sheet-mobile .mobile-abb-icon{width:60%;height:60%;object-fit:contain;}
 
   #sheet-mobile .mobile-brand{
     display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;

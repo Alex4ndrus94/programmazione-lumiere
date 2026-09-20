@@ -102,8 +102,8 @@ document.querySelectorAll('.tabs button').forEach(btn=>{
     btn.classList.add('active');
     document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
     renderAll();
-    if(btn.dataset.tab==='print'){ requestAnimationFrame(()=>fitAllFrameZones('print')); }
-    if(btn.dataset.tab==='mobile'){ requestAnimationFrame(()=>fitAllFrameZones('mobile')); }
+    if(btn.dataset.tab==='print'){ requestAnimationFrame(()=>fitAllCells('print')); }
+    if(btn.dataset.tab==='mobile'){ requestAnimationFrame(()=>fitAllCells('mobile')); }
     if(btn.dataset.tab==='banner'){ requestAnimationFrame(()=>fitZone('banner-zone')); }
   });
 });
@@ -278,137 +278,183 @@ function escAttr(str){ return (str||'').replace(/"/g,'&quot;'); }
 
 /* ============ PRINT SHEET RENDER ============ */
 /* ============ PRINT SHEET RENDER (sfondo immagine + zone di testo) ============ */
-// Coordinate delle 6 zone bianche in print-frame.png (1410x2001), in percentuale.
-// Coordinate per ciascuna delle 6 sale in print-frame.png (1054x1492), in percentuale.
-// Ogni sala ha una zona contenuto + tre colonne prezzo separate (Intero/Ridotto/Abb.).
-const ROOM_ZONES = [
-  {top:6.30,  height:11.33}, // decurtis
-  {top:22.12, height:11.39}, // sordi
-  {top:37.94, height:11.39}, // bergman
-  {top:53.69, height:11.19}, // virnalisi
-  {top:68.83, height:10.32}, // desica
-  {top:83.31, height:9.12},  // mastroianni
-];
-const ZONE_CONTENT = {left:3.13, width:72.01};
-const ZONE_INTERO  = {left:76.28, width:6.64};
-const ZONE_RIDOTTO = {left:83.68, width:6.55};
-const ZONE_ABB     = {left:90.89, width:6.36};
-
+// Coordinate misurate per ciascuna sala e ciascun numero di film (1-5), generate
+// automaticamente dalle immagini fornite: ogni film ha la propria casella dedicata.
+const ROOM_IMAGES = {
+  decurtis: {
+    1: {file:'room-decurtis-1.png', w:1410, h:193, content:[{left:3.191,top:41.451,width:71.915,height:48.705}], intero:[{left:76.241,top:43.005,width:6.667,height:48.187}], ridotto:[{left:83.688,top:43.005,width:6.454,height:47.668}], abb:[{left:90.851,top:43.005,width:6.241,height:48.187}]},
+    2: {file:'room-decurtis-2.png', w:1410, h:287, content:[{left:3.191,top:27.178,width:71.915,height:32.404},{left:3.191,top:61.324,width:71.915,height:29.617}], intero:[{left:76.241,top:27.875,width:6.667,height:31.707},{left:76.241,top:61.324,width:6.667,height:30.662}], ridotto:[{left:83.688,top:27.875,width:6.454,height:31.707},{left:83.688,top:61.324,width:6.454,height:29.965}], abb:[{left:90.851,top:27.875,width:6.241,height:31.707},{left:90.851,top:61.324,width:6.241,height:30.662}]},
+    3: {file:'room-decurtis-3.png', w:1410, h:375, content:[{left:3.191,top:21.333,width:71.915,height:24.8},{left:3.191,top:47.467,width:71.915,height:22.133},{left:3.191,top:70.667,width:71.915,height:22.667}], intero:[{left:76.241,top:22.133,width:6.667,height:24.0},{left:76.241,top:47.467,width:6.596,height:22.133},{left:76.241,top:70.667,width:6.667,height:23.467}], ridotto:[{left:83.688,top:22.133,width:6.454,height:24.0},{left:83.688,top:47.467,width:6.454,height:22.133},{left:83.688,top:70.667,width:6.454,height:22.933}], abb:[{left:90.851,top:22.133,width:6.241,height:24.0},{left:90.993,top:47.467,width:6.099,height:22.133},{left:90.851,top:70.667,width:6.241,height:23.467}]},
+    4: {file:'room-decurtis-4.png', w:1410, h:466, content:[{left:3.191,top:16.738,width:71.915,height:20.172},{left:3.191,top:37.768,width:71.915,height:17.811},{left:3.191,top:56.652,width:71.915,height:17.811},{left:3.191,top:75.536,width:71.915,height:18.67}], intero:[{left:76.241,top:17.382,width:6.667,height:19.528},{left:76.241,top:37.768,width:6.596,height:17.811},{left:76.241,top:56.652,width:6.596,height:17.811},{left:76.241,top:75.536,width:6.667,height:19.313}], ridotto:[{left:83.688,top:17.382,width:6.454,height:19.528},{left:83.688,top:37.768,width:6.454,height:17.811},{left:83.688,top:56.652,width:6.454,height:17.811},{left:83.688,top:75.536,width:6.454,height:19.099}], abb:[{left:90.851,top:17.382,width:6.241,height:19.528},{left:90.993,top:37.768,width:6.099,height:17.811},{left:90.851,top:56.652,width:6.241,height:17.811},{left:90.851,top:75.536,width:6.241,height:19.313}]},
+    5: {file:'room-decurtis-5.png', w:1410, h:549, content:[{left:3.191,top:14.026,width:71.915,height:17.122},{left:3.191,top:32.058,width:71.915,height:15.118},{left:3.191,top:47.905,width:71.915,height:15.301},{left:3.191,top:63.934,width:71.915,height:15.665},{left:3.191,top:80.51,width:71.915,height:15.301}], intero:[{left:76.241,top:14.572,width:6.667,height:16.576},{left:76.241,top:32.058,width:6.596,height:15.118},{left:76.241,top:47.905,width:6.596,height:15.301},{left:76.241,top:63.934,width:6.596,height:15.665},{left:76.241,top:80.51,width:6.667,height:15.847}], ridotto:[{left:83.688,top:14.572,width:6.454,height:16.576},{left:83.688,top:32.058,width:6.454,height:15.118},{left:83.688,top:47.905,width:6.454,height:15.301},{left:83.688,top:63.934,width:6.454,height:15.665},{left:83.688,top:80.51,width:6.454,height:15.847}], abb:[{left:90.851,top:14.572,width:6.241,height:16.576},{left:90.993,top:32.058,width:6.099,height:15.118},{left:90.993,top:47.905,width:6.099,height:15.301},{left:90.851,top:63.934,width:6.241,height:15.665},{left:90.851,top:80.51,width:6.241,height:15.847}]},
+  },
+  sordi: {
+    1: {file:'room-sordi-1.png', w:1410, h:194, content:[{left:3.191,top:32.99,width:71.915,height:57.732}], intero:[{left:76.241,top:35.052,width:6.667,height:56.186}], ridotto:[{left:83.688,top:35.567,width:6.454,height:55.67}], abb:[{left:90.851,top:35.567,width:6.241,height:55.67}]},
+    2: {file:'room-sordi-2.png', w:1410, h:287, content:[{left:3.191,top:25.087,width:71.915,height:34.843},{left:3.191,top:61.672,width:71.915,height:30.314}], intero:[{left:76.241,top:26.481,width:6.667,height:33.449},{left:76.241,top:61.672,width:6.667,height:31.01}], ridotto:[{left:83.688,top:26.829,width:6.454,height:33.101},{left:83.688,top:61.672,width:6.454,height:31.01}], abb:[{left:90.993,top:26.829,width:6.099,height:33.101},{left:90.851,top:61.672,width:6.241,height:31.01}]},
+    3: {file:'room-sordi-3.png', w:1410, h:375, content:[{left:3.191,top:17.867,width:71.915,height:28.533},{left:3.191,top:47.733,width:71.915,height:22.133},{left:3.191,top:70.933,width:71.915,height:23.2}], intero:[{left:76.241,top:19.467,width:6.667,height:26.933},{left:76.241,top:47.733,width:6.667,height:22.133},{left:76.241,top:70.933,width:6.667,height:23.733}], ridotto:[{left:83.688,top:19.2,width:6.454,height:27.2},{left:83.688,top:47.733,width:6.454,height:22.133},{left:83.688,top:70.933,width:6.454,height:23.733}], abb:[{left:90.993,top:19.2,width:6.099,height:27.2},{left:90.993,top:47.733,width:6.099,height:22.133},{left:90.851,top:70.933,width:6.241,height:23.733}]},
+    4: {file:'room-sordi-4.png', w:1410, h:461, content:[{left:3.191,top:14.751,width:71.915,height:22.343},{left:3.191,top:37.961,width:71.915,height:18.004},{left:3.191,top:57.05,width:71.915,height:18.004},{left:3.191,top:76.139,width:71.915,height:19.089}], intero:[{left:76.241,top:15.618,width:6.667,height:21.475},{left:76.241,top:37.961,width:6.667,height:18.004},{left:76.241,top:57.05,width:6.667,height:18.004},{left:76.241,top:76.139,width:6.667,height:19.306}], ridotto:[{left:83.688,top:15.835,width:6.454,height:21.258},{left:83.688,top:37.961,width:6.454,height:18.004},{left:83.688,top:57.05,width:6.454,height:18.004},{left:83.688,top:76.139,width:6.454,height:19.306}], abb:[{left:90.993,top:15.835,width:6.099,height:21.258},{left:90.993,top:37.961,width:6.099,height:18.004},{left:90.993,top:57.05,width:6.099,height:18.004},{left:90.851,top:76.139,width:6.241,height:19.306}]},
+    5: {file:'room-sordi-5.png', w:1409, h:555, content:[{left:3.123,top:12.793,width:71.966,height:19.279},{left:3.123,top:32.973,width:71.966,height:14.955},{left:3.123,top:48.649,width:71.966,height:15.135},{left:3.123,top:64.505,width:71.966,height:15.495},{left:3.123,top:80.901,width:71.966,height:15.676}], intero:[{left:76.224,top:13.514,width:6.671,height:18.559},{left:76.224,top:32.973,width:6.671,height:14.955},{left:76.224,top:48.649,width:6.671,height:15.135},{left:76.224,top:64.505,width:6.671,height:15.495},{left:76.224,top:80.901,width:6.671,height:15.856}], ridotto:[{left:83.676,top:13.694,width:6.458,height:18.378},{left:83.676,top:32.973,width:6.458,height:14.955},{left:83.676,top:48.649,width:6.458,height:15.135},{left:83.676,top:64.505,width:6.458,height:15.495},{left:83.676,top:80.901,width:6.458,height:15.856}], abb:[{left:90.987,top:13.694,width:6.104,height:18.378},{left:90.987,top:32.973,width:6.104,height:14.955},{left:90.987,top:48.649,width:6.104,height:15.135},{left:90.987,top:64.505,width:6.104,height:15.495},{left:90.845,top:80.901,width:6.246,height:15.856}]},
+  },
+  bergman: {
+    1: {file:'room-bergman-1.png', w:1410, h:193, content:[{left:3.191,top:33.679,width:71.915,height:56.995}], intero:[{left:76.241,top:36.788,width:6.667,height:54.404}], ridotto:[{left:83.688,top:36.269,width:6.454,height:54.922}], abb:[{left:90.851,top:36.269,width:6.312,height:54.922}]},
+    2: {file:'room-bergman-2.png', w:1410, h:278, content:[{left:3.191,top:24.46,width:71.915,height:34.892},{left:3.191,top:61.151,width:71.915,height:31.655}], intero:[{left:76.241,top:26.619,width:6.667,height:32.734},{left:76.241,top:61.151,width:6.667,height:32.374}], ridotto:[{left:83.688,top:25.899,width:6.454,height:33.453},{left:83.688,top:61.151,width:6.454,height:32.374}], abb:[{left:90.851,top:26.259,width:6.312,height:33.094},{left:90.851,top:61.151,width:6.312,height:32.374}]},
+    3: {file:'room-bergman-3.png', w:1410, h:370, content:[{left:3.191,top:18.649,width:71.915,height:27.568},{left:3.191,top:47.568,width:71.915,height:22.432},{left:3.191,top:71.081,width:71.915,height:23.784}], intero:[{left:76.241,top:19.73,width:6.667,height:26.486},{left:76.241,top:47.568,width:6.667,height:22.432},{left:76.241,top:71.081,width:6.667,height:24.324}], ridotto:[{left:83.688,top:19.73,width:6.454,height:26.486},{left:83.688,top:47.568,width:6.454,height:22.432},{left:83.688,top:71.081,width:6.454,height:24.324}], abb:[{left:90.851,top:19.73,width:6.312,height:26.486},{left:90.851,top:47.568,width:6.241,height:22.432},{left:90.851,top:71.081,width:6.312,height:24.324}]},
+    4: {file:'room-bergman-4.png', w:1410, h:458, content:[{left:3.191,top:14.41,width:71.915,height:21.834},{left:3.191,top:37.118,width:71.915,height:18.122},{left:3.191,top:56.332,width:71.915,height:18.122},{left:3.191,top:75.546,width:71.915,height:20.306}], intero:[{left:76.241,top:15.502,width:6.667,height:20.742},{left:76.241,top:37.118,width:6.667,height:18.122},{left:76.241,top:56.332,width:6.667,height:18.122},{left:76.241,top:75.546,width:6.667,height:20.742}], ridotto:[{left:83.688,top:15.284,width:6.454,height:20.961},{left:83.688,top:37.118,width:6.454,height:18.122},{left:83.688,top:56.332,width:6.454,height:18.122},{left:83.688,top:75.546,width:6.454,height:20.742}], abb:[{left:90.851,top:15.284,width:6.312,height:20.961},{left:90.851,top:37.118,width:6.241,height:18.122},{left:90.851,top:56.332,width:6.312,height:18.122},{left:90.851,top:75.546,width:6.312,height:20.742}]},
+    5: {file:'room-bergman-5.png', w:1410, h:551, content:[{left:3.191,top:12.16,width:71.915,height:18.875},{left:3.191,top:31.942,width:71.915,height:15.064},{left:3.191,top:47.731,width:71.915,height:15.245},{left:3.191,top:63.702,width:71.915,height:15.608},{left:3.191,top:80.218,width:71.915,height:16.334}], intero:[{left:76.241,top:13.249,width:6.667,height:17.786},{left:76.241,top:31.942,width:6.667,height:15.064},{left:76.241,top:47.731,width:6.667,height:15.245},{left:76.241,top:63.702,width:6.667,height:15.608},{left:76.241,top:80.218,width:6.667,height:16.515}], ridotto:[{left:83.688,top:12.886,width:6.454,height:18.149},{left:83.688,top:31.942,width:6.454,height:15.064},{left:83.688,top:47.731,width:6.454,height:15.245},{left:83.688,top:63.702,width:6.454,height:15.608},{left:83.688,top:80.218,width:6.454,height:16.515}], abb:[{left:90.851,top:12.886,width:6.312,height:18.149},{left:90.851,top:31.942,width:6.241,height:15.064},{left:90.851,top:47.731,width:6.241,height:15.245},{left:90.851,top:63.702,width:6.312,height:15.608},{left:90.851,top:80.218,width:6.312,height:16.515}]},
+  },
+  virnalisi: {
+    1: {file:'room-virnalisi-1.png', w:1410, h:196, content:[{left:3.191,top:34.694,width:71.915,height:55.612}], intero:[{left:76.241,top:36.224,width:6.667,height:54.082}], ridotto:[{left:83.688,top:36.224,width:6.454,height:53.571}], abb:[{left:90.851,top:36.224,width:6.312,height:55.102}]},
+    2: {file:'room-virnalisi-2.png', w:1410, h:281, content:[{left:3.191,top:23.488,width:71.915,height:36.655},{left:3.191,top:61.922,width:71.986,height:32.384}], intero:[{left:76.241,top:24.555,width:6.667,height:35.587},{left:76.241,top:61.922,width:6.667,height:32.74}], ridotto:[{left:83.688,top:24.555,width:6.454,height:35.587},{left:83.688,top:61.922,width:6.454,height:32.028}], abb:[{left:90.851,top:24.555,width:6.312,height:35.587},{left:90.851,top:61.922,width:6.312,height:32.74}]},
+    3: {file:'room-virnalisi-3.png', w:1410, h:378, content:[{left:3.191,top:17.46,width:71.915,height:28.571},{left:3.191,top:47.354,width:71.844,height:21.958},{left:3.191,top:70.37,width:71.986,height:24.074}], intero:[{left:76.241,top:18.519,width:6.667,height:27.513},{left:76.241,top:47.354,width:6.667,height:21.958},{left:76.241,top:70.37,width:6.667,height:24.339}], ridotto:[{left:83.688,top:18.519,width:6.454,height:27.513},{left:83.688,top:47.354,width:6.454,height:21.958},{left:83.688,top:70.37,width:6.454,height:23.81}], abb:[{left:90.851,top:18.519,width:6.312,height:27.513},{left:90.851,top:47.354,width:6.312,height:21.958},{left:90.851,top:70.37,width:6.312,height:24.339}]},
+    4: {file:'room-virnalisi-4.png', w:1410, h:463, content:[{left:3.191,top:14.687,width:71.915,height:22.03},{left:3.191,top:37.581,width:71.844,height:17.927},{left:3.191,top:56.587,width:71.844,height:17.927},{left:3.191,top:75.594,width:71.986,height:20.302}], intero:[{left:76.241,top:15.551,width:6.667,height:21.166},{left:76.241,top:37.581,width:6.667,height:17.927},{left:76.241,top:56.587,width:6.667,height:17.927},{left:76.241,top:75.594,width:6.667,height:20.086}], ridotto:[{left:83.688,top:15.551,width:6.454,height:21.166},{left:83.688,top:37.581,width:6.454,height:17.927},{left:83.688,top:56.587,width:6.454,height:17.927},{left:83.688,top:75.594,width:6.454,height:19.87}], abb:[{left:90.851,top:15.551,width:6.312,height:21.166},{left:90.851,top:37.581,width:6.312,height:17.927},{left:90.851,top:56.587,width:6.312,height:17.927},{left:90.851,top:75.594,width:6.312,height:20.518}]},
+    5: {file:'room-virnalisi-5.png', w:1410, h:555, content:[{left:3.191,top:11.892,width:71.915,height:19.459},{left:3.191,top:32.252,width:71.844,height:14.955},{left:3.191,top:47.928,width:71.844,height:15.135},{left:3.191,top:63.784,width:71.844,height:15.495},{left:3.191,top:80.18,width:71.915,height:16.216}], intero:[{left:76.241,top:12.613,width:6.667,height:18.739},{left:76.241,top:32.252,width:6.667,height:14.955},{left:76.241,top:47.928,width:6.667,height:15.135},{left:76.241,top:63.784,width:6.667,height:15.495},{left:76.241,top:80.18,width:6.667,height:16.577}], ridotto:[{left:83.688,top:12.613,width:6.454,height:18.739},{left:83.688,top:32.252,width:6.454,height:14.955},{left:83.688,top:47.928,width:6.454,height:15.135},{left:83.688,top:63.784,width:6.454,height:15.495},{left:83.688,top:80.18,width:6.454,height:16.036}], abb:[{left:90.851,top:12.613,width:6.312,height:18.739},{left:90.851,top:32.252,width:6.312,height:14.955},{left:90.851,top:47.928,width:6.312,height:15.135},{left:90.851,top:63.784,width:6.312,height:15.495},{left:90.851,top:80.18,width:6.312,height:16.577}]},
+  },
+  desica: {
+    1: {file:'room-desica-1.png', w:1410, h:198, content:[{left:3.191,top:31.818,width:71.915,height:57.576}], intero:[{left:76.241,top:34.343,width:6.667,height:56.566}], ridotto:[{left:83.688,top:34.343,width:6.454,height:56.566}], abb:[{left:90.851,top:34.343,width:6.312,height:56.566}]},
+    2: {file:'room-desica-2.png', w:1410, h:285, content:[{left:3.191,top:22.456,width:71.915,height:36.842},{left:3.191,top:61.053,width:71.915,height:31.93}], intero:[{left:76.241,top:24.211,width:6.667,height:35.088},{left:76.241,top:61.053,width:6.667,height:32.632}], ridotto:[{left:83.688,top:24.211,width:6.454,height:35.088},{left:83.688,top:61.053,width:6.454,height:32.982}], abb:[{left:90.993,top:24.211,width:6.17,height:35.088},{left:90.851,top:61.053,width:6.312,height:32.982}]},
+    3: {file:'room-desica-3.png', w:1410, h:379, content:[{left:3.191,top:16.887,width:71.915,height:29.551},{left:3.191,top:47.757,width:71.915,height:21.9},{left:3.191,top:70.712,width:71.915,height:24.011}], intero:[{left:76.241,top:18.206,width:6.667,height:28.232},{left:76.241,top:47.757,width:6.667,height:21.9},{left:76.241,top:70.712,width:6.667,height:24.538}], ridotto:[{left:83.688,top:18.206,width:6.454,height:28.232},{left:83.688,top:47.757,width:6.454,height:21.9},{left:83.688,top:70.712,width:6.454,height:24.802}], abb:[{left:90.993,top:18.206,width:6.17,height:28.232},{left:90.993,top:47.757,width:6.17,height:21.9},{left:90.851,top:70.712,width:6.312,height:24.802}]},
+    4: {file:'room-desica-4.png', w:1410, h:468, content:[{left:3.191,top:14.316,width:71.915,height:22.65},{left:3.191,top:37.821,width:71.915,height:17.735},{left:3.191,top:56.624,width:71.915,height:17.735},{left:3.191,top:75.427,width:71.915,height:20.513}], intero:[{left:76.241,top:15.385,width:6.667,height:21.581},{left:76.241,top:37.821,width:6.667,height:17.735},{left:76.241,top:56.624,width:6.667,height:17.735},{left:76.241,top:75.427,width:6.667,height:20.94}], ridotto:[{left:83.688,top:15.385,width:6.454,height:21.581},{left:83.688,top:37.821,width:6.454,height:17.735},{left:83.688,top:56.624,width:6.454,height:17.735},{left:83.688,top:75.427,width:6.454,height:20.94}], abb:[{left:90.993,top:15.385,width:6.17,height:21.581},{left:90.993,top:37.821,width:6.17,height:17.735},{left:90.993,top:56.624,width:6.17,height:17.735},{left:90.851,top:75.427,width:6.312,height:20.94}]},
+    5: {file:'room-desica-5.png', w:1409, h:552, content:[{left:3.123,top:11.413,width:71.966,height:19.565},{left:3.123,top:31.884,width:71.966,height:15.036},{left:3.123,top:47.645,width:71.966,height:15.217},{left:3.123,top:63.587,width:71.966,height:15.58},{left:3.123,top:80.072,width:71.966,height:16.304}], intero:[{left:76.224,top:12.319,width:6.671,height:18.659},{left:76.224,top:31.884,width:6.671,height:15.036},{left:76.224,top:47.645,width:6.671,height:15.217},{left:76.224,top:63.587,width:6.671,height:15.58},{left:76.224,top:80.072,width:6.671,height:16.848}], ridotto:[{left:83.676,top:12.319,width:6.458,height:18.659},{left:83.676,top:31.884,width:6.458,height:15.036},{left:83.676,top:47.645,width:6.458,height:15.217},{left:83.676,top:63.587,width:6.458,height:15.58},{left:83.676,top:80.072,width:6.458,height:16.848}], abb:[{left:90.987,top:12.319,width:6.175,height:18.659},{left:90.987,top:31.884,width:6.175,height:15.036},{left:90.987,top:47.645,width:6.175,height:15.217},{left:90.987,top:63.587,width:6.175,height:15.58},{left:90.845,top:80.072,width:6.317,height:16.848}]},
+  },
+  mastroianni: {
+    1: {file:'room-mastroianni-1.png', w:1410, h:195, content:[{left:3.191,top:33.333,width:71.915,height:57.436}], intero:[{left:76.241,top:35.385,width:6.667,height:57.436}], ridotto:[{left:83.617,top:35.385,width:6.525,height:56.923}], abb:[{left:90.851,top:35.385,width:6.312,height:57.436}]},
+    2: {file:'room-mastroianni-2.png', w:1410, h:280, content:[{left:3.191,top:23.214,width:71.915,height:36.429},{left:3.191,top:61.429,width:71.915,height:31.786}], intero:[{left:76.241,top:24.643,width:6.667,height:35.0},{left:76.241,top:61.429,width:6.667,height:32.857}], ridotto:[{left:83.617,top:24.643,width:6.525,height:35.0},{left:83.688,top:61.429,width:6.454,height:32.857}], abb:[{left:90.993,top:24.643,width:6.17,height:35.0},{left:90.851,top:61.429,width:6.312,height:32.857}]},
+    3: {file:'room-mastroianni-3.png', w:1410, h:377, content:[{left:3.191,top:17.772,width:71.915,height:28.647},{left:3.191,top:47.745,width:71.915,height:22.016},{left:3.191,top:70.822,width:71.915,height:24.138}], intero:[{left:76.241,top:18.833,width:6.667,height:27.586},{left:76.241,top:47.745,width:6.667,height:22.016},{left:76.241,top:70.822,width:6.667,height:24.934}], ridotto:[{left:83.617,top:18.833,width:6.525,height:27.586},{left:83.688,top:47.745,width:6.454,height:22.016},{left:83.688,top:70.822,width:6.454,height:24.934}], abb:[{left:90.993,top:18.833,width:6.17,height:27.586},{left:90.851,top:47.745,width:6.312,height:22.016},{left:90.851,top:70.822,width:6.312,height:24.934}]},
+    4: {file:'room-mastroianni-4.png', w:1410, h:458, content:[{left:3.191,top:14.192,width:71.915,height:22.271},{left:3.191,top:37.336,width:71.915,height:18.122},{left:3.191,top:56.55,width:71.915,height:18.122},{left:3.191,top:75.764,width:71.915,height:20.306}], intero:[{left:76.241,top:15.066,width:6.667,height:21.397},{left:76.241,top:37.336,width:6.667,height:18.122},{left:76.241,top:56.55,width:6.667,height:18.122},{left:76.241,top:75.764,width:6.667,height:21.179}], ridotto:[{left:83.617,top:15.066,width:6.525,height:21.397},{left:83.688,top:37.336,width:6.454,height:18.122},{left:83.688,top:56.55,width:6.454,height:18.122},{left:83.688,top:75.764,width:6.454,height:21.179}], abb:[{left:90.993,top:15.066,width:6.17,height:21.397},{left:90.851,top:37.336,width:6.312,height:18.122},{left:90.851,top:56.55,width:6.312,height:18.122},{left:90.851,top:75.764,width:6.312,height:21.179}]},
+    5: {file:'room-mastroianni-5.png', w:1410, h:550, content:[{left:3.191,top:12.364,width:71.915,height:18.909},{left:3.191,top:32.182,width:71.915,height:15.091},{left:3.191,top:48.0,width:71.915,height:15.273},{left:3.191,top:64.0,width:71.915,height:15.636},{left:3.191,top:80.545,width:71.915,height:16.0}], intero:[{left:76.241,top:13.091,width:6.667,height:18.182},{left:76.241,top:32.182,width:6.667,height:15.091},{left:76.241,top:48.0,width:6.667,height:15.273},{left:76.241,top:64.0,width:6.667,height:15.636},{left:76.241,top:80.545,width:6.667,height:16.727}], ridotto:[{left:83.617,top:13.091,width:6.525,height:18.182},{left:83.688,top:32.182,width:6.454,height:15.091},{left:83.688,top:48.0,width:6.454,height:15.273},{left:83.688,top:64.0,width:6.454,height:15.636},{left:83.688,top:80.545,width:6.454,height:16.545}], abb:[{left:90.993,top:13.091,width:6.17,height:18.182},{left:90.993,top:32.182,width:6.17,height:15.091},{left:90.851,top:48.0,width:6.312,height:15.273},{left:90.851,top:64.0,width:6.312,height:15.636},{left:90.851,top:80.545,width:6.312,height:16.545}]},
+  },
+};
 // Badge per versione (3D / V.O., riconosciuti dal testo libero del campo Versione)
 // e per CineRevolution (icona "persone" della legenda, riusata per identificarlo a colpo d'occhio)
-// Icone ritagliate direttamente dalla legenda della cornice (stessa identità visiva).
-function versionBadges(s){
+function versionBadges(s, prefix){
   const v = (s.versione||'').toLowerCase();
   let html = '';
-  if(v.includes('3d')) html += `<img src="icon-3d.png" class="pf-icon-badge" alt="3D" title="3D">`;
-  if(v.includes('ov') || v.includes('v.o') || v.includes('originale')) html += `<img src="icon-vo.png" class="pf-icon-badge" alt="Versione originale" title="Versione originale">`;
+  if(v.includes('3d')) html += `<img src="icon-3d.png" class="${prefix}-icon-badge" alt="3D" title="3D">`;
+  if(v.includes('ov') || v.includes('v.o') || v.includes('originale')) html += `<img src="icon-vo.png" class="${prefix}-icon-badge" alt="Versione originale" title="Versione originale">`;
   const sezionePromoText = (s.sezionePromo||'').trim();
-  if(sezionePromoText) html += `<img src="icon-people.png" class="pf-icon-badge" alt="${escAttr(sezionePromoText)}" title="${escAttr(sezionePromoText)}">`;
+  if(sezionePromoText) html += `<img src="icon-people.png" class="${prefix}-icon-badge" alt="${escAttr(sezionePromoText)}" title="${escAttr(sezionePromoText)}">`;
   return html;
 }
 
-function frameZonesHTML(prefix, showPrices){
-  return ROOMS.map((room, idx)=>{
-    const rz = ROOM_ZONES[idx];
-    const screenings = data[room.id] || [];
-    const baseStyle = `top:${rz.top}%;height:${rz.height}%;`;
-    if(screenings.length===0){
-      return `<div class="pf-zone pf-content" id="${prefix}-content-${room.id}" style="left:${ZONE_CONTENT.left}%;width:${ZONE_CONTENT.width}%;${baseStyle}"></div>`;
-    }
+function cellStyle(z){
+  return `left:${z.left}%;top:${z.top}%;width:${z.width}%;height:${z.height}%;`;
+}
 
-    const isSingleFilm = screenings.length === 1;
-    let contentHTML;
-    if(isSingleFilm){
-      const s = screenings[0];
-      const timesSet = new Set();
-      s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
-      const sortedTimes = sortTimesChronologically(timesSet);
-      const pills = sortedTimes.map(t=>`<span class="pf-pill-lg" style="background:${room.color}">${escHtml(t)}</span>`).join('');
-      contentHTML = `<div class="pf-film-single">
-        <div class="pf-film-title-lg">${escHtml(s.film)} ${versionBadges(s)}</div>
-        <div class="pf-pills-lg">${pills}</div>
-      </div>`;
-    }else{
-      contentHTML = screenings.map(s=>{
-        const timesSet = new Set();
-        s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
-        const sortedTimes = sortTimesChronologically(timesSet);
-        const pills = sortedTimes.map(t=>`<span class="pf-pill" style="background:${room.color}">${escHtml(t)}</span>`).join('');
-        return `<div class="pf-film-row">
-          <span class="pf-film-title">${escHtml(s.film)}</span>
-          ${versionBadges(s)}
-          <span class="pf-pills">${pills}</span>
-        </div>`;
-      }).join('');
-    }
+// Genera la fascia di UNA sala (immagine + celle di testo posizionate sopra), usando
+// la variante immagine giusta in base a quanti film ci sono in quel momento.
+function roomBandHTML(prefix, room, showPrices){
+  const screenings = data[room.id] || [];
+  if(screenings.length===0) return '';
 
-    let priceZones = '';
+  // Le immagini coprono da 1 a 5 film. Con più di 5, uniamo i film in eccesso
+  // nell'ultima casella (caso raro, meglio mostrarli comunque che perderli).
+  let displayScreenings = screenings;
+  if(screenings.length > 5){
+    const overflow = screenings.slice(4);
+    const merged = {
+      film: overflow.map(s=>s.film).join(' / '),
+      times: overflow.map(s=>s.times).join(' - '),
+      versione:'', sezionePromo:'',
+      intero: overflow[0].intero, ridotto: overflow[0].ridotto, abb: overflow[0].abb
+    };
+    displayScreenings = screenings.slice(0,4).concat([merged]);
+  }
+  const count = displayScreenings.length;
+  const variant = (ROOM_IMAGES[room.id] || {})[count];
+  if(!variant) return '';
+
+  let contentCells = '', interoCells = '', ridottoCells = '', abbCells = '';
+  displayScreenings.forEach((s, i)=>{
+    const cellId = `${prefix}-${room.id}-${i}`;
+    const timesSet = new Set();
+    s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
+    const sortedTimes = sortTimesChronologically(timesSet);
+    const pills = sortedTimes.map(t=>`<span class="${prefix}-pill" style="background:${room.color}">${escHtml(t)}</span>`).join('');
+    contentCells += `<div class="${prefix}-cell ${prefix}-content-cell" id="content-${cellId}" style="${cellStyle(variant.content[i])}">
+      <span class="${prefix}-film-title">${escHtml(s.film)}</span>
+      ${versionBadges(s, prefix)}
+      ${pills}
+    </div>`;
+
     if(showPrices){
-      const interoRows = screenings.map(s=>`<div class="pf-price-value">${formatPriceShort(s.intero)}</div>`).join('');
-      const ridottoRows = screenings.map(s=>{
-        const r = (s.ridotto||'').trim();
-        return `<div class="pf-price-value">${(r && r!=='-') ? formatPriceShort(r) : '-'}</div>`;
-      }).join('');
-      const abbRows = screenings.map(s=>{
-        return s.abb==='S' ? `<div class="pf-abb-cell"><img src="icon-abb-yes.png" class="pf-abb-icon" alt="Abbonamento sì"></div>` : `<div class="pf-abb-cell"><img src="icon-abb-no.png" class="pf-abb-icon" alt="Abbonamento no"></div>`;
-      }).join('');
-      priceZones = `
-        <div class="pf-zone pf-price" id="${prefix}-intero-${room.id}" style="left:${ZONE_INTERO.left}%;width:${ZONE_INTERO.width}%;${baseStyle}">${interoRows}</div>
-        <div class="pf-zone pf-price" id="${prefix}-ridotto-${room.id}" style="left:${ZONE_RIDOTTO.left}%;width:${ZONE_RIDOTTO.width}%;${baseStyle}">${ridottoRows}</div>
-        <div class="pf-zone pf-price" id="${prefix}-abb-${room.id}" style="left:${ZONE_ABB.left}%;width:${ZONE_ABB.width}%;${baseStyle}">${abbRows}</div>`;
+      interoCells += `<div class="${prefix}-cell ${prefix}-price-cell" id="intero-${cellId}" style="${cellStyle(variant.intero[i])}">${formatPriceShort(s.intero)}</div>`;
+      const r = (s.ridotto||'').trim();
+      ridottoCells += `<div class="${prefix}-cell ${prefix}-price-cell" id="ridotto-${cellId}" style="${cellStyle(variant.ridotto[i])}">${(r && r!=='-') ? formatPriceShort(r) : '-'}</div>`;
+      const abbIcon = s.abb==='S' ? 'icon-abb-yes.png' : 'icon-abb-no.png';
+      abbCells += `<div class="${prefix}-cell ${prefix}-abb-cell" style="${cellStyle(variant.abb[i])}"><img src="${abbIcon}" class="${prefix}-abb-icon" alt="Abbonamento"></div>`;
     }
-
-    return `<div class="pf-zone pf-content" id="${prefix}-content-${room.id}" style="left:${ZONE_CONTENT.left}%;width:${ZONE_CONTENT.width}%;${baseStyle}">${contentHTML}</div>
-      ${priceZones}`;
-  }).join('');
-}
-
-function fitFrameZone(id){
-  const zone = document.getElementById(id);
-  if(!zone) return;
-  if(zone.clientHeight === 0) return; // pannello non visibile, salta
-  zone.style.setProperty('--fz', 1);
-  // Partiamo con uno spazio tra le righe già stretto: se il contenuto è tanto
-  // (4-5 film), lo spazio "rubato" qui lascia più margine al font, invece di
-  // sacrificare subito la leggibilità del testo.
-  zone.style.setProperty('--fg', 0.45);
-  let s = 1;
-  for(let i=0; i<12; i++){
-    const naturalH = zone.scrollHeight;
-    const availH = zone.clientHeight;
-    const naturalW = zone.scrollWidth;
-    const availW = zone.clientWidth;
-    const ratio = Math.min(availH/naturalH, availW/naturalW);
-    if(Math.abs(ratio - 1) < 0.03) break;
-    s = Math.max(0.55, Math.min(2.5, s * ratio * 0.97));
-    zone.style.setProperty('--fz', s);
-  }
-  let g = 0.45;
-  for(let i=0; i<15; i++){
-    const naturalH = zone.scrollHeight;
-    const availH = zone.clientHeight;
-    if(naturalH >= availH * 0.98) break;
-    const ratio = availH / naturalH;
-    g = Math.min(10, g * Math.min(ratio, 1.4));
-    zone.style.setProperty('--fg', g);
-  }
-}
-
-function fitAllFrameZones(prefix){
-  ROOMS.forEach(room=>{
-    fitFrameZone(`${prefix}-content-${room.id}`);
-    fitFrameZone(`${prefix}-intero-${room.id}`);
-    fitFrameZone(`${prefix}-ridotto-${room.id}`);
-    fitFrameZone(`${prefix}-abb-${room.id}`);
   });
+
+  return `<div class="${prefix}-room-band">
+    <img src="${variant.file}" alt="${escAttr(room.name)}" class="${prefix}-band-img" onerror="this.style.opacity='0';">
+    ${contentCells}${interoCells}${ridottoCells}${abbCells}
+  </div>`;
+}
+
+function roomStackHTML(prefix, showPrices){
+  return ROOMS.map(room=>roomBandHTML(prefix, room, showPrices)).join('');
+}
+
+// Adatta il testo di UNA singola casella (cresce o si rimpicciolisce per riempirla,
+// dato che ora ogni film ha già la sua casella su misura, niente più compromessi).
+function fitCell(id){
+  const cell = document.getElementById(id);
+  if(!cell || cell.clientHeight === 0) return;
+  cell.style.setProperty('--fz', 1);
+  cell.style.setProperty('--fg', 1);
+  let s = 1;
+  for(let i=0; i<10; i++){
+    const ratio = Math.min(cell.clientHeight/cell.scrollHeight, cell.clientWidth/cell.scrollWidth);
+    if(Math.abs(ratio - 1) < 0.04) break;
+    s = Math.max(0.5, Math.min(2.2, s * ratio * 0.96));
+    cell.style.setProperty('--fz', s);
+  }
+  let g = 1;
+  for(let i=0; i<8; i++){
+    if(cell.scrollHeight >= cell.clientHeight * 0.97) break;
+    const ratio = cell.clientHeight / cell.scrollHeight;
+    g = Math.min(6, g * Math.min(ratio, 1.3));
+    cell.style.setProperty('--fg', g);
+  }
+}
+
+function fitAllCells(prefix){
+  document.querySelectorAll(`.${prefix}-content-cell, .${prefix}-price-cell`).forEach(el=>fitCell(el.id));
+}
+
+// Se l'insieme di tutte le sale (impilate) è più alto dello spazio disponibile,
+// restringiamo TUTTO insieme proporzionalmente (mai una sala sola), per restare
+// sempre su un'unica pagina/riquadro.
+function fitStackScale(stackEl, availableHeightPx){
+  stackEl.style.transform = 'none';
+  const naturalH = stackEl.scrollHeight;
+  if(naturalH <= availableHeightPx){ return; }
+  const scale = Math.max(0.4, availableHeightPx / naturalH);
+  stackEl.style.transformOrigin = 'top center';
+  stackEl.style.transform = `scale(${scale})`;
 }
 
 function renderPrintSheet(){
   const el = document.getElementById('sheet-print');
   el.innerHTML = `
-    <img src="print-frame.png" alt="Programmazione" class="print-frame-bg" onerror="this.style.opacity='0';">
-    ${frameZonesHTML('print', true)}`;
-  fitAllFrameZones('print');
+    <div class="print-stack" id="print-stack">
+      <div class="print-doc-header">
+        <img src="logo-lumiere.png" alt="Logo" onerror="this.style.display='none';">
+        <div>
+          <div class="print-doc-title">PROGRAMMAZIONE</div>
+          <div class="print-doc-sub">Aggiornata al ${todayStr()}</div>
+        </div>
+      </div>
+      ${roomStackHTML('print', true)}
+      <img src="legenda.png" alt="Legenda" class="print-legend-img" onerror="this.style.display='none';">
+    </div>`;
+  fitAllCells('print');
+  waitImagesThen(el, ()=>{
+    fitAllCells('print');
+    const stack = document.getElementById('print-stack');
+    const sheet = document.getElementById('sheet-print');
+    fitStackScale(stack, sheet.clientHeight - 20);
+  });
 }
 
 function renderMobileSheet(){
@@ -416,9 +462,8 @@ function renderMobileSheet(){
   el.innerHTML = `
     <div class="mobile-safe-top"></div>
     <div class="mobile-content-group">
-      <div class="mobile-frame-wrap">
-        <img src="print-frame.png" alt="Programmazione" class="print-frame-bg" onerror="this.style.opacity='0';">
-        ${frameZonesHTML('mobile', true)}
+      <div class="mobile-stack" id="mobile-stack">
+        ${roomStackHTML('mobile', true)}
       </div>
       <div class="mobile-brand">
         <img src="logo-lumiere.png" alt="Logo Cinema Lumière" onerror="this.style.display='none';">
@@ -426,22 +471,36 @@ function renderMobileSheet(){
       </div>
     </div>
     <div class="mobile-safe-bottom"></div>`;
-  fitAllFrameZones('mobile');
-  // Le immagini si caricano in modo asincrono: ricalcoliamo dopo che sono pronte
-  // per evitare che il layout si sposti e tagli l'ultima riga.
-  const imgs = el.querySelectorAll('img');
-  let toLoad = imgs.length;
-  if(toLoad > 0){
-    imgs.forEach(img=>{
-      if(img.complete){ toLoad--; }
-      else{
-        img.addEventListener('load', ()=>{ toLoad--; if(toLoad<=0) fitAllFrameZones('mobile'); });
-        img.addEventListener('error', ()=>{ toLoad--; if(toLoad<=0) fitAllFrameZones('mobile'); });
-      }
-    });
-    if(toLoad<=0) fitAllFrameZones('mobile');
-  }
+  fitAllCells('mobile');
+  waitImagesThen(el, ()=>{
+    fitAllCells('mobile');
+    const stack = document.getElementById('mobile-stack');
+    const group = document.querySelector('#sheet-mobile .mobile-content-group');
+    const brand = document.querySelector('#sheet-mobile .mobile-brand');
+    const budget = group.clientHeight - brand.offsetHeight - 22;
+    fitStackScale(stack, Math.max(80, budget));
+  });
 }
+
+// Ricalcola dopo che tutte le immagini (sale + logo + legenda) hanno finito di
+// caricare, altrimenti le misure sono sbagliate e il layout si sposta dopo.
+function waitImagesThen(container, callback){
+  const imgs = container.querySelectorAll('img');
+  let toLoad = imgs.length;
+  if(toLoad === 0){ callback(); return; }
+  let done = false;
+  const finish = ()=>{ if(done) return; done = true; callback(); };
+  imgs.forEach(img=>{
+    if(img.complete){ toLoad--; }
+    else{
+      img.addEventListener('load', ()=>{ toLoad--; if(toLoad<=0) finish(); });
+      img.addEventListener('error', ()=>{ toLoad--; if(toLoad<=0) finish(); });
+    }
+  });
+  if(toLoad<=0) finish();
+  setTimeout(finish, 1500); // rete di sicurezza se qualche immagine non risponde
+}
+
 
 
 /* ============ BANNER RENDER ============ */
@@ -649,7 +708,7 @@ async function exportPNG(elId, filename, format='png'){
   const win = window.open('', '_blank');
   try{
     if(elId==='sheet-banner'){ fitZone('banner-zone'); }
-    if(elId==='sheet-mobile'){ fitAllFrameZones('mobile'); }
+    if(elId==='sheet-mobile'){ fitAllCells('mobile'); }
     const node = document.getElementById(elId);
     // Aspettiamo che tutte le immagini (logo ecc.) siano caricate, altrimenti il layout
     // può spostarsi dopo la cattura e tagliare l'ultima riga.
@@ -659,7 +718,15 @@ async function exportPNG(elId, filename, format='png'){
         img.addEventListener('load', res); img.addEventListener('error', res);
       })));
       if(elId==='sheet-banner'){ fitZone('banner-zone'); }
-      if(elId==='sheet-mobile'){ fitAllFrameZones('mobile'); }
+      if(elId==='sheet-mobile'){ fitAllCells('mobile'); }
+    }
+    if(elId==='sheet-mobile'){
+      const stack = document.getElementById('mobile-stack');
+      const group = document.querySelector('#sheet-mobile .mobile-content-group');
+      const brand = document.querySelector('#sheet-mobile .mobile-brand');
+      if(stack && group && brand){
+        fitStackScale(stack, Math.max(80, group.clientHeight - brand.offsetHeight - 22));
+      }
     }
     const bg = elId==='sheet-banner' ? '#FFFFFF' : '#141212';
     // Per lo sfondo mobile puntiamo alla risoluzione esatta richiesta (2213×4798px)
@@ -701,15 +768,17 @@ async function exportPNG(elId, filename, format='png'){
 async function exportPDF(){
   const win = window.open('', '_blank');
   try{
-    fitAllFrameZones('print');
+    fitAllCells('print');
     const node = document.getElementById('sheet-print');
     const imgsToWait = Array.from(node.querySelectorAll('img')).filter(img=>!img.complete);
     if(imgsToWait.length){
       await Promise.all(imgsToWait.map(img=>new Promise(res=>{
         img.addEventListener('load', res); img.addEventListener('error', res);
       })));
-      fitAllFrameZones('print');
+      fitAllCells('print');
     }
+    const stack = document.getElementById('print-stack');
+    if(stack){ fitStackScale(stack, node.clientHeight - 20); }
     const canvas = await html2canvas(node, {backgroundColor:'#141212', scale:3});
     const imgData = canvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
