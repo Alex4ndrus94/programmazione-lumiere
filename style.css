@@ -266,3 +266,19 @@
   #sheet-banner .banner-zone .prevendite-film{font-family:'Inter';font-weight:800;font-size:calc(19px * var(--zs,1));color:#141212;}
   #sheet-banner .banner-zone .prevendite-data{font-family:'Inter';font-weight:600;font-size:calc(14px * var(--zs,1));color:#8a8a8a;}
   #sheet-banner .banner-zone .prevendite-times{font-family:'Inter';font-weight:700;font-size:calc(17px * var(--zs,1));color:#a11e1e;}
+
+/* Visibilità intervallo nell'editor */
+.interval-visibility{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-top:6px;
+  font-size:10px;
+  color:var(--ivory-dim);
+  cursor:pointer;
+}
+.interval-visibility input{
+  width:auto;
+  margin:0;
+  accent-color:#E8622C;
+}

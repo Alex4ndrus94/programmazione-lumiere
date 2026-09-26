@@ -15,37 +15,45 @@ const ROOMS_STAMPA = [...ROOMS, PREVENDITA_ROOM]; // ordine di stampa: le 6 sale
 
 const DEFAULT_DATA = {
   decurtis: [
-    {film:'SpiderMan Brand New Day', times:'16:45 - 19:30 - 22:15', intero:'10,5', ridotto:'-', abb:'N'}
+    {film:'SpiderMan Brand New Day', times:'16:45 - 19:30 - 22:15', intervallo:'', mostraIntervallo:true, intero:'10,5', ridotto:'-', abb:'N'}
   ],
   sordi: [
-    {film:'SpiderMan Brand New Day', times:'18:15 - 21:00', intero:'10,5', ridotto:'-', abb:'N'}
+    {film:'SpiderMan Brand New Day', times:'18:15 - 21:00', intervallo:'', mostraIntervallo:true, intero:'10,5', ridotto:'-', abb:'N'}
   ],
   bergman: [
-    {film:'Odissea', times:'18:00 - 21:15', intero:'10,5', ridotto:'9,5', abb:'N'}
+    {film:'Odissea', times:'18:00 - 21:15', intervallo:'', mostraIntervallo:true, intero:'10,5', ridotto:'9,5', abb:'N'}
   ],
   virnalisi: [
-    {film:'Odissea', times:'20:30', intero:'10,5', ridotto:'-', abb:'N'}
+    {film:'Odissea', times:'20:30', intervallo:'', mostraIntervallo:true, intero:'10,5', ridotto:'-', abb:'N'}
   ],
   desica: [
-    {film:'Minions', times:'17:30', intero:'8,5', ridotto:'7,5', abb:'S'},
-    {film:'Odissea', times:'19:15', intero:'9', ridotto:'-', abb:'N'},
-    {film:'Deep Water', times:'22:15', intero:'3,5', ridotto:'', abb:'N'},
+    {film:'Minions', times:'17:30', intervallo:'', mostraIntervallo:true, intero:'8,5', ridotto:'7,5', abb:'S'},
+    {film:'Odissea', times:'19:15', intervallo:'', mostraIntervallo:true, intero:'9', ridotto:'-', abb:'N'},
+    {film:'Deep Water', times:'22:15', intervallo:'', mostraIntervallo:true, intero:'3,5', ridotto:'', abb:'N'},
   ],
   mastroianni: [
-    {film:'Toy Story', times:'17:30', intero:'8.5', ridotto:'7.5', abb:'S'},
+    {film:'Toy Story', times:'17:30', intervallo:'', mostraIntervallo:true, intero:'8.5', ridotto:'7.5', abb:'S'},
     {film:'Odissea', times:'19:15', intero:'9', ridotto:'', abb:'N'},
-    {film:'Deep Water', times:'22:15', intero:'3,5', ridotto:'', abb:'N'},
+    {film:'Deep Water', times:'22:15', intervallo:'', mostraIntervallo:true, intero:'3,5', ridotto:'', abb:'N'},
   ],
   prevendita: [], // vuota di default: non compare finché non la riempi
 };
 
-const INTERVALLO_OPTIONS = ['3 min','5 min','7 min','10 min','15 min','Diretto'];
-const DEFAULT_INTERVALLO = 'Diretto';
+const INTERVALLO_OPTIONS = ['', '3 min','5 min','7 min','10 min','15 min','Diretto'];
+const DEFAULT_INTERVALLO = '5 min';
+const DEFAULT_MOSTRA_INTERVALLO = true;
 
 function normalizeScreeningInterval(screening){
   if(!screening || typeof screening !== 'object') return screening;
-  if(!INTERVALLO_OPTIONS.includes(screening.intervallo)){
+  // Il campo è facoltativo: vuoto/assente significa lo standard di 5 minuti.
+  if(screening.intervallo === undefined || screening.intervallo === null || screening.intervallo === ''){
+    screening.intervallo = '';
+  } else if(!INTERVALLO_OPTIONS.includes(screening.intervallo)){
     screening.intervallo = DEFAULT_INTERVALLO;
+  }
+  // Le proiezioni precedenti non hanno il flag: per compatibilità restano visibili.
+  if(typeof screening.mostraIntervallo !== 'boolean'){
+    screening.mostraIntervallo = DEFAULT_MOSTRA_INTERVALLO;
   }
   return screening;
 }
@@ -159,7 +167,7 @@ function renderEditor(){
     addBtn.textContent = '+ Aggiungi film';
     addBtn.onclick = ()=>{
       data[room.id] = data[room.id] || [];
-      data[room.id].push({film:'', times:'', versione:'', sezionePromo:'', intervallo:DEFAULT_INTERVALLO, intero:'', ridotto:'', abb:'N'});
+      data[room.id].push({film:'', times:'', versione:'', sezionePromo:'', intervallo:'', mostraIntervallo:DEFAULT_MOSTRA_INTERVALLO, intero:'', ridotto:'', abb:'N'});
       saveData(); renderEditor();
     };
     box.appendChild(addBtn);
@@ -238,10 +246,12 @@ function screeningRow(roomId, s, idx){
     </div>
     ${dataInizioField}
     <div>
-      <span class="field-label">Intervallo</span>
+      <span class="field-label">Intervallo (facoltativo — se lasciato vuoto vale 5 min)</span>
       <select data-field="intervallo">
-        ${INTERVALLO_OPTIONS.map(option=>`<option value="${option}" ${(s.intervallo||DEFAULT_INTERVALLO)===option?'selected':''}>${option}</option>`).join('')}
+        <option value="" ${(s.intervallo||'')===''?'selected':''}>Standard — 5 min</option>
+        ${INTERVALLO_OPTIONS.filter(Boolean).map(option=>`<option value="${option}" ${s.intervallo===option?'selected':''}>${option}</option>`).join('')}
       </select>
+      <label class="interval-visibility"><input type="checkbox" data-field="mostraIntervallo" ${s.mostraIntervallo!==false?'checked':''}> Mostra intervallo in A5 e sfondo mobile</label>
     </div>
     <div class="price-grid">
       <div><span class="field-label">Intero</span>${priceSelectHTML('intero', s.intero, INTERO_OPTIONS, false)}</div>
@@ -262,8 +272,9 @@ function screeningRow(roomId, s, idx){
     </div>
   `;
   row.querySelectorAll('input,select:not(.move-room-select)').forEach(el=>{
-    el.addEventListener('input', ()=>{
-      data[roomId][idx][el.dataset.field] = el.value;
+    const eventName = el.type === 'checkbox' ? 'change' : 'input';
+    el.addEventListener(eventName, ()=>{
+      data[roomId][idx][el.dataset.field] = el.type === 'checkbox' ? el.checked : el.value;
       saveData();
     });
   });
@@ -381,6 +392,7 @@ function roomBandHTML(prefix, room, showPrices){
       times: overflow.map(s=>s.times).join(' - '),
       versione:'', sezionePromo:'',
       intervallo: overflow.map(s=>s.intervallo||DEFAULT_INTERVALLO).join(' / '),
+      mostraIntervallo: overflow.some(s=>s.mostraIntervallo!==false),
       intero: overflow[0].intero, ridotto: overflow[0].ridotto, abb: overflow[0].abb
     };
     displayScreenings = screenings.slice(0,4).concat([merged]);
@@ -400,7 +412,7 @@ function roomBandHTML(prefix, room, showPrices){
       <span class="${prefix}-film-title">${escHtml(s.film)}</span>
       ${versionBadges(s, prefix)}
       ${pills}
-      <span class="${prefix}-interval">Intervallo: ${escHtml(s.intervallo||DEFAULT_INTERVALLO)}</span>
+      ${s.mostraIntervallo!==false ? `<span class="${prefix}-interval">Intervallo: ${escHtml(s.intervallo||DEFAULT_INTERVALLO)}</span>` : ''}
     </div>`;
 
     if(showPrices){
