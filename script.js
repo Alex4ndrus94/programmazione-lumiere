@@ -39,6 +39,25 @@ const DEFAULT_DATA = {
   prevendita: [], // vuota di default: non compare finché non la riempi
 };
 
+const INTERVALLO_OPTIONS = ['3 min','5 min','7 min','10 min','15 min','Diretto'];
+const DEFAULT_INTERVALLO = 'Diretto';
+
+function normalizeScreeningInterval(screening){
+  if(!screening || typeof screening !== 'object') return screening;
+  if(!INTERVALLO_OPTIONS.includes(screening.intervallo)){
+    screening.intervallo = DEFAULT_INTERVALLO;
+  }
+  return screening;
+}
+
+function normalizeAllIntervals(source){
+  Object.keys(source || {}).forEach(roomId=>{
+    if(!Array.isArray(source[roomId])) return;
+    source[roomId].forEach(normalizeScreeningInterval);
+  });
+  return source;
+}
+
 // ---- Firebase: fonte dati condivisa fra tutti i dispositivi ----
 // NB: databaseURL da completare non appena disponibile dalla console Firebase.
 const firebaseConfig = {
@@ -61,8 +80,8 @@ let saveTimeout = null;
 
 function loadDataLocalFallback(){
   const saved = localStorage.getItem('programmazione-data');
-  if(saved){ try{ return JSON.parse(saved); }catch(e){} }
-  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+  if(saved){ try{ return normalizeAllIntervals(JSON.parse(saved)); }catch(e){} }
+  return normalizeAllIntervals(JSON.parse(JSON.stringify(DEFAULT_DATA)));
 }
 
 async function initData(){
@@ -70,7 +89,7 @@ async function initData(){
   try{
     const snapshot = await fbRef.once('value');
     if(snapshot.exists()){
-      data = snapshot.val();
+      data = normalizeAllIntervals(snapshot.val());
     }else{
       // Primo avvio in assoluto: nessun dato condiviso ancora presente, carichiamo quello di default
       data = loadDataLocalFallback();
@@ -140,7 +159,7 @@ function renderEditor(){
     addBtn.textContent = '+ Aggiungi film';
     addBtn.onclick = ()=>{
       data[room.id] = data[room.id] || [];
-      data[room.id].push({film:'', times:'', intero:'', ridotto:'', abb:'N'});
+      data[room.id].push({film:'', times:'', versione:'', sezionePromo:'', intervallo:DEFAULT_INTERVALLO, intero:'', ridotto:'', abb:'N'});
       saveData(); renderEditor();
     };
     box.appendChild(addBtn);
@@ -218,6 +237,12 @@ function screeningRow(roomId, s, idx){
       <input type="text" value="${escAttr(s.sezionePromo||'')}" data-field="sezionePromo" placeholder="es. CineRevolution">
     </div>
     ${dataInizioField}
+    <div>
+      <span class="field-label">Intervallo</span>
+      <select data-field="intervallo">
+        ${INTERVALLO_OPTIONS.map(option=>`<option value="${option}" ${(s.intervallo||DEFAULT_INTERVALLO)===option?'selected':''}>${option}</option>`).join('')}
+      </select>
+    </div>
     <div class="price-grid">
       <div><span class="field-label">Intero</span>${priceSelectHTML('intero', s.intero, INTERO_OPTIONS, false)}</div>
       <div><span class="field-label">Ridotto</span>${priceSelectHTML('ridotto', s.ridotto, RIDOTTO_OPTIONS, true)}</div>
@@ -355,6 +380,7 @@ function roomBandHTML(prefix, room, showPrices){
       film: overflow.map(s=>s.film).join(' / '),
       times: overflow.map(s=>s.times).join(' - '),
       versione:'', sezionePromo:'',
+      intervallo: overflow.map(s=>s.intervallo||DEFAULT_INTERVALLO).join(' / '),
       intero: overflow[0].intero, ridotto: overflow[0].ridotto, abb: overflow[0].abb
     };
     displayScreenings = screenings.slice(0,4).concat([merged]);
@@ -374,6 +400,7 @@ function roomBandHTML(prefix, room, showPrices){
       <span class="${prefix}-film-title">${escHtml(s.film)}</span>
       ${versionBadges(s, prefix)}
       ${pills}
+      <span class="${prefix}-interval">Intervallo: ${escHtml(s.intervallo||DEFAULT_INTERVALLO)}</span>
     </div>`;
 
     if(showPrices){
