@@ -251,7 +251,7 @@ function screeningRow(roomId, s, idx){
         <option value="" ${(s.intervallo||'')===''?'selected':''}>Standard — 5 min</option>
         ${INTERVALLO_OPTIONS.filter(Boolean).map(option=>`<option value="${option}" ${s.intervallo===option?'selected':''}>${option}</option>`).join('')}
       </select>
-      <label class="interval-visibility"><input type="checkbox" data-field="mostraIntervallo" ${s.mostraIntervallo!==false?'checked':''}> Mostra intervallo in A5 e sfondo mobile</label>
+      <label class="interval-visibility"><input type="checkbox" data-field="mostraIntervallo" ${s.mostraIntervallo!==false?'checked':''}> Mostra icona intervallo in A5 e sfondo mobile</label>
     </div>
     <div class="price-grid">
       <div><span class="field-label">Intero</span>${priceSelectHTML('intero', s.intero, INTERO_OPTIONS, false)}</div>
@@ -362,6 +362,27 @@ const ROOM_IMAGES = {
 };
 // Badge per versione (3D / V.O., riconosciuti dal testo libero del campo Versione)
 // e per CineRevolution (icona "persone" della legenda, riusata per identificarlo a colpo d'occhio)
+const INTERVALLO_ICON_MAP = {
+  '3 min': 'interval-icons/interval-3.png',
+  '5 min': 'interval-icons/interval-5.png',
+  '7 min': 'interval-icons/interval-7.png',
+  '10 min': 'interval-icons/interval-10.png',
+  '15 min': 'interval-icons/interval-15.png',
+  'Diretto': 'interval-icons/interval-diretto.png'
+};
+
+function intervalIconHTML(s, prefix){
+  if(!s || s.mostraIntervallo === false) return '';
+  const values = Array.isArray(s.intervalli)
+    ? s.intervalli.filter(x=>x && x.visible!==false).map(x=>x.value || DEFAULT_INTERVALLO)
+    : [s.intervallo || DEFAULT_INTERVALLO];
+  const uniqueValues = [...new Set(values)].filter(v=>INTERVALLO_ICON_MAP[v]);
+  if(!uniqueValues.length) return '';
+  return uniqueValues.map(value =>
+    `<img src="${INTERVALLO_ICON_MAP[value]}" class="${prefix}-interval-icon" alt="Intervallo ${escAttr(value)}" title="Intervallo ${escAttr(value)}">`
+  ).join('');
+}
+
 function versionBadges(s, prefix){
   const v = (s.versione||'').toLowerCase();
   let html = '';
@@ -391,7 +412,11 @@ function roomBandHTML(prefix, room, showPrices){
       film: overflow.map(s=>s.film).join(' / '),
       times: overflow.map(s=>s.times).join(' - '),
       versione:'', sezionePromo:'',
-      intervallo: overflow.map(s=>s.intervallo||DEFAULT_INTERVALLO).join(' / '),
+      intervallo: overflow[0].intervallo || '',
+      intervalli: overflow.map(s=>({
+        value: s.intervallo || DEFAULT_INTERVALLO,
+        visible: s.mostraIntervallo !== false
+      })),
       mostraIntervallo: overflow.some(s=>s.mostraIntervallo!==false),
       intero: overflow[0].intero, ridotto: overflow[0].ridotto, abb: overflow[0].abb
     };
@@ -412,7 +437,7 @@ function roomBandHTML(prefix, room, showPrices){
       <span class="${prefix}-film-title">${escHtml(s.film)}</span>
       ${versionBadges(s, prefix)}
       ${pills}
-      ${s.mostraIntervallo!==false ? `<span class="${prefix}-interval">Intervallo: ${escHtml(s.intervallo||DEFAULT_INTERVALLO)}</span>` : ''}
+      ${intervalIconHTML(s, prefix)}
     </div>`;
 
     if(showPrices){
