@@ -368,7 +368,7 @@ const INTERVALLO_ICON_MAP = {
   '7 min': 'interval-icons/interval-7.png',
   '10 min': 'interval-icons/interval-10.png',
   '15 min': 'interval-icons/interval-15.png',
-  'Diretto': 'interval-icons/interval-diretto.png'
+  'Diretto': 'interval-icons/interval-diretto.PNG'
 };
 
 function intervalIconHTML(s, prefix){
