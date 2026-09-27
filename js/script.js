@@ -363,12 +363,12 @@ const ROOM_IMAGES = {
 // Badge per versione (3D / V.O., riconosciuti dal testo libero del campo Versione)
 // e per CineRevolution (icona "persone" della legenda, riusata per identificarlo a colpo d'occhio)
 const INTERVALLO_ICON_MAP = {
-  '3 min': 'assets/intervals/interval-3.png',
-  '5 min': 'assets/intervals/interval-5.png',
-  '7 min': 'assets/intervals/interval-7.png',
-  '10 min': 'assets/intervals/interval-10.png',
-  '15 min': 'assets/intervals/interval-15.png',
-  'Diretto': 'assets/intervals/interval-diretto.png'
+  '3 min': 'assets/intervals/interval-3.PNG',
+  '5 min': 'assets/intervals/interval-5.PNG',
+  '7 min': 'assets/intervals/interval-7.PNG',
+  '10 min': 'assets/intervals/interval-10.PNG',
+  '15 min': 'assets/intervals/interval-15.PNG',
+  'Diretto': 'assets/intervals/interval-diretto.PNG'
 };
 
 function intervalIconHTML(s, prefix){
