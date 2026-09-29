@@ -523,26 +523,25 @@ function renderPrintSheet(){
 
 function renderMobileSheet(){
   const el = document.getElementById('sheet-mobile');
+  // Lo sfondo mobile non contiene più logo/titolo: tutta l'area disponibile
+  // viene assegnata alla programmazione e il numero di proiezioni determina
+  // automaticamente l'altezza delle fasce.
   el.innerHTML = `
-    <div class="mobile-safe-top"></div>
     <div class="mobile-content-group">
       <div class="mobile-stack" id="mobile-stack">
         ${roomStackHTML('mobile', true)}
       </div>
-      <div class="mobile-brand">
-        <img src="assets/branding/logo-lumiere.png" alt="Logo Cinema Lumière" onerror="this.style.display='none';">
-        <div class="brand-text">Multisala Lumière</div>
-      </div>
-    </div>
-    <div class="mobile-safe-bottom"></div>`;
+    </div>`;
   fitAllCells('mobile');
   waitImagesThen(el, ()=>{
     fitAllCells('mobile');
     const stack = document.getElementById('mobile-stack');
     const group = document.querySelector('#sheet-mobile .mobile-content-group');
-    const brand = document.querySelector('#sheet-mobile .mobile-brand');
-    const budget = group.clientHeight - brand.offsetHeight - 22;
-    fitStackScale(stack, Math.max(80, budget));
+    if(stack && group){
+      // Usiamo praticamente tutta l'altezza utile. Non esistono più zone
+      // riservate a branding, quindi la programmazione può crescere liberamente.
+      fitStackScale(stack, Math.max(80, group.clientHeight));
+    }
   });
 }
 
@@ -787,9 +786,8 @@ async function exportPNG(elId, filename, format='png'){
     if(elId==='sheet-mobile'){
       const stack = document.getElementById('mobile-stack');
       const group = document.querySelector('#sheet-mobile .mobile-content-group');
-      const brand = document.querySelector('#sheet-mobile .mobile-brand');
-      if(stack && group && brand){
-        fitStackScale(stack, Math.max(80, group.clientHeight - brand.offsetHeight - 22));
+      if(stack && group){
+        fitStackScale(stack, Math.max(80, group.clientHeight));
       }
     }
     const bg = elId==='sheet-banner' ? '#FFFFFF' : '#141212';
