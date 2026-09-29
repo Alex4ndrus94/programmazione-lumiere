@@ -523,26 +523,32 @@ function renderPrintSheet(){
 
 function renderMobileSheet(){
   const el = document.getElementById('sheet-mobile');
-  // Lo sfondo mobile non contiene più logo/titolo: tutta l'area disponibile
-  // viene assegnata alla programmazione e il numero di proiezioni determina
-  // automaticamente l'altezza delle fasce.
+  // MOBILE: solo programmazione. Nessun logo, titolo, intestazione o spazio
+  // riservato al branding. La tela resta esattamente 390x846 (rapporto 2213x4798).
   el.innerHTML = `
     <div class="mobile-content-group">
       <div class="mobile-stack" id="mobile-stack">
         ${roomStackHTML('mobile', true)}
       </div>
     </div>`;
-  fitAllCells('mobile');
-  waitImagesThen(el, ()=>{
+
+  const fitMobile = ()=>{
     fitAllCells('mobile');
     const stack = document.getElementById('mobile-stack');
     const group = document.querySelector('#sheet-mobile .mobile-content-group');
-    if(stack && group){
-      // Usiamo praticamente tutta l'altezza utile. Non esistono più zone
-      // riservate a branding, quindi la programmazione può crescere liberamente.
-      fitStackScale(stack, Math.max(80, group.clientHeight));
-    }
-  });
+    if(!stack || !group) return;
+    // Prima misuriamo senza trasformazioni: così html2canvas non eredita una
+    // geometria già trasformata e non può tagliare la prima/ultima sala.
+    stack.style.transform = 'none';
+    const naturalH = stack.scrollHeight;
+    const availableH = group.clientHeight;
+    const scale = naturalH > availableH ? Math.max(0.35, availableH / naturalH) : 1;
+    stack.style.transformOrigin = 'top center';
+    stack.style.transform = `scale(${scale})`;
+  };
+
+  fitMobile();
+  waitImagesThen(el, fitMobile);
 }
 
 // Ricalcola dopo che tutte le immagini (sale + logo + legenda) hanno finito di
@@ -787,8 +793,23 @@ async function exportPNG(elId, filename, format='png'){
       const stack = document.getElementById('mobile-stack');
       const group = document.querySelector('#sheet-mobile .mobile-content-group');
       if(stack && group){
-        fitStackScale(stack, Math.max(80, group.clientHeight));
+        stack.style.transform = 'none';
+        const naturalH = stack.scrollHeight;
+        const scaleMobile = naturalH > group.clientHeight ? Math.max(0.35, group.clientHeight / naturalH) : 1;
+        stack.style.transformOrigin = 'top center';
+        stack.style.transform = `scale(${scaleMobile})`;
       }
+      // Forza le icone intervallo a dimensioni geometricamente quadrate anche
+      // nella fase di rasterizzazione html2canvas.
+      node.querySelectorAll('.mobile-interval-icon').forEach(img=>{
+        const w = parseFloat(getComputedStyle(img).width) || 19;
+        img.style.width = `${w}px`;
+        img.style.height = `${w}px`;
+        img.style.minWidth = `${w}px`;
+        img.style.minHeight = `${w}px`;
+        img.style.maxWidth = 'none';
+        img.style.maxHeight = 'none';
+      });
     }
     const bg = elId==='sheet-banner' ? '#FFFFFF' : '#141212';
     // Per lo sfondo mobile puntiamo alla risoluzione esatta richiesta (2213×4798px)
