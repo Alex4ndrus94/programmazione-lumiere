@@ -521,24 +521,186 @@ function renderPrintSheet(){
   });
 }
 
-function renderMobileSheet(){
-  const el = document.getElementById('sheet-mobile');
-  // Lo sfondo mobile usa ESCLUSIVAMENTE i template PNG delle sale.
-  // Nessun logo, titolo o spazio riservato: tutta la tela è disponibile per la programmazione.
-  el.innerHTML = `
-    <div class="mobile-content-group">
-      <div class="mobile-stack" id="mobile-stack">
-        ${roomStackHTML('mobile', true)}
-      </div>
-    </div>`;
-  fitAllCells('mobile');
-  waitImagesThen(el, ()=>{
-    fitAllCells('mobile');
-    const stack = document.getElementById('mobile-stack');
-    // Le sale vengono composte una sotto l'altra usando i PNG predisposti.
-    // Se l'insieme supera la tela, viene ridotto tutto proporzionalmente.
-    fitStackScale(stack, el.clientHeight);
+function mobileCanvasImage(src){
+  if(!window.__mobileCanvasImages) window.__mobileCanvasImages = new Map();
+  if(window.__mobileCanvasImages.has(src)) return window.__mobileCanvasImages.get(src);
+  const promise = new Promise((resolve,reject)=>{
+    const img = new Image();
+    img.onload = ()=>resolve(img);
+    img.onerror = ()=>reject(new Error('Immagine non caricata: '+src));
+    img.src = src;
   });
+  window.__mobileCanvasImages.set(src,promise);
+  return promise;
+}
+
+function mobileCanvasFitFont(ctx, text, maxWidth, maxHeight, baseSize, weight='700'){
+  const clean = String(text||'').trim();
+  if(!clean) return baseSize;
+  let size = baseSize;
+  while(size > 8){
+    ctx.font = `${weight} ${size}px Inter, Arial, sans-serif`;
+    if(ctx.measureText(clean).width <= maxWidth && size * 1.2 <= maxHeight) break;
+    size -= 1;
+  }
+  return size;
+}
+
+function mobileCanvasDrawCellText(ctx, text, x, y, w, h, color='#141212', baseSize=28){
+  const clean = String(text||'').trim();
+  if(!clean) return;
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const size = mobileCanvasFitFont(ctx, clean, w*0.94, h*0.82, baseSize, '700');
+  ctx.font = `700 ${size}px Inter, Arial, sans-serif`;
+  ctx.fillText(clean, x+w/2, y+h/2);
+  ctx.restore();
+}
+
+function mobileCanvasTimes(s){
+  const timesSet = new Set();
+  (s.times||'').split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
+  return sortTimesChronologically(timesSet);
+}
+
+async function renderMobileCanvas(){
+  const holder = document.getElementById('sheet-mobile');
+  if(!holder) return null;
+  const W = 2213, H = 4798;
+  holder.innerHTML = '<canvas id="mobile-wallpaper-canvas" width="2213" height="4798" aria-label="Anteprima sfondo mobile"></canvas>';
+  const canvas = document.getElementById('mobile-wallpaper-canvas');
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0,0,W,H);
+
+  const roomsToDraw = [];
+  for(const room of ROOMS_STAMPA){
+    const screenings = data[room.id] || [];
+    if(!screenings.length) continue;
+    let displayScreenings = screenings;
+    if(screenings.length > 5){
+      const overflow = screenings.slice(4);
+      displayScreenings = screenings.slice(0,4).concat([{
+        film: overflow.map(s=>s.film).join(' / '),
+        times: overflow.map(s=>s.times).join(' - '),
+        versione:'', sezionePromo:'', intervallo: overflow[0].intervallo || '',
+        intervalli: overflow.map(s=>({value:s.intervallo||DEFAULT_INTERVALLO, visible:s.mostraIntervallo!==false})),
+        mostraIntervallo: overflow.some(s=>s.mostraIntervallo!==false),
+        intero: overflow[0].intero, ridotto: overflow[0].ridotto, abb: overflow[0].abb
+      }]);
+    }
+    const variant = (ROOM_IMAGES[room.id]||{})[displayScreenings.length];
+    if(variant) roomsToDraw.push({room, variant, screenings:displayScreenings});
+  }
+
+  const mobileAssets = new Map();
+  const preloadSources = [...Object.values(INTERVALLO_ICON_MAP), 'assets/icons/icon-abb-yes.png', 'assets/icons/icon-abb-no.png'];
+  await Promise.all(preloadSources.map(async src=>{
+    try{ mobileAssets.set(src, await mobileCanvasImage(src)); }catch(err){ console.error(err); }
+  }));
+
+  const GAP = 10;
+  const naturalScale = W / 1410;
+  const naturalHeights = roomsToDraw.map(r=>r.variant.h*naturalScale);
+  const totalNatural = naturalHeights.reduce((a,b)=>a+b,0) + Math.max(0,roomsToDraw.length-1)*GAP;
+  const stackScale = Math.min(1, (H-8) / Math.max(1,totalNatural));
+  let y = 0;
+
+  for(let ri=0; ri<roomsToDraw.length; ri++){
+    const item = roomsToDraw[ri];
+    const variant = item.variant;
+    const imgW = W * stackScale;
+    const imgH = variant.h * (W/variant.w) * stackScale;
+    const x = (W-imgW)/2;
+    const roomY = y;
+    try{
+      const img = await mobileCanvasImage(variant.file);
+      ctx.drawImage(img,x,roomY,imgW,imgH);
+    }catch(err){
+      console.error(err);
+      ctx.fillStyle='#222'; ctx.fillRect(x,roomY,imgW,imgH);
+    }
+
+    const sx = imgW/variant.w, sy = imgH/variant.h;
+    item.screenings.forEach((scr,i)=>{
+      const content = variant.content[i];
+      if(!content) return;
+      const cx=x+(content.left/100)*imgW, cy=roomY+(content.top/100)*imgH;
+      const cw=(content.width/100)*imgW, ch=(content.height/100)*imgH;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(cx,cy,cw,ch); ctx.clip();
+      ctx.fillStyle='#141212'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      const title=(scr.film||'').trim();
+      const times=mobileCanvasTimes(scr).join(' · ');
+      const version=(scr.versione||'').trim();
+      const promo=(scr.sezionePromo||'').trim();
+      const lines=[title, version ? version.toUpperCase() : '', times, promo].filter(Boolean);
+      const base=Math.max(18, Math.min(42, ch*0.19));
+      const lineH=base*1.18;
+      const startY=cy+ch/2-(lines.length-1)*lineH/2;
+      lines.forEach((line,li)=>{
+        const fs=mobileCanvasFitFont(ctx,line,cw*0.9,base*1.2,base,'700');
+        ctx.font=`700 ${fs}px Inter, Arial, sans-serif`;
+        ctx.fillText(line,cx+cw/2,startY+li*lineH);
+      });
+      ctx.restore();
+
+      // Intervallo: icona PNG reale, senza deformazione.
+      if(scr.mostraIntervallo !== false){
+        const values = Array.isArray(scr.intervalli)
+          ? scr.intervalli.filter(v=>v && v.visible!==false).map(v=>v.value||DEFAULT_INTERVALLO)
+          : [scr.intervallo||DEFAULT_INTERVALLO];
+        const unique=[...new Set(values)].filter(v=>INTERVALLO_ICON_MAP[v]);
+        if(unique.length){
+          const iconSize=Math.min(cw*0.20,ch*0.34);
+          const gap=6*stackScale;
+          const total=unique.length*iconSize+(unique.length-1)*gap;
+          let ix=cx+cw-total-6*stackScale;
+          const iy=cy+ch-iconSize-5*stackScale;
+          for(const value of unique){
+            try{
+              const icon=mobileAssets.get(INTERVALLO_ICON_MAP[value]);
+              if(icon) ctx.drawImage(icon,ix,iy,iconSize,iconSize);
+            }catch(err){ console.error(err); }
+            ix+=iconSize+gap;
+          }
+        }
+      }
+
+      if(variant.intero[i]){
+        const z=variant.intero[i];
+        mobileCanvasDrawCellText(ctx,formatPriceShort(scr.intero),x+(z.left/100)*imgW,roomY+(z.top/100)*imgH,(z.width/100)*imgW,(z.height/100)*imgH,'#141212',Math.max(18,ch*0.18));
+      }
+      if(variant.ridotto[i]){
+        const z=variant.ridotto[i];
+        const rr=(scr.ridotto||'').trim();
+        mobileCanvasDrawCellText(ctx,(rr && rr!=='-')?formatPriceShort(rr):'-',x+(z.left/100)*imgW,roomY+(z.top/100)*imgH,(z.width/100)*imgW,(z.height/100)*imgH,'#141212',Math.max(18,ch*0.18));
+      }
+      if(variant.abb[i]){
+        const z=variant.abb[i];
+        try{
+          const icon=mobileAssets.get(scr.abb==='S'?'assets/icons/icon-abb-yes.png':'assets/icons/icon-abb-no.png');
+          if(!icon) return;
+          const aw=(z.width/100)*imgW, ah=(z.height/100)*imgH;
+          const size=Math.min(aw,ah)*0.65;
+          ctx.drawImage(icon,x+(z.left/100)*imgW+(aw-size)/2,roomY+(z.top/100)*imgH+(ah-size)/2,size,size);
+        }catch(err){ console.error(err); }
+      }
+    });
+    y += imgH + GAP*stackScale;
+  }
+  return canvas;
+}
+
+function renderMobileSheet(){
+  // Il mobile NON viene più ricostruito come una tabella HTML.
+  // La preview e il PNG finale usano lo stesso canvas: template PNG originali + testo sopra.
+  renderMobileCanvas().catch(err=>console.error('Errore rendering mobile:',err));
 }
 
 // Ricalcola dopo che tutte le immagini (sale + logo + legenda) hanno finito di
@@ -762,6 +924,21 @@ document.getElementById('toggle-prezzo').addEventListener('change', renderBanner
 
 /* ============ EXPORT ============ */
 async function exportPNG(elId, filename, format='png'){
+  if(elId==='sheet-mobile') {
+    const canvas = document.getElementById('mobile-wallpaper-canvas') || await renderMobileCanvas();
+    if(!canvas) { alert('Impossibile generare lo sfondo mobile.'); return; }
+    try {
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      if(!blob) throw new Error('Canvas vuoto');
+      const url = URL.createObjectURL(blob);
+      const win = window.open(url, '_blank');
+      const link = document.createElement('a');
+      link.href=url; link.download=`${filename}.png`;
+      document.body.appendChild(link); link.click(); link.remove();
+      if(!win) alert('Consenti i popup per aprire lo sfondo generato.');
+    } catch(err) { console.error(err); alert('Errore nella generazione dello sfondo mobile.'); }
+    return;
+  }
   // Apriamo subito la scheda, nello stesso istante del tap: iOS Safari blocca
   // le aperture "in differita" dopo un'operazione asincrona come html2canvas.
   const win = window.open('', '_blank');
