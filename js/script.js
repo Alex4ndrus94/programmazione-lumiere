@@ -95,7 +95,7 @@ function loadDataLocalFallback(){
 async function initData(){
   if(!fbRef){ data = loadDataLocalFallback(); renderAll(); return; }
   try{
-    const snapshot = await Promise.race([fbRef.once('value'), new Promise((_,rej)=>setTimeout(()=>rej(new Error('Firebase timeout')),6000))]);
+    const snapshot = await fbRef.once('value');
     if(snapshot.exists()){
       data = normalizeAllIntervals(snapshot.val());
     }else{
@@ -521,186 +521,29 @@ function renderPrintSheet(){
   });
 }
 
-function mobileCanvasImage(src){
-  if(!window.__mobileCanvasImages) window.__mobileCanvasImages = new Map();
-  if(window.__mobileCanvasImages.has(src)) return window.__mobileCanvasImages.get(src);
-  const promise = new Promise((resolve,reject)=>{
-    const img = new Image();
-    img.onload = ()=>resolve(img);
-    img.onerror = ()=>reject(new Error('Immagine non caricata: '+src));
-    img.src = src;
-  });
-  window.__mobileCanvasImages.set(src,promise);
-  return promise;
-}
-
-function mobileCanvasFitFont(ctx, text, maxWidth, maxHeight, baseSize, weight='700'){
-  const clean = String(text||'').trim();
-  if(!clean) return baseSize;
-  let size = baseSize;
-  while(size > 8){
-    ctx.font = `${weight} ${size}px Inter, Arial, sans-serif`;
-    if(ctx.measureText(clean).width <= maxWidth && size * 1.2 <= maxHeight) break;
-    size -= 1;
-  }
-  return size;
-}
-
-function mobileCanvasDrawCellText(ctx, text, x, y, w, h, color='#141212', baseSize=28){
-  const clean = String(text||'').trim();
-  if(!clean) return;
-  ctx.save();
-  ctx.fillStyle = color;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  const size = mobileCanvasFitFont(ctx, clean, w*0.94, h*0.82, baseSize, '700');
-  ctx.font = `700 ${size}px Inter, Arial, sans-serif`;
-  ctx.fillText(clean, x+w/2, y+h/2);
-  ctx.restore();
-}
-
-function mobileCanvasTimes(s){
-  const timesSet = new Set();
-  (s.times||'').split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
-  return sortTimesChronologically(timesSet);
-}
-
-async function renderMobileCanvas(){
-  const holder = document.getElementById('sheet-mobile');
-  if(!holder) return null;
-  const W = 2213, H = 4798;
-  holder.innerHTML = '<canvas id="mobile-wallpaper-canvas" width="2213" height="4798" aria-label="Anteprima sfondo mobile"></canvas>';
-  const canvas = document.getElementById('mobile-wallpaper-canvas');
-  canvas.style.width = '100%';
-  canvas.style.height = '100%';
-  canvas.style.display = 'block';
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0,0,W,H);
-
-  const roomsToDraw = [];
-  for(const room of ROOMS_STAMPA){
-    const screenings = data[room.id] || [];
-    if(!screenings.length) continue;
-    let displayScreenings = screenings;
-    if(screenings.length > 5){
-      const overflow = screenings.slice(4);
-      displayScreenings = screenings.slice(0,4).concat([{
-        film: overflow.map(s=>s.film).join(' / '),
-        times: overflow.map(s=>s.times).join(' - '),
-        versione:'', sezionePromo:'', intervallo: overflow[0].intervallo || '',
-        intervalli: overflow.map(s=>({value:s.intervallo||DEFAULT_INTERVALLO, visible:s.mostraIntervallo!==false})),
-        mostraIntervallo: overflow.some(s=>s.mostraIntervallo!==false),
-        intero: overflow[0].intero, ridotto: overflow[0].ridotto, abb: overflow[0].abb
-      }]);
-    }
-    const variant = (ROOM_IMAGES[room.id]||{})[displayScreenings.length];
-    if(variant) roomsToDraw.push({room, variant, screenings:displayScreenings});
-  }
-
-  const mobileAssets = new Map();
-  const preloadSources = [...Object.values(INTERVALLO_ICON_MAP), 'assets/icons/icon-abb-yes.png', 'assets/icons/icon-abb-no.png'];
-  await Promise.all(preloadSources.map(async src=>{
-    try{ mobileAssets.set(src, await mobileCanvasImage(src)); }catch(err){ console.error(err); }
-  }));
-
-  const GAP = 10;
-  const naturalScale = W / 1410;
-  const naturalHeights = roomsToDraw.map(r=>r.variant.h*naturalScale);
-  const totalNatural = naturalHeights.reduce((a,b)=>a+b,0) + Math.max(0,roomsToDraw.length-1)*GAP;
-  const stackScale = Math.min(1, (H-8) / Math.max(1,totalNatural));
-  let y = 0;
-
-  for(let ri=0; ri<roomsToDraw.length; ri++){
-    const item = roomsToDraw[ri];
-    const variant = item.variant;
-    const imgW = W * stackScale;
-    const imgH = variant.h * (W/variant.w) * stackScale;
-    const x = (W-imgW)/2;
-    const roomY = y;
-    try{
-      const img = await mobileCanvasImage(variant.file);
-      ctx.drawImage(img,x,roomY,imgW,imgH);
-    }catch(err){
-      console.error(err);
-      ctx.fillStyle='#222'; ctx.fillRect(x,roomY,imgW,imgH);
-    }
-
-    const sx = imgW/variant.w, sy = imgH/variant.h;
-    item.screenings.forEach((scr,i)=>{
-      const content = variant.content[i];
-      if(!content) return;
-      const cx=x+(content.left/100)*imgW, cy=roomY+(content.top/100)*imgH;
-      const cw=(content.width/100)*imgW, ch=(content.height/100)*imgH;
-      ctx.save();
-      ctx.beginPath(); ctx.rect(cx,cy,cw,ch); ctx.clip();
-      ctx.fillStyle='#141212'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      const title=(scr.film||'').trim();
-      const times=mobileCanvasTimes(scr).join(' · ');
-      const version=(scr.versione||'').trim();
-      const promo=(scr.sezionePromo||'').trim();
-      const lines=[title, version ? version.toUpperCase() : '', times, promo].filter(Boolean);
-      const base=Math.max(18, Math.min(42, ch*0.19));
-      const lineH=base*1.18;
-      const startY=cy+ch/2-(lines.length-1)*lineH/2;
-      lines.forEach((line,li)=>{
-        const fs=mobileCanvasFitFont(ctx,line,cw*0.9,base*1.2,base,'700');
-        ctx.font=`700 ${fs}px Inter, Arial, sans-serif`;
-        ctx.fillText(line,cx+cw/2,startY+li*lineH);
-      });
-      ctx.restore();
-
-      // Intervallo: icona PNG reale, senza deformazione.
-      if(scr.mostraIntervallo !== false){
-        const values = Array.isArray(scr.intervalli)
-          ? scr.intervalli.filter(v=>v && v.visible!==false).map(v=>v.value||DEFAULT_INTERVALLO)
-          : [scr.intervallo||DEFAULT_INTERVALLO];
-        const unique=[...new Set(values)].filter(v=>INTERVALLO_ICON_MAP[v]);
-        if(unique.length){
-          const iconSize=Math.min(cw*0.20,ch*0.34);
-          const gap=6*stackScale;
-          const total=unique.length*iconSize+(unique.length-1)*gap;
-          let ix=cx+cw-total-6*stackScale;
-          const iy=cy+ch-iconSize-5*stackScale;
-          for(const value of unique){
-            try{
-              const icon=mobileAssets.get(INTERVALLO_ICON_MAP[value]);
-              if(icon) ctx.drawImage(icon,ix,iy,iconSize,iconSize);
-            }catch(err){ console.error(err); }
-            ix+=iconSize+gap;
-          }
-        }
-      }
-
-      if(variant.intero[i]){
-        const z=variant.intero[i];
-        mobileCanvasDrawCellText(ctx,formatPriceShort(scr.intero),x+(z.left/100)*imgW,roomY+(z.top/100)*imgH,(z.width/100)*imgW,(z.height/100)*imgH,'#141212',Math.max(18,ch*0.18));
-      }
-      if(variant.ridotto[i]){
-        const z=variant.ridotto[i];
-        const rr=(scr.ridotto||'').trim();
-        mobileCanvasDrawCellText(ctx,(rr && rr!=='-')?formatPriceShort(rr):'-',x+(z.left/100)*imgW,roomY+(z.top/100)*imgH,(z.width/100)*imgW,(z.height/100)*imgH,'#141212',Math.max(18,ch*0.18));
-      }
-      if(variant.abb[i]){
-        const z=variant.abb[i];
-        try{
-          const icon=mobileAssets.get(scr.abb==='S'?'assets/icons/icon-abb-yes.png':'assets/icons/icon-abb-no.png');
-          if(!icon) return;
-          const aw=(z.width/100)*imgW, ah=(z.height/100)*imgH;
-          const size=Math.min(aw,ah)*0.65;
-          ctx.drawImage(icon,x+(z.left/100)*imgW+(aw-size)/2,roomY+(z.top/100)*imgH+(ah-size)/2,size,size);
-        }catch(err){ console.error(err); }
-      }
-    });
-    y += imgH + GAP*stackScale;
-  }
-  return canvas;
-}
-
 function renderMobileSheet(){
-  // Il mobile NON viene più ricostruito come una tabella HTML.
-  // La preview e il PNG finale usano lo stesso canvas: template PNG originali + testo sopra.
-  renderMobileCanvas().catch(err=>console.error('Errore rendering mobile:',err));
+  const el = document.getElementById('sheet-mobile');
+  el.innerHTML = `
+    <div class="mobile-safe-top"></div>
+    <div class="mobile-content-group">
+      <div class="mobile-stack" id="mobile-stack">
+        ${roomStackHTML('mobile', true)}
+      </div>
+      <div class="mobile-brand">
+        <img src="assets/branding/logo-lumiere.png" alt="Logo Cinema Lumière" onerror="this.style.display='none';">
+        <div class="brand-text">Multisala Lumière</div>
+      </div>
+    </div>
+    <div class="mobile-safe-bottom"></div>`;
+  fitAllCells('mobile');
+  waitImagesThen(el, ()=>{
+    fitAllCells('mobile');
+    const stack = document.getElementById('mobile-stack');
+    const group = document.querySelector('#sheet-mobile .mobile-content-group');
+    const brand = document.querySelector('#sheet-mobile .mobile-brand');
+    const budget = group.clientHeight - brand.offsetHeight - 22;
+    fitStackScale(stack, Math.max(80, budget));
+  });
 }
 
 // Ricalcola dopo che tutte le immagini (sale + logo + legenda) hanno finito di
@@ -923,101 +766,144 @@ document.getElementById('toggle-sala').addEventListener('change', renderBannerSh
 document.getElementById('toggle-prezzo').addEventListener('change', renderBannerSheet);
 
 /* ============ EXPORT ============ */
-// Barra in basso: mostra stato/errori e, a file pronto, un pulsante da toccare.
-// Il tocco diretto dell'utente evita i blocchi popup/download di iOS Safari e delle PWA.
-function exportStatus(msg, blob, filename){
-  let bar = document.getElementById('export-bar');
-  if(!bar){
-    bar = document.createElement('div'); bar.id = 'export-bar';
-    bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#1e1c1a;color:#F5F0E6;padding:12px 14px calc(12px + env(safe-area-inset-bottom));font:600 14px Inter,Arial,sans-serif;display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-top:2px solid #E8622C';
-    document.body.appendChild(bar);
-  }
-  bar.innerHTML = '';
-  const t = document.createElement('span'); t.textContent = msg; t.style.flex = '1 1 100%'; bar.appendChild(t);
-  const mk = (tag,label)=>{ const e = document.createElement(tag); e.textContent = label; e.className = 'btn-export'; e.style.textDecoration = 'none'; return e; };
-  if(blob){
-    const a = mk('a','Apri / Scarica'); a.href = URL.createObjectURL(blob); a.download = filename; a.target = '_blank'; bar.appendChild(a);
-    try{
-      const file = new File([blob], filename, {type: blob.type});
-      if(navigator.canShare && navigator.canShare({files:[file]})){
-        const s = mk('button','Condividi / Salva'); s.onclick = ()=>navigator.share({files:[file], title:filename}).catch(()=>{}); bar.appendChild(s);
-      }
-    }catch(e){}
-  }
-  if(blob || /^Errore/.test(msg)){ const c = mk('button','Chiudi'); c.style.background = '#444'; c.onclick = ()=>bar.remove(); bar.appendChild(c); }
-}
-
-const canvasToBlob = (c, mime, q)=>new Promise(res=>c.toBlob(res, mime, q));
-
-async function waitNodeImages(node){
-  const pending = Array.from(node.querySelectorAll('img')).filter(img=>!img.complete);
-  if(pending.length) await Promise.all(pending.map(img=>new Promise(res=>{ img.addEventListener('load',res); img.addEventListener('error',res); })));
-}
-
-// Limita i pixel totali (~12 Mpx): oltre, Safari su iPhone esaurisce la memoria e la pagina si blocca in silenzio.
-async function captureNode(node, bg, wantedScale){
-  if(typeof html2canvas === 'undefined') throw new Error('libreria html2canvas non caricata (controlla la connessione)');
-  const px = Math.max(1, node.offsetWidth * node.offsetHeight);
-  const scale = Math.min(wantedScale, Math.sqrt(12e6 / px));
-  return html2canvas(node, {backgroundColor:bg, scale});
-}
-
 async function exportPNG(elId, filename, format='png'){
+  // Apriamo subito la scheda, nello stesso istante del tap: iOS Safari blocca
+  // le aperture "in differita" dopo un'operazione asincrona come html2canvas.
+  const win = window.open('', '_blank');
   try{
-    exportStatus('Generazione in corso…');
-    let blob, ext;
-    if(elId === 'sheet-mobile'){
-      const canvas = document.getElementById('mobile-wallpaper-canvas') || await renderMobileCanvas();
-      if(!canvas) throw new Error('canvas non disponibile');
-      blob = await canvasToBlob(canvas, 'image/png'); ext = 'png';
-    }else{
-      fitZone('banner-zone');
-      const node = document.getElementById(elId);
-      await waitNodeImages(node); fitZone('banner-zone');
-      const canvas = await captureNode(node, '#FFFFFF', 3);
-      const jpeg = format === 'jpeg';
-      blob = await canvasToBlob(canvas, jpeg ? 'image/jpeg' : 'image/png', jpeg ? 0.92 : undefined); ext = jpeg ? 'jpg' : 'png';
+    if(elId==='sheet-banner'){ fitZone('banner-zone'); }
+    if(elId==='sheet-mobile'){ fitAllCells('mobile'); }
+    const node = document.getElementById(elId);
+    // Aspettiamo che tutte le immagini (logo ecc.) siano caricate, altrimenti il layout
+    // può spostarsi dopo la cattura e tagliare l'ultima riga.
+    const imgsToWait = Array.from(node.querySelectorAll('img')).filter(img=>!img.complete);
+    if(imgsToWait.length){
+      await Promise.all(imgsToWait.map(img=>new Promise(res=>{
+        img.addEventListener('load', res); img.addEventListener('error', res);
+      })));
+      if(elId==='sheet-banner'){ fitZone('banner-zone'); }
+      if(elId==='sheet-mobile'){ fitAllCells('mobile'); }
     }
-    if(!blob) throw new Error('immagine vuota (memoria del dispositivo insufficiente?)');
-    exportStatus('Pronto: ' + filename + '.' + ext, blob, filename + '.' + ext);
-  }catch(err){ console.error(err); exportStatus('Errore: ' + err.message); }
+    if(elId==='sheet-mobile'){
+      const stack = document.getElementById('mobile-stack');
+      const group = document.querySelector('#sheet-mobile .mobile-content-group');
+      const brand = document.querySelector('#sheet-mobile .mobile-brand');
+      if(stack && group && brand){
+        fitStackScale(stack, Math.max(80, group.clientHeight - brand.offsetHeight - 22));
+      }
+    }
+    const bg = elId==='sheet-banner' ? '#FFFFFF' : '#141212';
+    // Per lo sfondo mobile puntiamo alla risoluzione esatta richiesta (2213×4798px)
+    // invece di un fattore di scala fisso, così il file combacia sempre con quella misura.
+    const scale = elId==='sheet-mobile' ? (2213 / node.offsetWidth) : 3;
+    const canvas = await html2canvas(node, {backgroundColor:bg, scale});
+    // Usiamo un Blob invece di un data-URL: un PNG/JPEG in alta qualità genera un
+    // URL troppo lungo che Safari su iOS a volte rifiuta di aprire in silenzio.
+    const mime = format==='jpeg' ? 'image/jpeg' : 'image/png';
+    const quality = format==='jpeg' ? 0.92 : undefined;
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, mime, quality));
+    if(win && blob){
+      const blobUrl = URL.createObjectURL(blob);
+      win.location.href = blobUrl;
+      // Su Chrome desktop, aprire un blob JPEG senza nome file lo fa salvare
+      // come .jfif invece di .jpg: forziamo il nome corretto con un link "download"
+      // in parallelo. Su iOS questo passaggio in genere non fa nulla (nessun danno),
+      // e la scheda già aperta resta comunque disponibile per il salvataggio manuale.
+      const ext = format==='jpeg' ? 'jpg' : 'png';
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `${filename}.${ext}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }else if(win){
+      win.close();
+      alert('Errore nella generazione dell\'immagine. Riprova.');
+    }else{
+      alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
+    }
+  }catch(err){
+    if(win) win.close();
+    alert('Errore durante la generazione: ' + err.message);
+    console.error(err);
+  }
 }
 
 async function exportPDF(){
+  const win = window.open('', '_blank');
   try{
-    exportStatus('Generazione PDF in corso…');
-    if(!window.jspdf) throw new Error('libreria jsPDF non caricata (controlla la connessione)');
     fitAllCells('print');
     const node = document.getElementById('sheet-print');
-    await waitNodeImages(node); fitAllCells('print');
+    const imgsToWait = Array.from(node.querySelectorAll('img')).filter(img=>!img.complete);
+    if(imgsToWait.length){
+      await Promise.all(imgsToWait.map(img=>new Promise(res=>{
+        img.addEventListener('load', res); img.addEventListener('error', res);
+      })));
+      fitAllCells('print');
+    }
     const stack = document.getElementById('print-stack');
     if(stack){ fitStackScale(stack, node.clientHeight - 20); }
-    const canvas = await captureNode(node, '#141212', 3);
-    const pdf = new window.jspdf.jsPDF({unit:'mm', format:'a5', orientation:'portrait'});
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
-    exportStatus('Pronto: programmazione-a5.pdf', pdf.output('blob'), 'programmazione-a5.pdf');
-  }catch(err){ console.error(err); exportStatus('Errore: ' + err.message); }
+    const canvas = await html2canvas(node, {backgroundColor:'#141212', scale:3});
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({unit:'mm', format:'a5', orientation:'portrait'});
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
+    const blobUrl = pdf.output('bloburl');
+    if(win){
+      win.location.href = blobUrl;
+    }else{
+      alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
+    }
+  }catch(err){
+    if(win) win.close();
+    alert('Errore durante la generazione: ' + err.message);
+    console.error(err);
+  }
 }
 
 async function exportPDFBanner(){
+  const win = window.open('', '_blank');
   const frameImg = document.querySelector('#sheet-banner .frame-bg');
   const originalSrc = frameImg ? frameImg.getAttribute('src') : null;
   try{
-    exportStatus('Generazione PDF in corso…');
-    if(!window.jspdf) throw new Error('libreria jsPDF non caricata (controlla la connessione)');
     fitZone('banner-zone');
     const node = document.getElementById('sheet-banner');
-    // Per il PDF (stampa) usiamo la cornice in bianco e nero; il JPEG (monitor) resta a colori.
+
+    // Per il PDF (stampa) usiamo la cornice in bianco e nero; il PNG (monitor) resta a colori.
     if(frameImg){
-      await new Promise((resolve, reject)=>{ frameImg.onload = resolve; frameImg.onerror = reject; frameImg.src = 'assets/banners/banner-bw.png'; });
+      await new Promise((resolve, reject)=>{
+        frameImg.onload = resolve;
+        frameImg.onerror = reject;
+        frameImg.src = 'assets/banners/banner-bw.png';
+      });
     }
-    const canvas = await captureNode(node, '#FFFFFF', 3);
-    const ratio = 1513/1039, pageW = 297, pageH = pageW / ratio;
-    const pdf = new window.jspdf.jsPDF({unit:'mm', format:[pageW, pageH], orientation:'landscape'});
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pageW, pageH);
-    exportStatus('Pronto: banner-pubblico.pdf', pdf.output('blob'), 'banner-pubblico.pdf');
-  }catch(err){ console.error(err); exportStatus('Errore: ' + err.message); }
-  finally{ if(frameImg && originalSrc){ frameImg.src = originalSrc; } }
+
+    const canvas = await html2canvas(node, {backgroundColor:'#FFFFFF', scale:3});
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    // La cornice ha un rapporto (1513:1039) leggermente diverso dall'A4 standard:
+    // usiamo una pagina larga come un A4 orizzontale ma alta il giusto per non deformare l'immagine.
+    const ratio = 1513/1039;
+    const pageW = 297;
+    const pageH = pageW / ratio;
+    const pdf = new jsPDF({unit:'mm', format:[pageW, pageH], orientation:'landscape'});
+    pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
+    const blobUrl = pdf.output('bloburl');
+    if(win){
+      win.location.href = blobUrl;
+    }else{
+      alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
+    }
+  }catch(err){
+    if(win) win.close();
+    alert('Errore durante la generazione: ' + err.message);
+    console.error(err);
+  }finally{
+    // Ripristiniamo sempre la cornice a colori nell'anteprima, qualunque cosa succeda
+    if(frameImg && originalSrc){ frameImg.src = originalSrc; }
+  }
 }
 
 initData();
