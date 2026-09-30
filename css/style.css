@@ -176,16 +176,42 @@
   /* ---- Mobile wallpaper ---- */
   #sheet-mobile{
     width:390px;height:846px;
-    background:#000;
-    display:block;
-    padding:0;
+    background:#000000;
+    display:flex;flex-direction:column;align-items:center;
+    padding:22px 18px;
     overflow:hidden;
   }
-  #sheet-mobile #mobile-wallpaper-canvas{
-    display:block;
-    width:100%;height:100%;
-    margin:0;
-    background:#000;
+  #sheet-mobile .mobile-safe-top{ flex:0 0 25%; width:100%; }
+  #sheet-mobile .mobile-safe-bottom{ flex:0 0 7%; width:100%; }
+  #sheet-mobile .mobile-content-group{
+    flex:1;min-height:0;width:100%;overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  }
+  #sheet-mobile .mobile-stack{ width:100%; }
+  #sheet-mobile .mobile-room-band{position:relative;width:100%;margin-bottom:4px;}
+  #sheet-mobile .mobile-band-img{display:block;width:100%;height:auto;}
+  #sheet-mobile .mobile-cell{position:absolute;box-sizing:border-box;overflow:hidden;z-index:1;
+    display:flex;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center;
+    padding:1px 4px;gap:calc(3px * var(--fg,1));
+  }
+  #sheet-mobile .mobile-film-title{font-family:'Inter';font-weight:700;font-size:calc(10px * var(--fz,1));color:#141212;}
+  #sheet-mobile .mobile-interval-icon{
+    width:calc(29px * var(--fz,1));height:calc(19px * var(--fz,1));
+    object-fit:contain;flex:0 0 auto;display:block;
+  }
+  #sheet-mobile .mobile-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(7.5px * var(--fz,1));padding:1.5px 5px;border-radius:4px;white-space:nowrap;}
+  #sheet-mobile .mobile-icon-badge{width:calc(9.5px * var(--fz,1));height:calc(9.5px * var(--fz,1));object-fit:contain;flex-shrink:0;}
+  #sheet-mobile .mobile-price-cell{font-family:'Inter';font-weight:700;font-size:calc(9.5px * var(--fz,1));color:#141212;}
+  #sheet-mobile .mobile-abb-cell{display:flex;align-items:center;justify-content:center;}
+  #sheet-mobile .mobile-abb-icon{width:60%;height:60%;object-fit:contain;}
+
+  #sheet-mobile .mobile-brand{
+    display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;
+  }
+  #sheet-mobile .mobile-brand img{width:56px;height:auto;}
+  #sheet-mobile .mobile-brand .brand-text{
+    font-family:'Inter';font-weight:800;font-size:18px;letter-spacing:1px;color:#E8622C;
+    text-transform:uppercase;text-align:center;
   }
 
   /* ---- Public banner: sfondo immagine reale + zona data + zona contenuto ---- */
