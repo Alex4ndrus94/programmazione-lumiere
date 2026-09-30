@@ -450,7 +450,7 @@ function roomBandHTML(prefix, room, showPrices){
   });
 
   return `<div class="${prefix}-room-band">
-    <img src="${variant.file}" alt="${escAttr(room.name)}" class="${prefix}-band-img" loading="eager" decoding="sync">
+    <img src="${variant.file}" alt="${escAttr(room.name)}" class="${prefix}-band-img" onerror="this.style.opacity='0';">
     ${contentCells}${interoCells}${ridottoCells}${abbCells}
   </div>`;
 }
@@ -523,7 +523,8 @@ function renderPrintSheet(){
 
 function renderMobileSheet(){
   const el = document.getElementById('sheet-mobile');
-  // Sfondo mobile: solo la programmazione. Nessun logo, titolo o fascia riservata.
+  // Lo sfondo mobile usa ESCLUSIVAMENTE i template PNG delle sale.
+  // Nessun logo, titolo o spazio riservato: tutta la tela è disponibile per la programmazione.
   el.innerHTML = `
     <div class="mobile-content-group">
       <div class="mobile-stack" id="mobile-stack">
@@ -534,9 +535,9 @@ function renderMobileSheet(){
   waitImagesThen(el, ()=>{
     fitAllCells('mobile');
     const stack = document.getElementById('mobile-stack');
-    const group = document.querySelector('#sheet-mobile .mobile-content-group');
-    if(!stack || !group) return;
-    fitStackScale(stack, group.clientHeight);
+    // Le sale vengono composte una sotto l'altra usando i PNG predisposti.
+    // Se l'insieme supera la tela, viene ridotto tutto proporzionalmente.
+    fitStackScale(stack, el.clientHeight);
   });
 }
 
@@ -777,14 +778,6 @@ async function exportPNG(elId, filename, format='png'){
       })));
       if(elId==='sheet-banner'){ fitZone('banner-zone'); }
       if(elId==='sheet-mobile'){ fitAllCells('mobile'); }
-    }
-    if(elId==='sheet-mobile'){
-      const stack = document.getElementById('mobile-stack');
-      const group = document.querySelector('#sheet-mobile .mobile-content-group');
-      const brand = document.querySelector('#sheet-mobile .mobile-brand');
-      if(stack && group && brand){
-        fitStackScale(stack, Math.max(80, group.clientHeight - brand.offsetHeight - 22));
-      }
     }
     const bg = elId==='sheet-banner' ? '#FFFFFF' : '#141212';
     // Per lo sfondo mobile puntiamo alla risoluzione esatta richiesta (2213×4798px)
