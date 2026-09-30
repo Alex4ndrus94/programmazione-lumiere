@@ -95,7 +95,7 @@ function loadDataLocalFallback(){
 async function initData(){
   if(!fbRef){ data = loadDataLocalFallback(); renderAll(); return; }
   try{
-    const snapshot = await fbRef.once('value');
+    const snapshot = await Promise.race([fbRef.once('value'), new Promise((_,rej)=>setTimeout(()=>rej(new Error('Firebase timeout')),6000))]);
     if(snapshot.exists()){
       data = normalizeAllIntervals(snapshot.val());
     }else{
@@ -923,151 +923,101 @@ document.getElementById('toggle-sala').addEventListener('change', renderBannerSh
 document.getElementById('toggle-prezzo').addEventListener('change', renderBannerSheet);
 
 /* ============ EXPORT ============ */
+// Barra in basso: mostra stato/errori e, a file pronto, un pulsante da toccare.
+// Il tocco diretto dell'utente evita i blocchi popup/download di iOS Safari e delle PWA.
+function exportStatus(msg, blob, filename){
+  let bar = document.getElementById('export-bar');
+  if(!bar){
+    bar = document.createElement('div'); bar.id = 'export-bar';
+    bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#1e1c1a;color:#F5F0E6;padding:12px 14px calc(12px + env(safe-area-inset-bottom));font:600 14px Inter,Arial,sans-serif;display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-top:2px solid #E8622C';
+    document.body.appendChild(bar);
+  }
+  bar.innerHTML = '';
+  const t = document.createElement('span'); t.textContent = msg; t.style.flex = '1 1 100%'; bar.appendChild(t);
+  const mk = (tag,label)=>{ const e = document.createElement(tag); e.textContent = label; e.className = 'btn-export'; e.style.textDecoration = 'none'; return e; };
+  if(blob){
+    const a = mk('a','Apri / Scarica'); a.href = URL.createObjectURL(blob); a.download = filename; a.target = '_blank'; bar.appendChild(a);
+    try{
+      const file = new File([blob], filename, {type: blob.type});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        const s = mk('button','Condividi / Salva'); s.onclick = ()=>navigator.share({files:[file], title:filename}).catch(()=>{}); bar.appendChild(s);
+      }
+    }catch(e){}
+  }
+  if(blob || /^Errore/.test(msg)){ const c = mk('button','Chiudi'); c.style.background = '#444'; c.onclick = ()=>bar.remove(); bar.appendChild(c); }
+}
+
+const canvasToBlob = (c, mime, q)=>new Promise(res=>c.toBlob(res, mime, q));
+
+async function waitNodeImages(node){
+  const pending = Array.from(node.querySelectorAll('img')).filter(img=>!img.complete);
+  if(pending.length) await Promise.all(pending.map(img=>new Promise(res=>{ img.addEventListener('load',res); img.addEventListener('error',res); })));
+}
+
+// Limita i pixel totali (~12 Mpx): oltre, Safari su iPhone esaurisce la memoria e la pagina si blocca in silenzio.
+async function captureNode(node, bg, wantedScale){
+  if(typeof html2canvas === 'undefined') throw new Error('libreria html2canvas non caricata (controlla la connessione)');
+  const px = Math.max(1, node.offsetWidth * node.offsetHeight);
+  const scale = Math.min(wantedScale, Math.sqrt(12e6 / px));
+  return html2canvas(node, {backgroundColor:bg, scale});
+}
+
 async function exportPNG(elId, filename, format='png'){
-  if(elId==='sheet-mobile') {
-    const canvas = document.getElementById('mobile-wallpaper-canvas') || await renderMobileCanvas();
-    if(!canvas) { alert('Impossibile generare lo sfondo mobile.'); return; }
-    try {
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-      if(!blob) throw new Error('Canvas vuoto');
-      const url = URL.createObjectURL(blob);
-      const win = window.open(url, '_blank');
-      const link = document.createElement('a');
-      link.href=url; link.download=`${filename}.png`;
-      document.body.appendChild(link); link.click(); link.remove();
-      if(!win) alert('Consenti i popup per aprire lo sfondo generato.');
-    } catch(err) { console.error(err); alert('Errore nella generazione dello sfondo mobile.'); }
-    return;
-  }
-  // Apriamo subito la scheda, nello stesso istante del tap: iOS Safari blocca
-  // le aperture "in differita" dopo un'operazione asincrona come html2canvas.
-  const win = window.open('', '_blank');
   try{
-    if(elId==='sheet-banner'){ fitZone('banner-zone'); }
-    if(elId==='sheet-mobile'){ fitAllCells('mobile'); }
-    const node = document.getElementById(elId);
-    // Aspettiamo che tutte le immagini (logo ecc.) siano caricate, altrimenti il layout
-    // può spostarsi dopo la cattura e tagliare l'ultima riga.
-    const imgsToWait = Array.from(node.querySelectorAll('img')).filter(img=>!img.complete);
-    if(imgsToWait.length){
-      await Promise.all(imgsToWait.map(img=>new Promise(res=>{
-        img.addEventListener('load', res); img.addEventListener('error', res);
-      })));
-      if(elId==='sheet-banner'){ fitZone('banner-zone'); }
-      if(elId==='sheet-mobile'){ fitAllCells('mobile'); }
-    }
-    const bg = elId==='sheet-banner' ? '#FFFFFF' : '#141212';
-    // Per lo sfondo mobile puntiamo alla risoluzione esatta richiesta (2213×4798px)
-    // invece di un fattore di scala fisso, così il file combacia sempre con quella misura.
-    const scale = elId==='sheet-mobile' ? (2213 / node.offsetWidth) : 3;
-    const canvas = await html2canvas(node, {backgroundColor:bg, scale});
-    // Usiamo un Blob invece di un data-URL: un PNG/JPEG in alta qualità genera un
-    // URL troppo lungo che Safari su iOS a volte rifiuta di aprire in silenzio.
-    const mime = format==='jpeg' ? 'image/jpeg' : 'image/png';
-    const quality = format==='jpeg' ? 0.92 : undefined;
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, mime, quality));
-    if(win && blob){
-      const blobUrl = URL.createObjectURL(blob);
-      win.location.href = blobUrl;
-      // Su Chrome desktop, aprire un blob JPEG senza nome file lo fa salvare
-      // come .jfif invece di .jpg: forziamo il nome corretto con un link "download"
-      // in parallelo. Su iOS questo passaggio in genere non fa nulla (nessun danno),
-      // e la scheda già aperta resta comunque disponibile per il salvataggio manuale.
-      const ext = format==='jpeg' ? 'jpg' : 'png';
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = `${filename}.${ext}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }else if(win){
-      win.close();
-      alert('Errore nella generazione dell\'immagine. Riprova.');
+    exportStatus('Generazione in corso…');
+    let blob, ext;
+    if(elId === 'sheet-mobile'){
+      const canvas = document.getElementById('mobile-wallpaper-canvas') || await renderMobileCanvas();
+      if(!canvas) throw new Error('canvas non disponibile');
+      blob = await canvasToBlob(canvas, 'image/png'); ext = 'png';
     }else{
-      alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
+      fitZone('banner-zone');
+      const node = document.getElementById(elId);
+      await waitNodeImages(node); fitZone('banner-zone');
+      const canvas = await captureNode(node, '#FFFFFF', 3);
+      const jpeg = format === 'jpeg';
+      blob = await canvasToBlob(canvas, jpeg ? 'image/jpeg' : 'image/png', jpeg ? 0.92 : undefined); ext = jpeg ? 'jpg' : 'png';
     }
-  }catch(err){
-    if(win) win.close();
-    alert('Errore durante la generazione: ' + err.message);
-    console.error(err);
-  }
+    if(!blob) throw new Error('immagine vuota (memoria del dispositivo insufficiente?)');
+    exportStatus('Pronto: ' + filename + '.' + ext, blob, filename + '.' + ext);
+  }catch(err){ console.error(err); exportStatus('Errore: ' + err.message); }
 }
 
 async function exportPDF(){
-  const win = window.open('', '_blank');
   try{
+    exportStatus('Generazione PDF in corso…');
+    if(!window.jspdf) throw new Error('libreria jsPDF non caricata (controlla la connessione)');
     fitAllCells('print');
     const node = document.getElementById('sheet-print');
-    const imgsToWait = Array.from(node.querySelectorAll('img')).filter(img=>!img.complete);
-    if(imgsToWait.length){
-      await Promise.all(imgsToWait.map(img=>new Promise(res=>{
-        img.addEventListener('load', res); img.addEventListener('error', res);
-      })));
-      fitAllCells('print');
-    }
+    await waitNodeImages(node); fitAllCells('print');
     const stack = document.getElementById('print-stack');
     if(stack){ fitStackScale(stack, node.clientHeight - 20); }
-    const canvas = await html2canvas(node, {backgroundColor:'#141212', scale:3});
-    const imgData = canvas.toDataURL('image/png');
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({unit:'mm', format:'a5', orientation:'portrait'});
-    const pageW = pdf.internal.pageSize.getWidth();
-    const pageH = pdf.internal.pageSize.getHeight();
-    pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
-    const blobUrl = pdf.output('bloburl');
-    if(win){
-      win.location.href = blobUrl;
-    }else{
-      alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
-    }
-  }catch(err){
-    if(win) win.close();
-    alert('Errore durante la generazione: ' + err.message);
-    console.error(err);
-  }
+    const canvas = await captureNode(node, '#141212', 3);
+    const pdf = new window.jspdf.jsPDF({unit:'mm', format:'a5', orientation:'portrait'});
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
+    exportStatus('Pronto: programmazione-a5.pdf', pdf.output('blob'), 'programmazione-a5.pdf');
+  }catch(err){ console.error(err); exportStatus('Errore: ' + err.message); }
 }
 
 async function exportPDFBanner(){
-  const win = window.open('', '_blank');
   const frameImg = document.querySelector('#sheet-banner .frame-bg');
   const originalSrc = frameImg ? frameImg.getAttribute('src') : null;
   try{
+    exportStatus('Generazione PDF in corso…');
+    if(!window.jspdf) throw new Error('libreria jsPDF non caricata (controlla la connessione)');
     fitZone('banner-zone');
     const node = document.getElementById('sheet-banner');
-
-    // Per il PDF (stampa) usiamo la cornice in bianco e nero; il PNG (monitor) resta a colori.
+    // Per il PDF (stampa) usiamo la cornice in bianco e nero; il JPEG (monitor) resta a colori.
     if(frameImg){
-      await new Promise((resolve, reject)=>{
-        frameImg.onload = resolve;
-        frameImg.onerror = reject;
-        frameImg.src = 'assets/banners/banner-bw.png';
-      });
+      await new Promise((resolve, reject)=>{ frameImg.onload = resolve; frameImg.onerror = reject; frameImg.src = 'assets/banners/banner-bw.png'; });
     }
-
-    const canvas = await html2canvas(node, {backgroundColor:'#FFFFFF', scale:3});
-    const imgData = canvas.toDataURL('image/png');
-    const { jsPDF } = window.jspdf;
-    // La cornice ha un rapporto (1513:1039) leggermente diverso dall'A4 standard:
-    // usiamo una pagina larga come un A4 orizzontale ma alta il giusto per non deformare l'immagine.
-    const ratio = 1513/1039;
-    const pageW = 297;
-    const pageH = pageW / ratio;
-    const pdf = new jsPDF({unit:'mm', format:[pageW, pageH], orientation:'landscape'});
-    pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
-    const blobUrl = pdf.output('bloburl');
-    if(win){
-      win.location.href = blobUrl;
-    }else{
-      alert('Il browser ha bloccato l\'apertura automatica. Consenti i popup per questo sito nelle impostazioni di Safari e riprova.');
-    }
-  }catch(err){
-    if(win) win.close();
-    alert('Errore durante la generazione: ' + err.message);
-    console.error(err);
-  }finally{
-    // Ripristiniamo sempre la cornice a colori nell'anteprima, qualunque cosa succeda
-    if(frameImg && originalSrc){ frameImg.src = originalSrc; }
-  }
+    const canvas = await captureNode(node, '#FFFFFF', 3);
+    const ratio = 1513/1039, pageW = 297, pageH = pageW / ratio;
+    const pdf = new window.jspdf.jsPDF({unit:'mm', format:[pageW, pageH], orientation:'landscape'});
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pageW, pageH);
+    exportStatus('Pronto: banner-pubblico.pdf', pdf.output('blob'), 'banner-pubblico.pdf');
+  }catch(err){ console.error(err); exportStatus('Errore: ' + err.message); }
+  finally{ if(frameImg && originalSrc){ frameImg.src = originalSrc; } }
 }
 
 initData();
