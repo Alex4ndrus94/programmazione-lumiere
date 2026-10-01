@@ -521,28 +521,42 @@ function renderPrintSheet(){
   });
 }
 
+// SOLO MOBILE: adatta la pila delle sale all'area realmente disponibile, con scaling
+// uniforme (un solo fattore per larghezza e altezza, mai stretching) e SENZA scala minima,
+// così nessuna sala/riga/orario può essere tagliato. L'altezza del contenitore viene
+// impostata a quella già scalata, così il centraggio verticale resta corretto.
+function fitMobileStack(){
+  const stack = document.getElementById('mobile-stack');
+  const wrap = document.getElementById('mobile-stack-wrap');
+  const group = document.querySelector('#sheet-mobile .mobile-content-group');
+  if(!stack || !wrap || !group) return;
+  stack.style.transform = 'none';
+  wrap.style.height = 'auto';
+  const naturalH = stack.offsetHeight;
+  const availH = group.clientHeight;
+  if(!naturalH || !availH) return;
+  const scale = Math.min(1, availH / naturalH);
+  stack.style.transformOrigin = 'top center';
+  stack.style.transform = scale < 1 ? `scale(${scale})` : 'none';
+  wrap.style.height = (naturalH * scale) + 'px';
+}
+
 function renderMobileSheet(){
   const el = document.getElementById('sheet-mobile');
   el.innerHTML = `
     <div class="mobile-safe-top"></div>
     <div class="mobile-content-group">
-      <div class="mobile-stack" id="mobile-stack">
-        ${roomStackHTML('mobile', true)}
-      </div>
-      <div class="mobile-brand">
-        <img src="logo-lumiere.png" alt="Logo Cinema Lumière" onerror="this.style.display='none';">
-        <div class="brand-text">Multisala Lumière</div>
+      <div class="mobile-stack-wrap" id="mobile-stack-wrap">
+        <div class="mobile-stack" id="mobile-stack">
+          ${roomStackHTML('mobile', true)}
+        </div>
       </div>
     </div>
     <div class="mobile-safe-bottom"></div>`;
   fitAllCells('mobile');
   waitImagesThen(el, ()=>{
     fitAllCells('mobile');
-    const stack = document.getElementById('mobile-stack');
-    const group = document.querySelector('#sheet-mobile .mobile-content-group');
-    const brand = document.querySelector('#sheet-mobile .mobile-brand');
-    const budget = group.clientHeight - brand.offsetHeight - 22;
-    fitStackScale(stack, Math.max(80, budget));
+    fitMobileStack();
   });
 }
 
@@ -784,14 +798,7 @@ async function exportPNG(elId, filename, format='png'){
       if(elId==='sheet-banner'){ fitZone('banner-zone'); }
       if(elId==='sheet-mobile'){ fitAllCells('mobile'); }
     }
-    if(elId==='sheet-mobile'){
-      const stack = document.getElementById('mobile-stack');
-      const group = document.querySelector('#sheet-mobile .mobile-content-group');
-      const brand = document.querySelector('#sheet-mobile .mobile-brand');
-      if(stack && group && brand){
-        fitStackScale(stack, Math.max(80, group.clientHeight - brand.offsetHeight - 22));
-      }
-    }
+    if(elId==='sheet-mobile'){ fitMobileStack(); }
     const bg = elId==='sheet-banner' ? '#FFFFFF' : '#141212';
     // Per lo sfondo mobile puntiamo alla risoluzione esatta richiesta (2213×4798px)
     // invece di un fattore di scala fisso, così il file combacia sempre con quella misura.
@@ -849,7 +856,16 @@ async function exportPDF(){
     const pdf = new jsPDF({unit:'mm', format:'a5', orientation:'portrait'});
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
-    pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
+    // Il canvas (600x846, rapporto 0,709) non ha lo stesso rapporto della pagina A5
+    // (148x210, 0,705): addImage con larghezza e altezza forzate lo stirava in verticale.
+    // Ora l'immagine entra nella pagina in modo proporzionale e centrato; il piccolo margine
+    // residuo viene riempito con lo stesso colore di sfondo del foglio.
+    pdf.setFillColor(20, 18, 18); // #141212
+    pdf.rect(0, 0, pageW, pageH, 'F');
+    const imgRatio = canvas.width / canvas.height;
+    let drawW = pageW, drawH = pageW / imgRatio;
+    if(drawH > pageH){ drawH = pageH; drawW = pageH * imgRatio; }
+    pdf.addImage(imgData, 'PNG', (pageW - drawW) / 2, (pageH - drawH) / 2, drawW, drawH);
     const blobUrl = pdf.output('bloburl');
     if(win){
       win.location.href = blobUrl;
