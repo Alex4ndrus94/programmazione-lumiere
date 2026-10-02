@@ -167,7 +167,7 @@
     width:calc(46px * var(--fz,1));height:auto;
     flex:0 0 auto;display:block;
   }
-  #sheet-print .print-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(11px * var(--fz,1));padding:2px 7px;border-radius:5px;white-space:nowrap;}
+  #sheet-print .print-pill{color:#fff;font-family:'Oswald','Inter',sans-serif;font-weight:600;font-size:calc(13.5px * var(--fz,1));line-height:1.1;padding:0.6px 7px 1.9px;border-radius:5px;white-space:nowrap;}
   #sheet-print .print-icon-badge{width:calc(14px * var(--fz,1));height:auto;flex-shrink:0;}
   #sheet-print .print-price-cell{font-family:'Inter';font-weight:700;font-size:calc(14px * var(--fz,1));color:#141212;}
   #sheet-print .print-abb-cell{display:flex;align-items:center;justify-content:center;}
@@ -200,7 +200,7 @@
     width:calc(29px * var(--fz,1));height:calc(19px * var(--fz,1));
     object-fit:contain;flex:0 0 auto;display:block;
   }
-  #sheet-mobile .mobile-pill{color:#fff;font-family:'Inter';font-weight:700;font-size:calc(7.5px * var(--fz,1));padding:1.5px 5px;border-radius:4px;white-space:nowrap;}
+  #sheet-mobile .mobile-pill{color:#fff;font-family:'Oswald','Inter',sans-serif;font-weight:600;font-size:calc(10px * var(--fz,1));line-height:1.1;padding:0.13px 5px 1.07px;border-radius:4px;white-space:nowrap;}
   #sheet-mobile .mobile-icon-badge{width:calc(9.5px * var(--fz,1));height:calc(9.5px * var(--fz,1));object-fit:contain;flex-shrink:0;}
   #sheet-mobile .mobile-price-cell{font-family:'Inter';font-weight:700;font-size:calc(9.5px * var(--fz,1));color:#141212;}
   #sheet-mobile .mobile-abb-cell{display:flex;align-items:center;justify-content:center;}

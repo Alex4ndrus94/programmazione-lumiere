@@ -776,6 +776,11 @@ function renderAll(){
   renderBannerSheet();
 }
 
+// Oswald (orari nelle pillole) va caricato prima delle misure: al termine ricalcoliamo i fit.
+if(document.fonts && document.fonts.load){
+  document.fonts.load('600 10px Oswald').then(()=>{ renderPrintSheet(); renderMobileSheet(); }).catch(()=>{});
+}
+
 document.getElementById('toggle-sala').addEventListener('change', renderBannerSheet);
 document.getElementById('toggle-prezzo').addEventListener('change', renderBannerSheet);
 
@@ -785,6 +790,7 @@ async function exportPNG(elId, filename, format='png'){
   // le aperture "in differita" dopo un'operazione asincrona come html2canvas.
   const win = window.open('', '_blank');
   try{
+    if(document.fonts && document.fonts.load){ try{ await document.fonts.load('600 10px Oswald'); }catch(e){} }
     if(elId==='sheet-banner'){ fitZone('banner-zone'); }
     if(elId==='sheet-mobile'){ fitAllCells('mobile'); }
     const node = document.getElementById(elId);
