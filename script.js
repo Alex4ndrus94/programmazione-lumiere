@@ -785,6 +785,43 @@ document.getElementById('toggle-sala').addEventListener('change', renderBannerSh
 document.getElementById('toggle-prezzo').addEventListener('change', renderBannerSheet);
 
 /* ============ EXPORT ============ */
+// Acquisizione comune a PNG mobile e PDF A5.
+// html2canvas legge le posizioni con getBoundingClientRect (già rimpicciolite dal
+// transform: scale() della pila) e poi riapplica il transform: la scala viene così
+// applicata due volte e il contenuto esce più basso/stretto rispetto alla preview.
+// Qui la pila viene quindi disegnata SENZA transform, alla scala finale (scala export
+// x fattore della preview, un solo fattore per larghezza e altezza), e posizionata
+// dove si trova nella preview. Sfondo e margini vengono dal resto del foglio.
+async function captureSheet(node, stackId, bg, scale){
+  const stack = document.getElementById(stackId);
+  if(!stack) return html2canvas(node, {backgroundColor:bg, scale});
+  const sheetRect = node.getBoundingClientRect();
+  const stackRect = stack.getBoundingClientRect(); // ingombro visivo nella preview (già scalato)
+  const naturalW = stack.offsetWidth;              // misura reale, senza transform
+  const f = naturalW ? (stackRect.width / naturalW) : 1; // fattore uniforme della preview
+  // 1) foglio senza la pila (sfondo, margini)
+  const base = await html2canvas(node, {backgroundColor:bg, scale,
+    onclone:(doc)=>{ const s = doc.getElementById(stackId); if(s) s.style.visibility = 'hidden'; }});
+  // 2) pila a dimensione naturale, alla scala finale, senza transform né ritagli
+  const top = await html2canvas(stack, {backgroundColor:null, scale: scale * f,
+    onclone:(doc)=>{
+      const s = doc.getElementById(stackId);
+      if(!s) return;
+      s.style.transform = 'none';
+      for(let p = s.parentElement; p; p = p.parentElement){
+        p.style.overflow = 'visible';
+        if(p.id && p.id === node.id) break;
+      }
+      const w = doc.getElementById('mobile-stack-wrap');
+      if(w && w.contains(s)) w.style.height = 'auto';
+    }});
+  const ctx = base.getContext('2d');
+  const dx = Math.round((stackRect.left - sheetRect.left) * scale);
+  const dy = Math.round((stackRect.top - sheetRect.top) * scale);
+  // nessun ridimensionamento: si copia il canvas così com'è (dw/dh = dimensioni native)
+  ctx.drawImage(top, dx, dy);
+  return base;
+}
 async function exportPNG(elId, filename, format='png'){
   // Apriamo subito la scheda, nello stesso istante del tap: iOS Safari blocca
   // le aperture "in differita" dopo un'operazione asincrona come html2canvas.
@@ -809,7 +846,9 @@ async function exportPNG(elId, filename, format='png'){
     // Per lo sfondo mobile puntiamo alla risoluzione esatta richiesta (2213×4798px)
     // invece di un fattore di scala fisso, così il file combacia sempre con quella misura.
     const scale = elId==='sheet-mobile' ? (2213 / node.offsetWidth) : 3;
-    const canvas = await html2canvas(node, {backgroundColor:bg, scale});
+    const canvas = elId==='sheet-mobile'
+      ? await captureSheet(node, 'mobile-stack', bg, scale)
+      : await html2canvas(node, {backgroundColor:bg, scale});
     // Usiamo un Blob invece di un data-URL: un PNG/JPEG in alta qualità genera un
     // URL troppo lungo che Safari su iOS a volte rifiuta di aprire in silenzio.
     const mime = format==='jpeg' ? 'image/jpeg' : 'image/png';
@@ -856,7 +895,7 @@ async function exportPDF(){
     }
     const stack = document.getElementById('print-stack');
     if(stack){ fitStackScale(stack, node.clientHeight - 20); }
-    const canvas = await html2canvas(node, {backgroundColor:'#141212', scale:3});
+    const canvas = await captureSheet(node, 'print-stack', '#141212', 3);
     const imgData = canvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({unit:'mm', format:'a5', orientation:'portrait'});
