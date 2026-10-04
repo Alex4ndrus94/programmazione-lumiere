@@ -792,6 +792,53 @@ document.getElementById('toggle-prezzo').addEventListener('change', renderBanner
 // Qui la pila viene quindi disegnata SENZA transform, alla scala finale (scala export
 // x fattore della preview, un solo fattore per larghezza e altezza), e posizionata
 // dove si trova nella preview. Sfondo e margini vengono dal resto del foglio.
+// Raccoglie, nel documento clonato da html2canvas (pila a dimensione naturale), posizione
+// e stile di ogni pillola oraria, poi nasconde il testo originale: verrà ridisegnato da
+// drawPillTexts. Il rettangolo è misurato sul layout reale della pillola, quindi segue
+// automaticamente qualunque dimensione calcolata da CSS/fit (--fz) senza costanti proprie.
+function collectAndHidePills(stackEl, items){
+  const sr = stackEl.getBoundingClientRect();
+  stackEl.querySelectorAll('.print-pill, .mobile-pill').forEach(el=>{
+    const r = el.getBoundingClientRect();
+    const cs = el.ownerDocument.defaultView.getComputedStyle(el);
+    items.push({
+      text: el.textContent.trim(),
+      cx: r.left - sr.left + r.width / 2,
+      cy: r.top - sr.top + r.height / 2,
+      fontPx: parseFloat(cs.fontSize),
+      weight: cs.fontWeight,
+      family: cs.fontFamily,
+      color: cs.color
+    });
+    el.style.color = 'transparent';
+  });
+}
+
+// Disegna gli orari al centro esatto delle pillole.
+// - Orizzontale: textAlign='center' sul centro della pillola (come fa il browser, il
+//   padding laterale è simmetrico).
+// - Verticale: textBaseline='alphabetic' e baseline calcolata dall'inchiostro delle cifre.
+//   L'altezza di riferimento è quella della sequenza "0123456789:" (sempre la stessa),
+//   non della singola stringa: 16:45, 18:05, 20:10 e 22:15 risultano così tutte alla
+//   stessa quota, senza offset arbitrari in pixel.
+function drawPillTexts(canvas, items, K){
+  if(!items.length) return;
+  const ctx = canvas.getContext('2d');
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  items.forEach(it=>{
+    ctx.font = `${it.weight} ${it.fontPx * K}px ${it.family}`;
+    const m = ctx.measureText('0123456789:');
+    const inkAscent = m.actualBoundingBoxAscent;
+    const inkDescent = m.actualBoundingBoxDescent;
+    const baselineY = it.cy * K + (inkAscent - inkDescent) / 2;
+    ctx.fillStyle = it.color;
+    ctx.fillText(it.text, it.cx * K, baselineY);
+  });
+  ctx.restore();
+}
+
 async function captureSheet(node, stackId, bg, scale){
   const stack = document.getElementById(stackId);
   if(!stack) return html2canvas(node, {backgroundColor:bg, scale});
@@ -802,19 +849,37 @@ async function captureSheet(node, stackId, bg, scale){
   // 1) foglio senza la pila (sfondo, margini)
   const base = await html2canvas(node, {backgroundColor:bg, scale,
     onclone:(doc)=>{ const s = doc.getElementById(stackId); if(s) s.style.visibility = 'hidden'; }});
-  // 2) pila a dimensione naturale, alla scala finale, senza transform né ritagli
-  const top = await html2canvas(stack, {backgroundColor:null, scale: scale * f,
-    onclone:(doc)=>{
-      const s = doc.getElementById(stackId);
-      if(!s) return;
-      s.style.transform = 'none';
-      for(let p = s.parentElement; p; p = p.parentElement){
-        p.style.overflow = 'visible';
-        if(p.id && p.id === node.id) break;
-      }
-      const w = doc.getElementById('mobile-stack-wrap');
-      if(w && w.contains(s)) w.style.height = 'auto';
-    }});
+  // 2) pila a dimensione naturale, alla scala finale, senza transform né ritagli.
+  // Il testo delle pillole non lo disegna html2canvas (posiziona la riga di testo con
+  // una baseline che dipende dalle metriche del font e dal browser, e con Oswald, che ha
+  // ascent/descent molto sbilanciati, il testo esce decentrato): lo disegniamo noi sopra
+  // la pillola, centrato per misura (vedi drawPillTexts).
+  const K = scale * f; // pixel del canvas per ogni pixel CSS naturale della pila
+  const captureStack = (overlay) => {
+    const pillItems = [];
+    return html2canvas(stack, {backgroundColor:null, scale: K,
+      onclone:(doc)=>{
+        const s = doc.getElementById(stackId);
+        if(!s) return;
+        s.style.transform = 'none';
+        for(let p = s.parentElement; p; p = p.parentElement){
+          p.style.overflow = 'visible';
+          if(p.id && p.id === node.id) break;
+        }
+        const w = doc.getElementById('mobile-stack-wrap');
+        if(w && w.contains(s)) w.style.height = 'auto';
+        if(overlay) collectAndHidePills(s, pillItems);
+      }}).then(canvas => ({canvas, pillItems}));
+  };
+  let top, topResult = await captureStack(true);
+  top = topResult.canvas;
+  try{
+    drawPillTexts(top, topResult.pillItems, K);
+  }catch(err){
+    // Se il disegno del testo fallisse, ripieghiamo sulla resa standard di html2canvas
+    console.error('Testo pillole: ripiego su html2canvas', err);
+    top = (await captureStack(false)).canvas;
+  }
   const ctx = base.getContext('2d');
   const dx = Math.round((stackRect.left - sheetRect.left) * scale);
   const dy = Math.round((stackRect.top - sheetRect.top) * scale);
@@ -884,6 +949,7 @@ async function exportPNG(elId, filename, format='png'){
 async function exportPDF(){
   const win = window.open('', '_blank');
   try{
+    if(document.fonts && document.fonts.load){ try{ await document.fonts.load('600 10px Oswald'); }catch(e){} }
     fitAllCells('print');
     const node = document.getElementById('sheet-print');
     const imgsToWait = Array.from(node.querySelectorAll('img')).filter(img=>!img.complete);
