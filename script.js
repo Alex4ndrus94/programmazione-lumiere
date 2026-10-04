@@ -786,106 +786,121 @@ document.getElementById('toggle-prezzo').addEventListener('change', renderBanner
 
 /* ============ EXPORT ============ */
 // Acquisizione comune a PNG mobile e PDF A5.
-// html2canvas legge le posizioni con getBoundingClientRect (già rimpicciolite dal
-// transform: scale() della pila) e poi riapplica il transform: la scala viene così
-// applicata due volte e il contenuto esce più basso/stretto rispetto alla preview.
-// Qui la pila viene quindi disegnata SENZA transform, alla scala finale (scala export
-// x fattore della preview, un solo fattore per larghezza e altezza), e posizionata
-// dove si trova nella preview. Sfondo e margini vengono dal resto del foglio.
-// Raccoglie, nel documento clonato da html2canvas (pila a dimensione naturale), posizione
-// e stile di ogni pillola oraria, poi nasconde il testo originale: verrà ridisegnato da
-// drawPillTexts. Il rettangolo è misurato sul layout reale della pillola, quindi segue
-// automaticamente qualunque dimensione calcolata da CSS/fit (--fz) senza costanti proprie.
-function collectAndHidePills(stackEl, items){
-  const sr = stackEl.getBoundingClientRect();
-  stackEl.querySelectorAll('.print-pill, .mobile-pill').forEach(el=>{
-    const r = el.getBoundingClientRect();
-    const cs = el.ownerDocument.defaultView.getComputedStyle(el);
-    items.push({
-      text: el.textContent.trim(),
-      cx: r.left - sr.left + r.width / 2,
-      cy: r.top - sr.top + r.height / 2,
-      fontPx: parseFloat(cs.fontSize),
-      weight: cs.fontWeight,
-      family: cs.fontFamily,
-      color: cs.color
-    });
-    el.style.color = 'transparent';
-  });
-}
-
-// Disegna gli orari al centro esatto delle pillole.
-// - Orizzontale: textAlign='center' sul centro della pillola (come fa il browser, il
-//   padding laterale è simmetrico).
-// - Verticale: textBaseline='alphabetic' e baseline calcolata dall'inchiostro delle cifre.
-//   L'altezza di riferimento è quella della sequenza "0123456789:" (sempre la stessa),
-//   non della singola stringa: 16:45, 18:05, 20:10 e 22:15 risultano così tutte alla
-//   stessa quota, senza offset arbitrari in pixel.
-function drawPillTexts(canvas, items, K){
-  if(!items.length) return;
+// NIENTE html2canvas per il foglio: la pila delle sale ha un transform: scale() nella
+// preview e html2canvas, con un transform su un elemento non radice, applica la scala
+// due volte e (con una seconda cattura a scala frazionaria) sposta/ingrandisce il
+// contenuto. Qui il foglio viene invece DISEGNATO direttamente su un canvas leggendo la
+// geometria reale della preview (getBoundingClientRect, già comprensiva della scala):
+// ogni immagine, pillola e riga di testo finisce nella stessa posizione e con le stesse
+// proporzioni della preview, moltiplicate per un UNICO fattore di export. Nessuna seconda
+// scalatura, nessuna misura propria delle pillole, nessun offset in pixel.
+function paintSheetToCanvas(sheetEl, stackEl, bg, scale){
+  const sheetRect = sheetEl.getBoundingClientRect();
+  const W = Math.round(sheetEl.offsetWidth * scale);
+  const H = Math.round(sheetEl.offsetHeight * scale);
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
-  ctx.save();
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'alphabetic';
-  items.forEach(it=>{
-    ctx.font = `${it.weight} ${it.fontPx * K}px ${it.family}`;
-    const m = ctx.measureText('0123456789:');
-    const inkAscent = m.actualBoundingBoxAscent;
-    const inkDescent = m.actualBoundingBoxDescent;
-    const baselineY = it.cy * K + (inkAscent - inkDescent) / 2;
-    ctx.fillStyle = it.color;
-    ctx.fillText(it.text, it.cx * K, baselineY);
-  });
-  ctx.restore();
-}
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
 
+  const stackRect = stackEl.getBoundingClientRect();
+  const f = stackEl.offsetWidth ? stackRect.width / stackEl.offsetWidth : 1; // scala visiva della pila (uniforme)
+  const X = v => (v - sheetRect.left) * scale;
+  const Y = v => (v - sheetRect.top) * scale;
+  const clear = c => !c || c === 'transparent' || c === 'rgba(0, 0, 0, 0)';
+
+  function roundedRect(x, y, w, h, r){
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function paintImage(img, cs, r){
+    if(!img.complete || !img.naturalWidth) return;
+    let dx = r.left, dy = r.top, dw = r.width, dh = r.height;
+    if(cs.objectFit === 'contain'){
+      const k = Math.min(r.width / img.naturalWidth, r.height / img.naturalHeight);
+      dw = img.naturalWidth * k; dh = img.naturalHeight * k;
+      dx = r.left + (r.width - dw) / 2; dy = r.top + (r.height - dh) / 2;
+    }
+    ctx.drawImage(img, X(dx), Y(dy), dw * scale, dh * scale);
+  }
+
+  // Testo: ogni carattere viene disegnato dove il browser lo ha messo nella preview
+  // (posizione presa dal layout reale, quindi centratura, crenatura e spaziatura
+  // coincidono con la preview per qualunque orario e qualunque font).
+  function paintText(textNode){
+    const str = textNode.nodeValue;
+    if(!str || !str.trim()) return;
+    const el = textNode.parentElement;
+    if(!el) return;
+    const cs = getComputedStyle(el);
+    if(cs.visibility === 'hidden') return;
+    const cssSize = parseFloat(cs.fontSize);
+    const size = cssSize * f * scale;
+    ctx.fillStyle = cs.color;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    // Il layout del browser arrotonda l'ascent del font (alla dimensione CSS non scalata)
+    // prima di posizionare la riga: lo replichiamo, così la baseline coincide con la preview.
+    ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cssSize}px ${cs.fontFamily}`;
+    const m = ctx.measureText('Hg');
+    const ascent = (typeof m.fontBoundingBoxAscent === 'number')
+      ? Math.round(m.fontBoundingBoxAscent) * f * scale : null;
+    ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${size}px ${cs.fontFamily}`;
+    const text = cs.textTransform === 'uppercase' ? str.toUpperCase() : str;
+    const range = document.createRange();
+    let i = 0;
+    while(i < str.length){
+      const cp = str.codePointAt(i);
+      const len = cp > 0xFFFF ? 2 : 1;
+      if(!/\s/.test(str.substr(i, len))){
+        range.setStart(textNode, i); range.setEnd(textNode, i + len);
+        const rc = range.getClientRects()[0];
+        if(rc && rc.width > 0){
+          const base = Y(rc.top) + (ascent !== null ? ascent : rc.height * scale * 0.8);
+          ctx.fillText(text.substr(i, len), X(rc.left), base);
+        }
+      }
+      i += len;
+    }
+  }
+
+  function paint(node){
+    if(node.nodeType === 3){ paintText(node); return; }
+    if(node.nodeType !== 1) return;
+    const cs = getComputedStyle(node);
+    if(cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return;
+    const r = node.getBoundingClientRect();
+    const clip = node !== stackEl && cs.overflow !== 'visible';
+    if(clip){
+      ctx.save(); ctx.beginPath();
+      ctx.rect(X(r.left), Y(r.top), r.width * scale, r.height * scale); ctx.clip();
+    }
+    if(!clear(cs.backgroundColor)){
+      ctx.fillStyle = cs.backgroundColor;
+      roundedRect(X(r.left), Y(r.top), r.width * scale, r.height * scale,
+        parseFloat(cs.borderTopLeftRadius) * f * scale || 0);
+      ctx.fill();
+    }
+    if(node.tagName === 'IMG') paintImage(node, cs, r);
+    else node.childNodes.forEach(paint);
+    if(clip) ctx.restore();
+  }
+
+  paint(stackEl);
+  return canvas;
+}
 async function captureSheet(node, stackId, bg, scale){
   const stack = document.getElementById(stackId);
   if(!stack) return html2canvas(node, {backgroundColor:bg, scale});
-  const sheetRect = node.getBoundingClientRect();
-  const stackRect = stack.getBoundingClientRect(); // ingombro visivo nella preview (già scalato)
-  const naturalW = stack.offsetWidth;              // misura reale, senza transform
-  const f = naturalW ? (stackRect.width / naturalW) : 1; // fattore uniforme della preview
-  // 1) foglio senza la pila (sfondo, margini)
-  const base = await html2canvas(node, {backgroundColor:bg, scale,
-    onclone:(doc)=>{ const s = doc.getElementById(stackId); if(s) s.style.visibility = 'hidden'; }});
-  // 2) pila a dimensione naturale, alla scala finale, senza transform né ritagli.
-  // Il testo delle pillole non lo disegna html2canvas (posiziona la riga di testo con
-  // una baseline che dipende dalle metriche del font e dal browser, e con Oswald, che ha
-  // ascent/descent molto sbilanciati, il testo esce decentrato): lo disegniamo noi sopra
-  // la pillola, centrato per misura (vedi drawPillTexts).
-  const K = scale * f; // pixel del canvas per ogni pixel CSS naturale della pila
-  const captureStack = (overlay) => {
-    const pillItems = [];
-    return html2canvas(stack, {backgroundColor:null, scale: K,
-      onclone:(doc)=>{
-        const s = doc.getElementById(stackId);
-        if(!s) return;
-        s.style.transform = 'none';
-        for(let p = s.parentElement; p; p = p.parentElement){
-          p.style.overflow = 'visible';
-          if(p.id && p.id === node.id) break;
-        }
-        const w = doc.getElementById('mobile-stack-wrap');
-        if(w && w.contains(s)) w.style.height = 'auto';
-        if(overlay) collectAndHidePills(s, pillItems);
-      }}).then(canvas => ({canvas, pillItems}));
-  };
-  let top, topResult = await captureStack(true);
-  top = topResult.canvas;
-  try{
-    drawPillTexts(top, topResult.pillItems, K);
-  }catch(err){
-    // Se il disegno del testo fallisse, ripieghiamo sulla resa standard di html2canvas
-    console.error('Testo pillole: ripiego su html2canvas', err);
-    top = (await captureStack(false)).canvas;
-  }
-  const ctx = base.getContext('2d');
-  const dx = Math.round((stackRect.left - sheetRect.left) * scale);
-  const dy = Math.round((stackRect.top - sheetRect.top) * scale);
-  // nessun ridimensionamento: si copia il canvas così com'è (dw/dh = dimensioni native)
-  ctx.drawImage(top, dx, dy);
-  return base;
+  return paintSheetToCanvas(node, stack, bg, scale);
 }
 async function exportPNG(elId, filename, format='png'){
   // Apriamo subito la scheda, nello stesso istante del tap: iOS Safari blocca
