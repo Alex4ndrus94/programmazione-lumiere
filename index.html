@@ -52,6 +52,10 @@
   <div class="toolbar">
     <label class="toggle"><input type="checkbox" id="toggle-sala"> Mostra sala</label>
     <label class="toggle"><input type="checkbox" id="toggle-prezzo"> Mostra prezzi</label>
+    <label class="toggle headline-field">Titolo
+      <input type="text" id="banner-headline" maxlength="40" autocomplete="off" autocapitalize="characters" enterkeyhint="done">
+    </label>
+    <button type="button" class="btn-headline-auto" id="banner-headline-auto">Automatico</button>
     <button class="btn-export" onclick="exportPDFBanner()">Scarica PDF (A4 orizzontale)</button>
     <button class="btn-export" onclick="exportPNG('sheet-banner','banner-pubblico-monitor','jpeg')">Scarica JPEG (per monitor)</button>
   </div>

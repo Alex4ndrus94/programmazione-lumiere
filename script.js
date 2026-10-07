@@ -670,13 +670,64 @@ function renderBannerSheet(){
   `;
 
   fitZone('banner-zone');
+  fitBannerHeadline();
 }
 
-function bannerHeadline(){
+// Se il titolo scelto è lungo, lo rimpiccioliamo per farlo stare nella fascia (mai a capo né tagliato).
+function fitBannerHeadline(){
+  const zone = document.querySelector('#sheet-banner .banner-date-zone');
+  const span = zone && zone.querySelector('span');
+  if(!span || !zone.clientWidth) return;
+  span.style.whiteSpace = 'nowrap';
+  span.style.fontSize = '';
+  const w = span.scrollWidth, avail = zone.clientWidth;
+  if(w > avail) span.style.fontSize = Math.max(12, 28 * avail / w * 0.98) + 'px';
+}
+
+// Titolo del banner: di default automatico ("DA" + giorno di oggi), ma modificabile a mano
+// (es. "SOLO DOMANI", "DA GIOVEDÌ", "SABATO 11 OTTOBRE"). Il testo scelto resta salvato su
+// questo dispositivo finché non si preme "Automatico" o si svuota il campo.
+const HEADLINE_KEY = 'banner-headline-custom';
+function autoBannerHeadline(){
   const d = new Date();
   const giorni = ['DOMENICA','LUNEDÌ','MARTEDÌ','MERCOLEDÌ','GIOVEDÌ','VENERDÌ','SABATO'];
   return 'DA ' + giorni[d.getDay()];
 }
+function customBannerHeadline(){
+  try{ return (localStorage.getItem(HEADLINE_KEY) || '').trim(); }catch(e){ return ''; }
+}
+function bannerHeadline(){
+  return escHtml(customBannerHeadline() || autoBannerHeadline());
+}
+(function setupHeadlineField(){
+  const input = document.getElementById('banner-headline');
+  const autoBtn = document.getElementById('banner-headline-auto');
+  if(!input || !autoBtn) return;
+  const sync = ()=>{
+    const custom = customBannerHeadline();
+    input.value = custom || autoBannerHeadline();
+    autoBtn.style.display = custom ? '' : 'none';
+  };
+  input.addEventListener('input', ()=>{
+    const v = input.value.trim();
+    try{
+      // se il testo coincide con quello automatico non serve salvarlo come personalizzato
+      if(!v || v.toUpperCase() === autoBannerHeadline()) localStorage.removeItem(HEADLINE_KEY);
+      else localStorage.setItem(HEADLINE_KEY, input.value);
+    }catch(e){}
+    autoBtn.style.display = customBannerHeadline() ? '' : 'none';
+    renderBannerSheet();
+  });
+  input.addEventListener('keydown', e=>{ if(e.key === 'Enter') input.blur(); });
+  autoBtn.addEventListener('click', ()=>{
+    try{ localStorage.removeItem(HEADLINE_KEY); }catch(e){}
+    sync(); renderBannerSheet();
+  });
+  sync();
+  document.querySelector('.tabs button[data-tab="banner"]').addEventListener('click', ()=>{
+    if(document.activeElement !== input) sync();
+  });
+})();
 
 // Rimpicciolisce O ingrandisce il contenuto per riempire il più possibile lo spazio
 // disponibile, senza mai uscire dai bordi (le colonne fisse 50/50 impediscono
