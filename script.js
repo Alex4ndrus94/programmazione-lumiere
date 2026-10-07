@@ -245,7 +245,7 @@ function screeningRow(roomId, s, idx){
       <input type="text" value="${escAttr(s.sezionePromo||'')}" data-field="sezionePromo" placeholder="es. CineRevolution">
     </div>
     <div>
-      <span class="field-label">Validità (facoltativo — es. Solo sabato e domenica. Se lasciato vuoto non compare nulla; se compilato appare una piccola etichetta accanto al titolo in A5, sfondo mobile e banner)</span>
+      <span class="field-label">Validità (facoltativo — es. Solo sabato e domenica. Se lasciato vuoto non compare nulla; se compilato: in A5 e sfondo mobile appare una piccola etichetta accanto al titolo; nel banner il film va in una sezione separata con quella dicitura, insieme agli altri film con lo stesso testo)</span>
       <input type="text" value="${escAttr(s.validita||'')}" data-field="validita" maxlength="40" placeholder="es. Solo sabato e domenica">
     </div>
     ${dataInizioField}
@@ -602,11 +602,13 @@ function renderBannerSheet(){
   ROOMS.forEach(room=>{
     (data[room.id]||[]).forEach(s=>{
       if(!s.film) return;
-      const sezione = (s.sezionePromo||'').trim();
-      const validita = (s.validita||'').trim();
-      const key = (s.film.trim().toLowerCase())+'|'+((s.versione||'').trim().toLowerCase())+'|'+sezione.toLowerCase()+'|'+validita.toLowerCase();
+      // Nel banner la "Validità" funziona come la sezione promo: il film finisce in una sezione
+      // separata con quella dicitura (più film con lo stesso testo condividono la stessa sezione).
+      // Se sono compilati entrambi i campi, vince la sezione promo.
+      const sezione = (s.sezionePromo||'').trim() || (s.validita||'').trim();
+      const key = (s.film.trim().toLowerCase())+'|'+((s.versione||'').trim().toLowerCase())+'|'+sezione.toLowerCase();
       if(!filmMap.has(key)){
-        filmMap.set(key, {film:s.film.trim(), versione:(s.versione||'').trim(), sezionePromo:sezione, validita, times:new Set(), rooms:new Set()});
+        filmMap.set(key, {film:s.film.trim(), versione:(s.versione||'').trim(), sezionePromo:sezione, times:new Set(), rooms:new Set()});
       }
       const entry = filmMap.get(key);
       entry.rooms.add(room.name);
@@ -631,7 +633,7 @@ function renderBannerSheet(){
     const salaTag = showSala ? ' — ' + Array.from(entry.rooms).join(', ') : '';
     const priceCell = showPrezzo ? `<div class="zf-cell"><span class="zf-price">${pricesForFilm(entry)}</span></div>` : '';
     return `<div class="zone-row${showPrezzo ? ' with-price' : ''}">
-      <div class="zf-cell"><span class="zf-title">${escHtml(entry.film)}${versionTag}${salaTag}${entry.validita ? `<span class="zf-validity">${escHtml(entry.validita)}</span>` : ''}</span></div>
+      <div class="zf-cell"><span class="zf-title">${escHtml(entry.film)}${versionTag}${salaTag}</span></div>
       <div class="zf-cell"><span class="zf-times">${escHtml(sortedTimes)}</span></div>
       ${priceCell}
     </div>`;
