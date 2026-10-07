@@ -176,6 +176,7 @@
     object-fit:contain;flex:0 0 auto;display:block;
   }
   #sheet-print .print-pill{color:#fff;font-family:'Oswald','Inter',sans-serif;font-weight:600;font-size:calc(16px * var(--fz,1));line-height:1;padding:0.25em 0.6em;border-radius:0.4em;white-space:nowrap;box-sizing:border-box;text-align:center;flex:0 0 auto;}
+  #sheet-print .print-validity{background:#141212;color:#F5F0E6;font-family:'Inter';font-weight:800;font-size:calc(10px * var(--fz,1));line-height:1;padding:0.3em 0.55em;border-radius:0.4em;text-transform:uppercase;letter-spacing:0.02em;white-space:nowrap;box-sizing:border-box;flex:0 0 auto;}
   #sheet-print .print-icon-badge{width:calc(15px * var(--fz,1));height:auto;flex-shrink:0;}
   #sheet-print .print-price-cell{font-family:'Inter';font-weight:700;font-size:calc(14px * var(--fz,1));color:#141212;}
   #sheet-print .print-abb-cell{display:flex;align-items:center;justify-content:center;}
@@ -209,6 +210,7 @@
     object-fit:contain;flex:0 0 auto;display:block;
   }
   #sheet-mobile .mobile-pill{color:#fff;font-family:'Oswald','Inter',sans-serif;font-weight:600;font-size:calc(10px * var(--fz,1));line-height:1;padding:0.25em 0.6em;border-radius:0.4em;white-space:nowrap;box-sizing:border-box;text-align:center;flex:0 0 auto;}
+  #sheet-mobile .mobile-validity{background:#141212;color:#F5F0E6;font-family:'Inter';font-weight:800;font-size:calc(6.5px * var(--fz,1));line-height:1;padding:0.3em 0.55em;border-radius:0.4em;text-transform:uppercase;letter-spacing:0.02em;white-space:nowrap;box-sizing:border-box;flex:0 0 auto;}
   #sheet-mobile .mobile-icon-badge{width:calc(9.5px * var(--fz,1));height:calc(9.5px * var(--fz,1));object-fit:contain;flex-shrink:0;}
   #sheet-mobile .mobile-price-cell{font-family:'Inter';font-weight:700;font-size:calc(9.5px * var(--fz,1));color:#141212;}
   #sheet-mobile .mobile-abb-cell{display:flex;align-items:center;justify-content:center;}
@@ -259,6 +261,7 @@
   #sheet-banner .banner-zone .zone-row:last-child{border-bottom:none;}
   #sheet-banner .banner-zone .zf-cell{display:flex;align-items:center;justify-content:center;text-align:center;min-width:0;}
   #sheet-banner .banner-zone .zf-title{font-family:'Inter';font-weight:800;font-size:calc(27px * var(--zs,1));color:#141212;text-transform:uppercase;line-height:1.15;}
+  #sheet-banner .banner-zone .zf-validity{display:block;font-size:0.5em;font-weight:800;color:#a11e1e;letter-spacing:0.5px;line-height:1.2;margin-top:0.15em;}
   #sheet-banner .banner-zone .zf-times{font-family:'Inter';font-weight:800;font-size:calc(27px * var(--zs,1));color:#a11e1e;line-height:1.15;}
   #sheet-banner .banner-zone .zf-price{font-family:'IBM Plex Mono';font-size:calc(11px * var(--zs,1));color:#777;line-height:1.2;}
   #sheet-banner .banner-zone .promo-section-bar{

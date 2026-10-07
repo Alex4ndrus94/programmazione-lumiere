@@ -167,7 +167,7 @@ function renderEditor(){
     addBtn.textContent = '+ Aggiungi film';
     addBtn.onclick = ()=>{
       data[room.id] = data[room.id] || [];
-      data[room.id].push({film:'', times:'', versione:'', sezionePromo:'', intervallo:'', mostraIntervallo:DEFAULT_MOSTRA_INTERVALLO, intero:'', ridotto:'', abb:'N'});
+      data[room.id].push({film:'', times:'', versione:'', sezionePromo:'', validita:'', intervallo:'', mostraIntervallo:DEFAULT_MOSTRA_INTERVALLO, intero:'', ridotto:'', abb:'N'});
       saveData(); renderEditor();
     };
     box.appendChild(addBtn);
@@ -243,6 +243,10 @@ function screeningRow(roomId, s, idx){
     <div>
       <span class="field-label">Sezione promo (facoltativo — es. CineRevolution, Cinema in Festa. Se compilato, nel banner pubblico il film comparirà raggruppato sotto quell'etichetta SENZA mostrare il prezzo)</span>
       <input type="text" value="${escAttr(s.sezionePromo||'')}" data-field="sezionePromo" placeholder="es. CineRevolution">
+    </div>
+    <div>
+      <span class="field-label">Validità (facoltativo — es. Solo sabato e domenica. Se lasciato vuoto non compare nulla; se compilato appare una piccola etichetta accanto al titolo in A5, sfondo mobile e banner)</span>
+      <input type="text" value="${escAttr(s.validita||'')}" data-field="validita" maxlength="40" placeholder="es. Solo sabato e domenica">
     </div>
     ${dataInizioField}
     <div>
@@ -411,7 +415,7 @@ function roomBandHTML(prefix, room, showPrices){
     const merged = {
       film: overflow.map(s=>s.film).join(' / '),
       times: overflow.map(s=>s.times).join(' - '),
-      versione:'', sezionePromo:'',
+      versione:'', sezionePromo:'', validita:'',
       intervallo: overflow[0].intervallo || '',
       intervalli: overflow.map(s=>({
         value: s.intervallo || DEFAULT_INTERVALLO,
@@ -432,9 +436,12 @@ function roomBandHTML(prefix, room, showPrices){
     const timesSet = new Set();
     s.times.split('-').map(t=>t.trim()).filter(Boolean).forEach(t=>timesSet.add(t));
     const sortedTimes = sortTimesChronologically(timesSet);
+    const validity = (s.validita||'').trim();
+    const validityHTML = validity ? `<span class="${prefix}-validity">${escHtml(validity)}</span>` : '';
     const pills = sortedTimes.map(t=>`<span class="${prefix}-pill" style="background:${room.color}">${escHtml(t)}</span>`).join('');
     contentCells += `<div class="${prefix}-cell ${prefix}-content-cell" id="content-${cellId}" style="${cellStyle(variant.content[i])}">
       <span class="${prefix}-film-title">${escHtml(s.film)}</span>
+      ${validityHTML}
       ${versionBadges(s, prefix)}
       ${pills}
       ${intervalIconHTML(s, prefix)}
@@ -596,9 +603,10 @@ function renderBannerSheet(){
     (data[room.id]||[]).forEach(s=>{
       if(!s.film) return;
       const sezione = (s.sezionePromo||'').trim();
-      const key = (s.film.trim().toLowerCase())+'|'+((s.versione||'').trim().toLowerCase())+'|'+sezione.toLowerCase();
+      const validita = (s.validita||'').trim();
+      const key = (s.film.trim().toLowerCase())+'|'+((s.versione||'').trim().toLowerCase())+'|'+sezione.toLowerCase()+'|'+validita.toLowerCase();
       if(!filmMap.has(key)){
-        filmMap.set(key, {film:s.film.trim(), versione:(s.versione||'').trim(), sezionePromo:sezione, times:new Set(), rooms:new Set()});
+        filmMap.set(key, {film:s.film.trim(), versione:(s.versione||'').trim(), sezionePromo:sezione, validita, times:new Set(), rooms:new Set()});
       }
       const entry = filmMap.get(key);
       entry.rooms.add(room.name);
@@ -623,7 +631,7 @@ function renderBannerSheet(){
     const salaTag = showSala ? ' — ' + Array.from(entry.rooms).join(', ') : '';
     const priceCell = showPrezzo ? `<div class="zf-cell"><span class="zf-price">${pricesForFilm(entry)}</span></div>` : '';
     return `<div class="zone-row${showPrezzo ? ' with-price' : ''}">
-      <div class="zf-cell"><span class="zf-title">${escHtml(entry.film)}${versionTag}${salaTag}</span></div>
+      <div class="zf-cell"><span class="zf-title">${escHtml(entry.film)}${versionTag}${salaTag}${entry.validita ? `<span class="zf-validity">${escHtml(entry.validita)}</span>` : ''}</span></div>
       <div class="zf-cell"><span class="zf-times">${escHtml(sortedTimes)}</span></div>
       ${priceCell}
     </div>`;
