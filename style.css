@@ -162,13 +162,13 @@
     display:flex;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center;
     padding:2px 6px;gap:calc(4px * var(--fg,1));
   }
-  #sheet-print .print-film-title{font-family:'Inter';font-weight:700;font-size:calc(15px * var(--fz,1));color:#141212;}
+  #sheet-print .print-film-title{font-family:'Inter';font-weight:700;font-size:calc(16px * var(--fz,1));color:#141212;}
   #sheet-print .print-interval-icon{
-    width:calc(46px * var(--fz,1));height:auto;
-    flex:0 0 auto;display:block;
+    width:calc(46px * var(--fz,1));height:calc(30px * var(--fz,1));
+    object-fit:contain;flex:0 0 auto;display:block;
   }
-  #sheet-print .print-pill{color:#fff;font-family:'Oswald','Inter',sans-serif;font-weight:600;font-size:calc(13.5px * var(--fz,1));line-height:1;padding:0.25em 0.6em;border-radius:0.4em;white-space:nowrap;box-sizing:border-box;text-align:center;flex:0 0 auto;}
-  #sheet-print .print-icon-badge{width:calc(14px * var(--fz,1));height:auto;flex-shrink:0;}
+  #sheet-print .print-pill{color:#fff;font-family:'Oswald','Inter',sans-serif;font-weight:600;font-size:calc(16px * var(--fz,1));line-height:1;padding:0.25em 0.6em;border-radius:0.4em;white-space:nowrap;box-sizing:border-box;text-align:center;flex:0 0 auto;}
+  #sheet-print .print-icon-badge{width:calc(15px * var(--fz,1));height:auto;flex-shrink:0;}
   #sheet-print .print-price-cell{font-family:'Inter';font-weight:700;font-size:calc(14px * var(--fz,1));color:#141212;}
   #sheet-print .print-abb-cell{display:flex;align-items:center;justify-content:center;}
   #sheet-print .print-abb-icon{height:60%;width:auto;}
